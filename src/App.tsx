@@ -17,17 +17,30 @@ import { fetchModel, fetchRegionData } from './models.ts';
 import type { RegionData } from './models.ts';
 import { CutViewCanvas } from './components/CutViewCanvas.tsx';
 import { SummaryDialog } from './components/SummaryDialog.tsx';
+import { TestSidebar } from './components/TestSidebar.tsx';
 import type { Region } from './utils/regions.ts';
+import { parseCsv, calculateVennCounts, getBinaryColumns } from './utils/csvParser.ts';
+import type { CsvData } from './utils/csvParser.ts';
 
 export type ViewStyle = 'layer' | 'cut';
+export type AppMode = 'view' | 'edit' | 'test';
 
 export default function App() {
-  const [mode, setMode] = useState<'view' | 'edit'>('view');
+  const [mode, setMode] = useState<AppMode>('view');
   const [currentModel, setCurrentModel] = useState<string | null>(null);
   const [isLoadingModel, setIsLoadingModel] = useState(false);
   const [viewStyle, setViewStyle] = useState<ViewStyle>('layer');
   const [regionData, setRegionData] = useState<RegionData | null>(null);
   const [summaryOpen, setSummaryOpen] = useState(false);
+
+  // Test mode state
+  const [testCsvData, setTestCsvData] = useState<CsvData | null>(null);
+  const [testCsvFilename, setTestCsvFilename] = useState<string | null>(null);
+  const [testModel, setTestModel] = useState<string | null>(null);
+  const [testColumnMapping, setTestColumnMapping] = useState<number[]>([]);
+  const [testCalculated, setTestCalculated] = useState(false);
+  const [, setTestVennCounts] = useState<Map<string, number> | null>(null);
+  const [testError, setTestError] = useState<string | null>(null);
 
   const svgDoc = useSvgDocument();
   const { doc } = svgDoc;
@@ -203,6 +216,96 @@ export default function App() {
   // Viewer: switch to edit
   const handleEditThis = useCallback(() => { setMode('edit'); }, []);
 
+  // Test mode handlers
+  const handleTestLoadCsv = useCallback(async (source: 'file' | 'sample') => {
+    if (source === 'sample') {
+      try {
+        const resp = await fetch('./data/dataset_streaming_platforms.csv');
+        const text = await resp.text();
+        const csv = parseCsv(text);
+        setTestCsvData(csv);
+        setTestCsvFilename('dataset_streaming_platforms.csv');
+        setTestError(null);
+        setTestCalculated(false);
+        // Auto-detect binary columns and set initial mapping
+        const binCols = getBinaryColumns(csv);
+        const n = Math.min(binCols.length, 8);
+        setTestColumnMapping(binCols.slice(0, n));
+      } catch (e) {
+        setTestError(`Failed to load sample: ${e}`);
+      }
+    }
+  }, []);
+
+  const handleTestFileUpload = useCallback((file: File) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const csv = parseCsv(reader.result as string);
+        setTestCsvData(csv);
+        setTestCsvFilename(file.name);
+        setTestError(null);
+        setTestCalculated(false);
+        const binCols = getBinaryColumns(csv);
+        if (binCols.length < 2) {
+          setTestError('CSV must have at least 2 binary columns (0/1 values)');
+          setTestColumnMapping([]);
+          return;
+        }
+        const n = Math.min(binCols.length, 8);
+        setTestColumnMapping(binCols.slice(0, n));
+      } catch (e) {
+        setTestError(`Failed to parse CSV: ${e}`);
+      }
+    };
+    reader.readAsText(file);
+  }, []);
+
+  const handleTestCalculate = useCallback(async () => {
+    if (!testCsvData || !testModel || testColumnMapping.length < 2) return;
+    setTestError(null);
+    try {
+      // Load SVG model
+      const [svgString, regData] = await Promise.all([
+        fetchModel(testModel),
+        fetchRegionData(testModel).catch(() => null),
+      ]);
+      svgDoc.loadFromString(testModel, svgString);
+      setRegionData(regData);
+      setCurrentModel(testModel);
+      zoomPan.resetZoom();
+
+      // Calculate Venn counts
+      const counts = calculateVennCounts(testCsvData, testColumnMapping);
+      setTestVennCounts(counts);
+
+      // Update text content in the loaded SVG
+      const letters = 'ABCDEFGH'.slice(0, testColumnMapping.length).split('');
+
+      // Update Count texts with calculated values
+      for (const [label, count] of counts) {
+        svgDoc.updateTextContent(`Count_${label}`, String(count));
+      }
+
+      // Update Name labels with column names
+      for (let i = 0; i < testColumnMapping.length; i++) {
+        const colName = testCsvData.headers[testColumnMapping[i]];
+        svgDoc.updateTextContent(`Name${letters[i]}`, colName);
+      }
+
+      // Update CountSUM with per-set totals
+      for (let i = 0; i < testColumnMapping.length; i++) {
+        const total = counts.get(letters[i]) ?? 0;
+        svgDoc.updateTextContent(`CountSUM_${letters[i]}`, String(total));
+      }
+
+      setTestCalculated(true);
+      regionDetection.clearSelection();
+    } catch (e) {
+      setTestError(`Calculation failed: ${e}`);
+    }
+  }, [testCsvData, testModel, testColumnMapping, svgDoc, zoomPan, regionDetection]);
+
   // Viewer: region list hover/click
   const handleSidebarHoverRegion = useCallback((_region: Region | null) => {
     // Sidebar hover could drive canvas highlight in the future
@@ -260,6 +363,22 @@ export default function App() {
             viewStyle={viewStyle}
             onSetViewStyle={setViewStyle}
           />
+        ) : mode === 'test' ? (
+          <TestSidebar
+            csvData={testCsvData}
+            csvFilename={testCsvFilename}
+            onLoadCsv={handleTestLoadCsv}
+            onFileUpload={handleTestFileUpload}
+            selectedModel={testModel}
+            onSelectModel={setTestModel}
+            columnMapping={testColumnMapping}
+            onSetColumnMapping={setTestColumnMapping}
+            onCalculate={handleTestCalculate}
+            isCalculated={testCalculated}
+            viewStyle={viewStyle}
+            onSetViewStyle={setViewStyle}
+            error={testError}
+          />
         ) : (
           <Sidebar
             doc={doc}
@@ -279,7 +398,7 @@ export default function App() {
 
         <div className="canvas-area">
           {doc ? (
-            mode === 'view' && viewStyle === 'cut' && regionData ? (
+            (mode === 'view' || mode === 'test') && viewStyle === 'cut' && regionData ? (
               <div className="canvas-container" ref={zoomPan.setContainerRef} onWheel={zoomPan.onWheel}>
                 <CutViewCanvas
                   regionData={regionData}
@@ -306,8 +425,8 @@ export default function App() {
                 onDragPointerMove={drag.onPointerMove}
                 onDragPointerUp={drag.onPointerUp}
                 onDoubleClickText={handleDoubleClickText}
-                readOnly={mode === 'view'}
-                viewStyle={mode === 'view' ? viewStyle : 'layer'}
+                readOnly={mode === 'view' || mode === 'test'}
+                viewStyle={(mode === 'view' || mode === 'test') ? viewStyle : 'layer'}
                 hoveredRegion={activeRegion}
                 onRegionHover={regionDetection.onHover}
                 onRegionClick={regionDetection.onClick}
@@ -316,7 +435,7 @@ export default function App() {
           ) : (
             <div className="canvas-empty">
               <div className="canvas-empty-text">
-                {mode === 'view' ? 'Select a Venn diagram model' : 'Open an SVG file to start editing'}
+                {mode === 'test' ? 'Load data and select a model to calculate' : mode === 'view' ? 'Select a Venn diagram model' : 'Open an SVG file to start editing'}
               </div>
               {mode === 'edit' && (
                 <button className="btn btn-large" onClick={handleOpen}>Open SVG File</button>
@@ -328,7 +447,7 @@ export default function App() {
           )}
         </div>
 
-        {mode === 'view' ? (
+        {mode === 'view' || mode === 'test' ? (
           <ViewerInfoPanel
             doc={doc}
             hoveredRegion={regionDetection.hoveredRegion}

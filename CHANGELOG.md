@@ -2,6 +2,22 @@
 
 All notable changes to the React Venn Diagram Modifier project.
 
+## [1.1.0] — 2025-12-31
+
+### Added
+- **Test mode**: Load CSV data, map columns to Venn sets, calculate intersection counts
+- Sample dataset: `data/dataset_streaming_platforms.csv` (603 titles, 8 platforms)
+- TestSidebar component: data source, model selection, column mapping, calculate button
+- CSV parser utility (`csvParser.ts`): parse, binary column detection, Venn count calculation
+- Layer/Cut view toggle in Test mode
+- Auto-detection of binary columns from CSV
+- Column name → set name mapping (NameA, NameB, ... replaced with column headers)
+- Vite config copies `data/*.csv` to dist/
+
+### Changed
+- Mode selector: View / Edit / Test (was View / Edit)
+- AppMode type extended with 'test'
+
 ## [1.0.2] — 2025-12-30
 
 ### Fixed

@@ -1735,3 +1735,76 @@ html, body, #root {
   font-size: 18px;
   color: var(--text-primary);
 }
+
+/* ---- Test Sidebar ---- */
+.test-sidebar {
+  display: flex;
+  flex-direction: column;
+}
+
+.test-csv-info {
+  margin-top: 6px;
+  padding: 6px 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+}
+
+.test-csv-filename {
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--text-primary);
+  word-break: break-all;
+}
+
+.test-csv-stats {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.test-column-mapping {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.test-column-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.test-column-letter {
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 14px;
+  color: var(--text-primary);
+  min-width: 16px;
+  text-align: center;
+}
+
+.test-column-select {
+  flex: 1;
+  padding: 3px 4px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+.test-error {
+  color: var(--danger);
+  font-size: 12px;
+  padding: 4px 0;
+}
+
+.btn-accent {
+  background: var(--accent) !important;
+  color: #fff !important;
+  border-color: var(--accent) !important;
+}
+
+.btn-accent:hover {
+  background: var(--accent-hover) !important;
+}

@@ -1,8 +1,10 @@
 import { APP_NAME, APP_VERSION } from '../version.ts';
 
+import type { AppMode } from '../App.tsx';
+
 interface ToolbarProps {
-  mode: 'view' | 'edit';
-  onSetMode: (mode: 'view' | 'edit') => void;
+  mode: AppMode;
+  onSetMode: (mode: AppMode) => void;
   onSummary: () => void;
   filename: string | null;
   zoom: number;
@@ -38,6 +40,7 @@ export function Toolbar({
         <div className="toolbar-mode-switcher">
           <button className={`btn btn-toolbar btn-mode ${mode === 'view' ? 'btn-mode-active' : ''}`} onClick={() => onSetMode('view')}>View</button>
           <button className={`btn btn-toolbar btn-mode ${mode === 'edit' ? 'btn-mode-active' : ''}`} onClick={() => onSetMode('edit')}>Edit</button>
+          <button className={`btn btn-toolbar btn-mode ${mode === 'test' ? 'btn-mode-active' : ''}`} onClick={() => onSetMode('test')}>Test</button>
         </div>
         <button className="btn btn-toolbar" onClick={onSummary} title="Show all diagrams">Summary</button>
         {mode === 'edit' && (

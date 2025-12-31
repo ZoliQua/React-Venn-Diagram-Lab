@@ -16,6 +16,15 @@ function copyModelsPlugin() {
           copyFileSync(resolve(svgSrc, file), resolve(svgDst, file))
         }
       }
+      // Copy data/*.csv
+      const dataSrc = resolve(__dirname, 'data')
+      const dataDst = resolve(__dirname, 'dist/data')
+      mkdirSync(dataDst, { recursive: true })
+      for (const file of readdirSync(dataSrc)) {
+        if (file.endsWith('.csv')) {
+          copyFileSync(resolve(dataSrc, file), resolve(dataDst, file))
+        }
+      }
       // Copy models/json/*.json
       const jsonSrc = resolve(__dirname, 'models/json')
       const jsonDst = resolve(__dirname, 'dist/models/json')
