@@ -6,6 +6,7 @@ interface SummaryDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectModel: (filename: string) => void;
+  selectMode?: boolean; // true = "Select for Edit" header
 }
 
 const SOURCES: Record<string, { label: string; url?: string }> = {
@@ -67,7 +68,7 @@ function SvgPreview({ filename }: { filename: string }) {
   );
 }
 
-export function SummaryDialog({ isOpen, onClose, onSelectModel }: SummaryDialogProps) {
+export function SummaryDialog({ isOpen, onClose, onSelectModel, selectMode }: SummaryDialogProps) {
   const modelsBySet = useMemo(() => getModelsBySetCount(), []);
 
   if (!isOpen) return null;
@@ -76,8 +77,8 @@ export function SummaryDialog({ isOpen, onClose, onSelectModel }: SummaryDialogP
     <div className="dialog-overlay" onClick={onClose}>
       <div className="summary-dialog" onClick={e => e.stopPropagation()}>
         <div className="summary-header">
-          <h1 className="summary-title">{APP_NAME}</h1>
-          <p className="summary-subtitle">32 Venn diagram models from 2-set to 8-set — v{APP_VERSION}</p>
+          <h1 className="summary-title">{selectMode ? 'Select SVG Model' : APP_NAME}</h1>
+          <p className="summary-subtitle">{selectMode ? 'Choose a diagram to open in the editor' : `32 Venn diagram models from 2-set to 8-set — v${APP_VERSION}`}</p>
           <button className="btn btn-toolbar summary-close" onClick={onClose}>Close</button>
         </div>
 

@@ -9,8 +9,7 @@ interface ToolbarProps {
   filename: string | null;
   zoom: number;
   showGrid: boolean;
-  onOpen: () => void;
-  onSave: () => void;
+  onHelp: () => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
   onZoomReset: () => void;
@@ -25,7 +24,7 @@ interface ToolbarProps {
 export function Toolbar({
   mode, onSetMode, onSummary,
   filename, zoom, showGrid,
-  onOpen, onSave,
+  onHelp,
   onZoomIn, onZoomOut, onZoomReset,
   showValidation,
   onToggleGrid, onToggleValidation,
@@ -44,9 +43,6 @@ export function Toolbar({
         <button className="btn btn-toolbar" onClick={onSummary} title="Show all diagrams">Summary</button>
         {mode === 'edit' && (
           <>
-            <span className="toolbar-sep" />
-            <button className="btn btn-toolbar" onClick={onOpen}>Open</button>
-            <button className="btn btn-toolbar" onClick={onSave} disabled={!filename}>Save</button>
             <span className="toolbar-sep" />
             <button className="btn btn-toolbar" onClick={onUndo}>Undo</button>
             <button className="btn btn-toolbar" onClick={onRedo}>Redo</button>
@@ -68,6 +64,7 @@ export function Toolbar({
         <span className="toolbar-zoom">{Math.round(zoom * 100)}%</span>
         <button className="btn btn-toolbar btn-sm" onClick={onZoomIn}>+</button>
         <button className="btn btn-toolbar btn-sm" onClick={onZoomReset}>1:1</button>
+        <button className="btn btn-toolbar btn-sm" onClick={onHelp} title="Help">?</button>
         <span className="toolbar-version">v{APP_VERSION}</span>
       </div>
     </div>

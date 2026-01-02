@@ -8,6 +8,9 @@ interface SidebarProps {
   selected: SelectableElement | null;
   onLoadFile: (filename: string, content: string) => void;
   onSave: () => void;
+  onRestore: () => void;
+  onSelectFromLibrary: () => void;
+  onOpenCustomFile: (filename: string, content: string) => void;
   onSelect: (id: string) => void;
   onToggleMeta: (key: 'headerHidden' | 'bulletsHidden') => void;
   onMoveElement: (group: 'shapes' | 'names' | 'values' | 'sums' | 'bullets', id: string, direction: 'up' | 'down') => void;
@@ -18,7 +21,7 @@ interface SidebarProps {
   onToggleGroupVisibility: (group: string) => void;
 }
 
-export function Sidebar({ doc, selected, onLoadFile, onSave, onSelect, onToggleMeta, onMoveElement, onAddText, onAddTextDirect, onRemoveText, onToggleElementVisibility, onToggleGroupVisibility }: SidebarProps) {
+export function Sidebar({ doc, selected, onSave, onRestore, onSelectFromLibrary, onOpenCustomFile, onSelect, onToggleMeta, onMoveElement, onAddText, onAddTextDirect, onRemoveText, onToggleElementVisibility, onToggleGroupVisibility }: SidebarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,7 +29,7 @@ export function Sidebar({ doc, selected, onLoadFile, onSave, onSelect, onToggleM
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
-      onLoadFile(file.name, reader.result as string);
+      onOpenCustomFile(file.name, reader.result as string);
     };
     reader.readAsText(file);
     e.target.value = '';
@@ -50,23 +53,19 @@ export function Sidebar({ doc, selected, onLoadFile, onSave, onSelect, onToggleM
   return (
     <div className="sidebar">
       <div className="sidebar-file-section">
-        <div className="sidebar-title">File</div>
-        <input
-          ref={inputRef}
-          type="file"
-          accept=".svg"
-          style={{ display: 'none' }}
-          onChange={handleFileChange}
-        />
-        <button className="btn" onClick={() => inputRef.current?.click()}>
-          Open SVG
-        </button>
+        <div className="sidebar-title">SVG File</div>
+        <input ref={inputRef} type="file" accept=".svg" style={{ display: 'none' }} onChange={handleFileChange} />
+        <div className="sidebar-file-buttons">
+          <button className="btn" onClick={onSelectFromLibrary}>Select</button>
+          <button className="btn" onClick={() => inputRef.current?.click()}>Open Custom</button>
+        </div>
         {doc && (
           <>
             <div className="sidebar-filename" title={doc.filename}>{doc.filename}</div>
-            <button className="btn" onClick={onSave}>
-              Save
-            </button>
+            <div className="sidebar-file-buttons">
+              <button className="btn" onClick={onSave}>Save</button>
+              <button className="btn" onClick={onRestore}>Restore</button>
+            </div>
           </>
         )}
       </div>

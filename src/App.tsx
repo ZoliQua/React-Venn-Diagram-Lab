@@ -17,6 +17,9 @@ import { fetchModel, fetchRegionData } from './models.ts';
 import type { RegionData } from './models.ts';
 import { CutViewCanvas } from './components/CutViewCanvas.tsx';
 import { SummaryDialog } from './components/SummaryDialog.tsx';
+import { WelcomeDialog } from './components/WelcomeDialog.tsx';
+import { HelpDialog } from './components/HelpDialog.tsx';
+import { SvgValidationDialog } from './components/SvgValidationDialog.tsx';
 import { TestSidebar } from './components/TestSidebar.tsx';
 import type { Region } from './utils/regions.ts';
 import { parseCsv, calculateVennCounts, getBinaryColumns } from './utils/csvParser.ts';
@@ -32,7 +35,12 @@ export default function App() {
   const [viewStyle, setViewStyle] = useState<ViewStyle>('layer');
   const [regionData, setRegionData] = useState<RegionData | null>(null);
   const [summaryOpen, setSummaryOpen] = useState(false);
+  const [summarySelectMode, setSummarySelectMode] = useState(false);
+  const [welcomeOpen, setWelcomeOpen] = useState(true);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [hasUnsavedEdits, setHasUnsavedEdits] = useState(false);
+  const [validationDialog, setValidationDialog] = useState<{ filename: string; content: string } | null>(null);
+  const [originalSvgContent, setOriginalSvgContent] = useState<string | null>(null);
 
   // Test mode state
   const [testCsvData, setTestCsvData] = useState<CsvData | null>(null);
@@ -150,9 +158,35 @@ export default function App() {
     svgDoc.loadFromString(filename, content);
     clearSelection();
     setHasUnsavedEdits(false);
+    setOriginalSvgContent(content);
   }, [svgDoc, clearSelection]);
 
   const handleOpen = useCallback(() => { fileInputRef.current?.click(); }, []);
+
+  const handleRestore = useCallback(() => {
+    if (!doc || !originalSvgContent) return;
+    if (!confirm('Restore to original? All changes will be lost.')) return;
+    svgDoc.loadFromString(doc.filename, originalSvgContent);
+    clearSelection();
+    setHasUnsavedEdits(false);
+  }, [doc, originalSvgContent, svgDoc, clearSelection]);
+
+  // Edit: open custom file → validation dialog
+  const handleOpenCustomFile = useCallback((filename: string, content: string) => {
+    setValidationDialog({ filename, content });
+  }, []);
+
+  const handleValidationAccept = useCallback(() => {
+    if (!validationDialog) return;
+    handleLoadFile(validationDialog.filename, validationDialog.content);
+    setValidationDialog(null);
+  }, [validationDialog, handleLoadFile]);
+
+  // Edit: select from library
+  const handleSelectFromLibrary = useCallback(() => {
+    setSummarySelectMode(true);
+    setSummaryOpen(true);
+  }, []);
 
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -359,12 +393,11 @@ export default function App() {
           }
           setMode(newMode);
         }}
-        onSummary={() => setSummaryOpen(true)}
+        onSummary={() => { setSummarySelectMode(false); setSummaryOpen(true); }}
+        onHelp={() => setHelpOpen(true)}
         filename={doc?.filename ?? null}
         zoom={zoomPan.state.scale}
         showGrid={showGrid}
-        onOpen={handleOpen}
-        onSave={handleSave}
         onZoomIn={zoomPan.zoomIn}
         onZoomOut={zoomPan.zoomOut}
         onZoomReset={zoomPan.resetZoom}
@@ -437,6 +470,9 @@ export default function App() {
             selected={selected}
             onLoadFile={handleLoadFile}
             onSave={handleSave}
+            onRestore={handleRestore}
+            onSelectFromLibrary={handleSelectFromLibrary}
+            onOpenCustomFile={handleOpenCustomFile}
             onSelect={selectById}
             onToggleMeta={svgDoc.toggleMeta}
             onMoveElement={svgDoc.moveElementInGroup}
@@ -547,10 +583,19 @@ export default function App() {
 
       <SummaryDialog
         isOpen={summaryOpen}
-        onClose={() => setSummaryOpen(false)}
-        onSelectModel={(filename) => {
-          handleLoadModel(filename);
-          setMode('view');
+        selectMode={summarySelectMode}
+        onClose={() => { setSummaryOpen(false); setSummarySelectMode(false); }}
+        onSelectModel={async (filename) => {
+          if (summarySelectMode) {
+            // Edit mode: load into editor
+            const svgString = await fetchModel(filename);
+            handleLoadFile(filename, svgString);
+          } else {
+            handleLoadModel(filename);
+            setMode('view');
+          }
+          setSummaryOpen(false);
+          setSummarySelectMode(false);
         }}
       />
 
@@ -560,6 +605,26 @@ export default function App() {
         currentContent={editDialog?.content ?? ''}
         onConfirm={handleEditDialogConfirm}
         onCancel={handleEditDialogCancel}
+      />
+
+      <WelcomeDialog
+        isOpen={welcomeOpen}
+        onSelectMode={(m) => { setMode(m); setWelcomeOpen(false); }}
+        onSummary={() => { setSummarySelectMode(false); setSummaryOpen(true); setWelcomeOpen(false); }}
+      />
+
+      <HelpDialog
+        isOpen={helpOpen}
+        mode={mode}
+        onClose={() => setHelpOpen(false)}
+      />
+
+      <SvgValidationDialog
+        isOpen={validationDialog !== null}
+        svgContent={validationDialog?.content ?? ''}
+        filename={validationDialog?.filename ?? ''}
+        onAccept={handleValidationAccept}
+        onCancel={() => setValidationDialog(null)}
       />
     </div>
   );

@@ -2,6 +2,21 @@
 
 All notable changes to the React Venn Diagram Modifier project.
 
+## [1.3.0] — 2026-01-01
+
+### Added
+- **Welcome dialog**: mode selector (View/Edit/Test) with icons on startup
+- **Help dialog** ("?" button): context-sensitive help for each mode
+- **SVG validation dialog**: checks file against VENN-DIAGRAM-SVG.md spec on Open Custom
+- **Select from library**: opens Summary dialog in select mode for Edit
+- **Restore button**: reverts to original SVG state in Edit mode
+- **Summary select mode**: different header for Edit file selection
+
+### Changed
+- Edit sidebar: FILE → SVG FILE, Open → Select + Open Custom, Save + Restore buttons
+- Removed Open/Save from top toolbar (available in sidebar)
+- SummaryDialog supports `selectMode` prop for Edit file selection
+
 ## [1.2.0] — 2026-01-01
 
 ### Added
