@@ -7,6 +7,7 @@ import { getBinaryColumns } from '../utils/csvParser.ts';
 interface TestSidebarProps {
   csvData: CsvData | null;
   csvFilename: string | null;
+  fileType?: 'binary' | 'aggregated';
   selectedModel: string | null;
   onSelectModel: (filename: string, setCount: number) => void;
   columnMapping: number[];  // indices into csv headers for A, B, C, ...
@@ -15,6 +16,8 @@ interface TestSidebarProps {
   isCalculated: boolean;
   viewStyle: ViewStyle;
   onSetViewStyle: (style: ViewStyle) => void;
+  cutColorMode: 'depth' | 'heatmap';
+  onSetCutColorMode: (mode: 'depth' | 'heatmap') => void;
   error: string | null;
   showTitle: boolean;
   showNames: boolean;
@@ -34,14 +37,17 @@ interface TestSidebarProps {
   onShapeColorChange: (letter: string, color: string) => void;
   shapeOpacity: number;
   onShapeOpacityChange: (opacity: number) => void;
+  onExportRegionSummary?: () => void;
+  onExportMatrix?: () => void;
 }
 
 export function TestSidebar({
-  csvData, csvFilename,
+  csvData, csvFilename, fileType,
   selectedModel, onSelectModel,
   columnMapping, onSetColumnMapping,
   onCalculate, isCalculated,
   viewStyle, onSetViewStyle,
+  cutColorMode, onSetCutColorMode,
   error,
   showTitle, showNames, showSums,
   onToggleTitle, onToggleNames, onToggleSums,
@@ -51,6 +57,7 @@ export function TestSidebar({
   titleFontFamily, onTitleFontFamilyChange,
   shapeColors, onShapeColorChange,
   shapeOpacity, onShapeOpacityChange,
+  onExportRegionSummary, onExportMatrix,
 }: TestSidebarProps) {
   useMemo(() => getModelsBySetCount(), []);
 
@@ -66,7 +73,7 @@ export function TestSidebar({
   }, [columnMapping, onSetColumnMapping]);
 
   const n = columnMapping.length;
-  const maxSets = Math.min(binaryColumns.length, 8);
+  const maxSets = fileType === 'aggregated' ? Math.min(n, 8) : Math.min(binaryColumns.length, 8);
   const letters = 'ABCDEFGH'.slice(0, n).split('');
 
   // Show all models from 2-set up to max available binary columns
@@ -80,7 +87,8 @@ export function TestSidebar({
       }
     }
     return groups;
-  }, [n]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [n, maxSets, fileType, binaryColumns.length]);
 
   return (
     <div className="sidebar test-sidebar">
@@ -90,9 +98,9 @@ export function TestSidebar({
           <div className="sidebar-section-title">1. File Info</div>
           <div className="sidebar-file-info">
             <div><span className="file-info-label">Filename:</span> {csvFilename}</div>
-            <div><span className="file-info-label">File type:</span> CSV</div>
+            <div><span className="file-info-label">Format:</span> {fileType === 'aggregated' ? 'Aggregated' : 'Binary'}</div>
             <div><span className="file-info-label">Columns:</span> {csvData.headers.length} columns</div>
-            <div><span className="file-info-label">Binary:</span> {binaryColumns.length} detected</div>
+            {fileType !== 'aggregated' && <div><span className="file-info-label">Binary:</span> {binaryColumns.length} detected</div>}
             <div><span className="file-info-label">Rows:</span> {csvData.rows.length}</div>
           </div>
           <button className="btn btn-sm" style={{ width: '100%', marginTop: 6 }}
@@ -133,7 +141,7 @@ export function TestSidebar({
               }
             </select>
           ) : (
-            <div className="test-error">Need at least 2 binary columns</div>
+            <div className="test-error">{fileType === 'aggregated' ? 'Need at least 2 data columns' : 'Need at least 2 binary columns'}</div>
           )}
         </div>
       )}
@@ -188,6 +196,15 @@ export function TestSidebar({
             <button className={`btn btn-sm btn-view-style ${viewStyle === 'layer' ? 'btn-mode-active' : ''}`} onClick={() => onSetViewStyle('layer')}>Layer</button>
             <button className={`btn btn-sm btn-view-style ${viewStyle === 'cut' ? 'btn-mode-active' : ''}`} onClick={() => onSetViewStyle('cut')}>Cut</button>
           </div>
+          {viewStyle === 'cut' && (
+            <div style={{ marginTop: 8 }}>
+              <div className="sidebar-section-title">Color mode</div>
+              <div className="view-style-switcher">
+                <button className={`btn btn-sm btn-view-style ${cutColorMode === 'depth' ? 'btn-mode-active' : ''}`} onClick={() => onSetCutColorMode('depth')}>Depth</button>
+                <button className={`btn btn-sm btn-view-style ${cutColorMode === 'heatmap' ? 'btn-mode-active' : ''}`} onClick={() => onSetCutColorMode('heatmap')}>Heatmap</button>
+              </div>
+            </div>
+          )}
           {viewStyle === 'layer' && (
             <>
               <div className="sidebar-section-title" style={{ marginTop: 8 }}>Show elements</div>
@@ -202,7 +219,7 @@ export function TestSidebar({
                 <label>Font-size: {nameFontSize}px</label>
                 <input type="range" min="8" max="48" value={nameFontSize} onChange={e => onNameFontSizeChange(parseInt(e.target.value))} />
               </div>
-              <div className="test-font-size">
+              <div className="test-font-type-row">
                 <label>Font type</label>
                 <select className="prop-select" value={nameFontFamily} onChange={e => onNameFontFamilyChange(e.target.value)}>
                   <option value="Tahoma">Tahoma</option>
@@ -218,7 +235,7 @@ export function TestSidebar({
                 <label>Font-size: {titleFontSize}px</label>
                 <input type="range" min="8" max="48" value={titleFontSize} onChange={e => onTitleFontSizeChange(parseInt(e.target.value))} />
               </div>
-              <div className="test-font-size">
+              <div className="test-font-type-row">
                 <label>Font type</label>
                 <select className="prop-select" value={titleFontFamily} onChange={e => onTitleFontFamilyChange(e.target.value)}>
                   <option value="Tahoma">Tahoma</option>
@@ -230,6 +247,19 @@ export function TestSidebar({
               </div>
             </>
           )}
+        </div>
+      )}
+
+      {/* Export */}
+      {isCalculated && onExportRegionSummary && (
+        <div className="sidebar-section">
+          <div className="sidebar-section-title">5. Export</div>
+          <button className="btn btn-sm" style={{ width: '100%', marginTop: 4 }} onClick={onExportRegionSummary}>
+            Regions Summary (TSV)
+          </button>
+          <button className="btn btn-sm" style={{ width: '100%', marginTop: 4 }} onClick={onExportMatrix}>
+            Item Matrix (TSV)
+          </button>
         </div>
       )}
 

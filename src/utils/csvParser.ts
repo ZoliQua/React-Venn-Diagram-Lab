@@ -3,8 +3,19 @@ export interface CsvData {
   rows: string[][];
 }
 
-/** Split a CSV line respecting quoted fields (handles commas inside quotes) */
-function splitCsvLine(line: string): string[] {
+export type FileType = 'binary' | 'aggregated';
+export type Delimiter = ',' | ';' | ' ' | '\t';
+
+export interface CsvImportResult {
+  csv: CsvData;
+  fileType: FileType;
+  selectedColumns: number[];
+  itemDelimiter?: Delimiter;
+  hasHeader: boolean;
+}
+
+/** Split a CSV line respecting quoted fields, with configurable delimiter */
+export function splitCsvLineWithDelimiter(line: string, delimiter: string): string[] {
   const result: string[] = [];
   let current = '';
   let inQuotes = false;
@@ -13,11 +24,11 @@ function splitCsvLine(line: string): string[] {
     if (ch === '"') {
       if (inQuotes && line[i + 1] === '"') {
         current += '"';
-        i++; // skip escaped quote
+        i++;
       } else {
         inQuotes = !inQuotes;
       }
-    } else if (ch === ',' && !inQuotes) {
+    } else if (ch === delimiter && !inQuotes) {
       result.push(current.trim());
       current = '';
     } else {
@@ -26,6 +37,11 @@ function splitCsvLine(line: string): string[] {
   }
   result.push(current.trim());
   return result;
+}
+
+/** Legacy comma-only splitter (calls general version) */
+function splitCsvLine(line: string): string[] {
+  return splitCsvLineWithDelimiter(line, ',');
 }
 
 export function parseCsv(text: string): CsvData {
@@ -38,20 +54,186 @@ export function parseCsv(text: string): CsvData {
   return { headers, rows };
 }
 
+/** Parse CSV with configurable delimiter and optional header */
+export function parseCsvWithDelimiter(text: string, delimiter: Delimiter, hasHeader: boolean = true): CsvData {
+  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n');
+  if (lines.length < 1) throw new Error('CSV file is empty');
+
+  if (hasHeader) {
+    if (lines.length < 2) throw new Error('CSV must have at least a header and one data row');
+    const headers = splitCsvLineWithDelimiter(lines[0], delimiter);
+    const rows = lines.slice(1)
+      .filter(line => line.trim() !== '')
+      .map(line => splitCsvLineWithDelimiter(line, delimiter));
+    return { headers, rows };
+  } else {
+    const allRows = lines
+      .filter(line => line.trim() !== '')
+      .map(line => splitCsvLineWithDelimiter(line, delimiter));
+    if (allRows.length === 0) throw new Error('CSV file has no data rows');
+    const colCount = allRows[0].length;
+    const headers = Array.from({ length: colCount }, (_, i) => `Column ${i + 1}`);
+    return { headers, rows: allRows };
+  }
+}
+
+/** Auto-detect delimiter from first few lines */
+export function detectDelimiter(text: string): Delimiter {
+  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n').slice(0, 5);
+  if (lines.length === 0) return ',';
+
+  const candidates: Delimiter[] = [',', ';', '\t', ' '];
+  let bestDelimiter: Delimiter = ',';
+  let bestScore = -1;
+
+  for (const d of candidates) {
+    const counts = lines.map(line => {
+      // Count delimiter occurrences outside quotes
+      let count = 0;
+      let inQuotes = false;
+      for (const ch of line) {
+        if (ch === '"') inQuotes = !inQuotes;
+        else if (ch === d && !inQuotes) count++;
+      }
+      return count;
+    });
+    // Score: consistent count across lines, and at least 1
+    const min = Math.min(...counts);
+    const max = Math.max(...counts);
+    if (min >= 1 && max - min <= 1) {
+      const score = min * 10 + (max === min ? 5 : 0);
+      if (score > bestScore) {
+        bestScore = score;
+        bestDelimiter = d;
+      }
+    }
+  }
+  return bestDelimiter;
+}
+
+/** Get preview rows (parsed with delimiter, first N rows) */
+export function getPreviewRows(text: string, delimiter: Delimiter, maxRows: number = 5): { headers: string[]; rows: string[][] } {
+  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n');
+  if (lines.length === 0) return { headers: [], rows: [] };
+  const headers = splitCsvLineWithDelimiter(lines[0], delimiter);
+  const rows = lines.slice(1, 1 + maxRows)
+    .filter(line => line.trim() !== '')
+    .map(line => splitCsvLineWithDelimiter(line, delimiter));
+  return { headers, rows };
+}
+
+/** Validate that selected columns contain only binary values */
+export function validateBinaryColumns(csv: CsvData, columns: number[]): string | null {
+  if (columns.length < 2) return 'At least 2 data columns must be selected';
+  if (columns.length > 8) return 'Maximum 8 data columns allowed';
+
+  for (const colIdx of columns) {
+    if (colIdx < 0 || colIdx >= csv.headers.length) return `Column index ${colIdx} out of range`;
+    const header = csv.headers[colIdx];
+    let hasTrue = false;
+    for (const row of csv.rows) {
+      const v = (row[colIdx] ?? '').toLowerCase().trim();
+      if (v === '') continue;
+      if (v === '1' || v === 'true' || v === 'yes') { hasTrue = true; continue; }
+      if (v === '0' || v === 'false' || v === 'no') continue;
+      return `Column "${header}" contains invalid value "${row[colIdx]}" (expected 0/1/true/false/yes/no)`;
+    }
+    if (!hasTrue) return `Column "${header}" has no truthy values (all 0 or empty)`;
+  }
+  return null;
+}
+
+/** Validate that selected columns contain non-empty string values */
+export function validateAggregatedColumns(csv: CsvData, columns: number[]): string | null {
+  if (columns.length < 2) return 'At least 2 data columns must be selected';
+  if (columns.length > 8) return 'Maximum 8 data columns allowed';
+
+  for (const colIdx of columns) {
+    if (colIdx < 0 || colIdx >= csv.headers.length) return `Column index ${colIdx} out of range`;
+    const header = csv.headers[colIdx];
+    const hasContent = csv.rows.some(row => (row[colIdx] ?? '').trim() !== '');
+    if (!hasContent) return `Column "${header}" is completely empty`;
+  }
+  return null;
+}
+
+/**
+ * Calculate Venn counts from aggregated (list-based) columns.
+ * Each column = a set. Each cell contains item names (one per cell, or multiple separated by itemDelimiter).
+ * Items appearing in multiple columns create intersections.
+ */
+export function calculateVennCountsFromAggregated(
+  csv: CsvData,
+  selectedColumns: number[],
+  itemDelimiter: Delimiter = ',',
+): VennResult {
+  const n = selectedColumns.length;
+  const letters = 'ABCDEFGH'.slice(0, n).split('');
+
+  // Collect items per set
+  const sets: Set<string>[] = selectedColumns.map(() => new Set<string>());
+  for (const row of csv.rows) {
+    for (let i = 0; i < n; i++) {
+      const cell = (row[selectedColumns[i]] ?? '').trim();
+      if (!cell) continue;
+      // Split cell by item delimiter
+      const items = cell.split(itemDelimiter).map(s => s.trim()).filter(s => s);
+      for (const item of items) {
+        sets[i].add(item);
+      }
+    }
+  }
+
+  // Build item → bitmask map
+  const allItems = new Set<string>();
+  for (const s of sets) for (const item of s) allItems.add(item);
+
+  const inclusive = new Map<string, number>();
+  const exclusive = new Map<string, number>();
+  const inclusiveItems = new Map<string, string[]>();
+  const exclusiveItems = new Map<string, string[]>();
+
+  // Initialize all 2^n - 1 regions
+  for (let mask = 1; mask < (1 << n); mask++) {
+    const label = letters.filter((_, i) => mask & (1 << i)).join('');
+    inclusive.set(label, 0);
+    exclusive.set(label, 0);
+    inclusiveItems.set(label, []);
+    exclusiveItems.set(label, []);
+  }
+
+  for (const item of allItems) {
+    let itemMask = 0;
+    for (let i = 0; i < n; i++) {
+      if (sets[i].has(item)) itemMask |= (1 << i);
+    }
+    if (itemMask === 0) continue;
+
+    // Exclusive
+    const exLabel = letters.filter((_, i) => itemMask & (1 << i)).join('');
+    exclusive.set(exLabel, (exclusive.get(exLabel) ?? 0) + 1);
+    exclusiveItems.get(exLabel)?.push(item);
+
+    // Inclusive
+    for (let mask = 1; mask < (1 << n); mask++) {
+      if ((itemMask & mask) === mask) {
+        const label = letters.filter((_, i) => mask & (1 << i)).join('');
+        inclusive.set(label, (inclusive.get(label) ?? 0) + 1);
+        inclusiveItems.get(label)?.push(item);
+      }
+    }
+  }
+
+  return { inclusive, exclusive, inclusiveItems, exclusiveItems };
+}
+
 /**
  * Calculate Venn region counts from binary (0/1) columns.
- * selectedColumns: indices into headers for the sets (A, B, C, ...)
- * Returns a Map: region label (e.g., "AB") → count of rows where exactly those columns are 1.
- * Also returns intersection counts (rows where ALL specified columns are 1, regardless of others).
  */
 export interface VennResult {
-  /** Inclusive counts: rows where ALL sets in the label are 1 (regardless of others) */
   inclusive: Map<string, number>;
-  /** Exclusive counts: rows where EXACTLY these sets are 1, no others */
   exclusive: Map<string, number>;
-  /** Items per inclusive region (for Name/CountSUM clicks) */
   inclusiveItems: Map<string, string[]>;
-  /** Items per exclusive region (for Count value display) */
   exclusiveItems: Map<string, string[]>;
 }
 
@@ -67,7 +249,6 @@ export function calculateVennCounts(
   const inclusiveItems = new Map<string, string[]>();
   const exclusiveItems = new Map<string, string[]>();
 
-  // Initialize all 2^n - 1 regions
   for (let mask = 1; mask < (1 << n); mask++) {
     const label = letters.filter((_, i) => mask & (1 << i)).join('');
     inclusive.set(label, 0);
@@ -88,12 +269,10 @@ export function calculateVennCounts(
 
     const title = row[0] ?? '';
 
-    // Exclusive: only the exact mask
     const exLabel = letters.filter((_, i) => rowMask & (1 << i)).join('');
     exclusive.set(exLabel, (exclusive.get(exLabel) ?? 0) + 1);
     exclusiveItems.get(exLabel)?.push(title);
 
-    // Inclusive: every subset of rowMask
     for (let mask = 1; mask < (1 << n); mask++) {
       if ((rowMask & mask) === mask) {
         const label = letters.filter((_, i) => mask & (1 << i)).join('');
@@ -112,7 +291,6 @@ export function calculateVennCounts(
 export function getBinaryColumns(csv: CsvData): number[] {
   const result: number[] = [];
   for (let i = 0; i < csv.headers.length; i++) {
-    // Check if all values in column are 0/1/true/false/yes/no
     const isBinary = csv.rows.every(row => {
       const v = row[i]?.toLowerCase();
       return v === '0' || v === '1' || v === 'true' || v === 'false' || v === 'yes' || v === 'no' || v === '';

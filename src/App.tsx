@@ -21,9 +21,11 @@ import { WelcomeDialog } from './components/WelcomeDialog.tsx';
 import { HelpDialog } from './components/HelpDialog.tsx';
 import { SvgValidationDialog } from './components/SvgValidationDialog.tsx';
 import { TestSidebar } from './components/TestSidebar.tsx';
+import { CsvImportDialog } from './components/CsvImportDialog.tsx';
 import type { Region } from './utils/regions.ts';
-import { parseCsv, calculateVennCounts, getBinaryColumns } from './utils/csvParser.ts';
-import type { CsvData } from './utils/csvParser.ts';
+import { calculateVennCounts, calculateVennCountsFromAggregated } from './utils/csvParser.ts';
+import type { CsvData, FileType, Delimiter, CsvImportResult, VennResult } from './utils/csvParser.ts';
+import { exportRegionSummaryTsv, exportMatrixTsv, downloadFile } from './utils/exportData.ts';
 
 export type ViewStyle = 'layer' | 'cut';
 export type AppMode = 'view' | 'edit' | 'data';
@@ -33,6 +35,7 @@ export default function App() {
   const [currentModel, setCurrentModel] = useState<string | null>(null);
   const [isLoadingModel, setIsLoadingModel] = useState(false);
   const [viewStyle, setViewStyle] = useState<ViewStyle>('layer');
+  const [cutColorMode, setCutColorMode] = useState<'depth' | 'heatmap'>('depth');
   const [regionData, setRegionData] = useState<RegionData | null>(null);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [summarySelectMode, setSummarySelectMode] = useState(false);
@@ -41,6 +44,7 @@ export default function App() {
   const [helpOpen, setHelpOpen] = useState(false);
   const [modeSwitchTarget, setModeSwitchTarget] = useState<AppMode | null>(null);
   const [dataOpenDialog, setDataOpenDialog] = useState(false);
+  const [csvImportDialog, setCsvImportDialog] = useState<{ rawText: string; filename: string } | null>(null);
   const [validationDialog, setValidationDialog] = useState<{ filename: string; content: string } | null>(null);
   const [originalSvgContent, setOriginalSvgContent] = useState<string | null>(null);
 
@@ -49,8 +53,11 @@ export default function App() {
   const [testCsvFilename, setTestCsvFilename] = useState<string | null>(null);
   const [testModel, setTestModel] = useState<string | null>(null);
   const [testColumnMapping, setTestColumnMapping] = useState<number[]>([]);
+  const [testOriginalColumns, setTestOriginalColumns] = useState<number[]>([]);
+  const [testFileType, setTestFileType] = useState<FileType>('binary');
+  const [testItemDelimiter, setTestItemDelimiter] = useState<Delimiter>(',');
   const [testCalculated, setTestCalculated] = useState(false);
-  const [, setTestVennCounts] = useState<Map<string, number> | null>(null);
+  const [testVennResult, setTestVennResult] = useState<VennResult | null>(null);
   const [testExclusiveItems, setTestExclusiveItems] = useState<Map<string, string[]> | null>(null);
   const [testInclusiveItems, setTestInclusiveItems] = useState<Map<string, string[]> | null>(null);
   const [testError, setTestError] = useState<string | null>(null);
@@ -380,6 +387,54 @@ export default function App() {
     svgDoc.markSaved();
   }, [doc, svgDoc]);
 
+  const handleExportImage = useCallback((format: 'png' | 'jpg') => {
+    const svgEl = document.querySelector('.canvas-svg') as SVGSVGElement | null;
+    if (!svgEl || !doc) return;
+    // Clone the SVG to avoid modifying the DOM
+    const clone = svgEl.cloneNode(true) as SVGSVGElement;
+    // Remove selection rects and hover highlights
+    clone.querySelectorAll('.selection-rect, [data-hover]').forEach(el => el.remove());
+    // Remove any region highlight styling (locked/hovered state)
+    clone.querySelectorAll('[style*="stroke-width: 3"]').forEach(el => {
+      (el as SVGElement).style.removeProperty('stroke-width');
+    });
+    // Serialize to string
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(clone);
+    const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+    const svgUrl = URL.createObjectURL(svgBlob);
+    const img = new Image();
+    img.onload = () => {
+      // Use viewBox dimensions for high-quality export
+      const vb = doc.viewBox;
+      const scale = 2; // 2x for retina quality
+      const canvas = document.createElement('canvas');
+      canvas.width = vb.w * scale;
+      canvas.height = vb.h * scale;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      // White background for both PNG and JPG
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(svgUrl);
+      const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
+      const ext = format === 'png' ? '.png' : '.jpg';
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = doc.filename.replace(/\.svg$/, ext);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, mimeType, 0.95);
+    };
+    img.src = svgUrl;
+  }, [doc]);
+
   // Stable refs for keyboard shortcuts
   const undoRef = useRef(svgDoc.undo);
   const redoRef = useRef(svgDoc.redo);
@@ -536,15 +591,7 @@ export default function App() {
       try {
         const resp = await fetch('./data/dataset_streaming_platforms.csv');
         const text = await resp.text();
-        const csv = parseCsv(text);
-        setTestCsvData(csv);
-        setTestCsvFilename('dataset_streaming_platforms.csv');
-        setTestError(null);
-        setTestCalculated(false);
-        // Auto-detect binary columns and set initial mapping
-        const binCols = getBinaryColumns(csv);
-        const n = Math.min(binCols.length, 8);
-        setTestColumnMapping(binCols.slice(0, n));
+        setCsvImportDialog({ rawText: text, filename: 'dataset_streaming_platforms.csv' });
       } catch (e) {
         setTestError(`Failed to load sample: ${e}`);
       }
@@ -554,26 +601,25 @@ export default function App() {
   const handleTestFileUpload = useCallback((file: File) => {
     const reader = new FileReader();
     reader.onload = () => {
-      try {
-        const csv = parseCsv(reader.result as string);
-        setTestCsvData(csv);
-        setTestCsvFilename(file.name);
-        setTestError(null);
-        setTestCalculated(false);
-        const binCols = getBinaryColumns(csv);
-        if (binCols.length < 2) {
-          setTestError('CSV must have at least 2 binary columns (0/1 values)');
-          setTestColumnMapping([]);
-          return;
-        }
-        const n = Math.min(binCols.length, 8);
-        setTestColumnMapping(binCols.slice(0, n));
-      } catch (e) {
-        setTestError(`Failed to parse CSV: ${e}`);
-      }
+      setCsvImportDialog({ rawText: reader.result as string, filename: file.name });
     };
     reader.readAsText(file);
   }, []);
+
+  const handleCsvImportLoad = useCallback((result: CsvImportResult) => {
+    const filename = csvImportDialog?.filename ?? 'data.csv';
+    setCsvImportDialog(null);
+    setTestCsvData(result.csv);
+    setTestCsvFilename(filename);
+    setTestFileType(result.fileType);
+    if (result.itemDelimiter) setTestItemDelimiter(result.itemDelimiter);
+    setTestError(null);
+    setTestCalculated(false);
+    // For aggregated: selectedColumns are the set columns; for binary: column indices
+    const cols = result.selectedColumns.slice(0, 8);
+    setTestColumnMapping(cols);
+    setTestOriginalColumns(cols);
+  }, [csvImportDialog]);
 
   const dataFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -582,8 +628,9 @@ export default function App() {
     setTestCsvFilename(null);
     setTestModel(null);
     setTestColumnMapping([]);
+    setTestOriginalColumns([]);
     setTestCalculated(false);
-    setTestVennCounts(null);
+    setTestVennResult(null);
     setTestExclusiveItems(null);
     setTestInclusiveItems(null);
     setTestError(null);
@@ -612,8 +659,10 @@ export default function App() {
       }
 
       // Calculate Venn counts
-      const result = calculateVennCounts(testCsvData, testColumnMapping);
-      setTestVennCounts(result.exclusive);
+      const result = testFileType === 'aggregated'
+        ? calculateVennCountsFromAggregated(testCsvData, testColumnMapping, testItemDelimiter)
+        : calculateVennCounts(testCsvData, testColumnMapping);
+      setTestVennResult(result);
       setTestExclusiveItems(result.exclusiveItems);
       setTestInclusiveItems(result.inclusiveItems);
 
@@ -650,11 +699,12 @@ export default function App() {
       }
 
       setTestCalculated(true);
+      setCutColorMode('heatmap');
       regionDetection.clearSelection();
     } catch (e) {
       setTestError(`Calculation failed: ${e}`);
     }
-  }, [testCsvData, testModel, testColumnMapping, svgDoc, zoomPan, regionDetection, testShapeColors, testShapeOpacity]);
+  }, [testCsvData, testModel, testColumnMapping, svgDoc, zoomPan, regionDetection, testShapeColors, testShapeOpacity, testFileType, testItemDelimiter]);
 
   // Viewer: region list hover/click
   const handleSidebarHoverRegion = useCallback((_region: Region | null) => {
@@ -679,7 +729,7 @@ export default function App() {
   return (
     <div className="app">
       <input ref={fileInputRef} type="file" accept=".svg" style={{ display: 'none' }} onChange={handleFileChange} />
-      <input ref={dataFileInputRef} type="file" accept=".csv" style={{ display: 'none' }} onChange={(e) => {
+      <input ref={dataFileInputRef} type="file" accept=".csv,.tsv,.txt" style={{ display: 'none' }} onChange={(e) => {
         const file = e.target.files?.[0];
         if (file) handleTestFileUpload(file);
         e.target.value = '';
@@ -736,15 +786,20 @@ export default function App() {
           !testCsvData ? null : <TestSidebar
             csvData={testCsvData}
             csvFilename={testCsvFilename}
+            fileType={testFileType}
             selectedModel={testModel}
             onSelectModel={(filename, setCount) => {
               setTestModel(filename);
               setTestCalculated(false);
               // Resize column mapping to match model's set count
               if (testCsvData) {
-                const binCols = getBinaryColumns(testCsvData);
-                const needed = Math.min(setCount, binCols.length);
-                setTestColumnMapping(binCols.slice(0, needed));
+                if (testFileType === 'aggregated') {
+                  // Aggregated: slice from original columns (so switching back to larger model works)
+                  setTestColumnMapping(testOriginalColumns.slice(0, setCount));
+                } else {
+                  // Binary: slice from original columns
+                  setTestColumnMapping(testOriginalColumns.slice(0, setCount));
+                }
               }
             }}
             columnMapping={testColumnMapping}
@@ -753,6 +808,8 @@ export default function App() {
             isCalculated={testCalculated}
             viewStyle={viewStyle}
             onSetViewStyle={setViewStyle}
+            cutColorMode={cutColorMode}
+            onSetCutColorMode={setCutColorMode}
             error={testError}
             showTitle={testShowTitle}
             showNames={testShowNames}
@@ -810,6 +867,18 @@ export default function App() {
               if (!doc?.texts.header) return;
               svgDoc.updateTextStyle(doc.texts.header.id, 'font-family', `'${font}'`);
             }}
+            onExportRegionSummary={testVennResult ? () => {
+              const setNames = testColumnMapping.map(ci => testCsvData?.headers[ci] ?? '');
+              let totalItems = 0;
+              for (const [, count] of testVennResult.exclusive) totalItems += count;
+              const tsv = exportRegionSummaryTsv(testVennResult, testColumnMapping.length, setNames, totalItems);
+              downloadFile(tsv, `venn_${testColumnMapping.length}set_regions.tsv`);
+            } : undefined}
+            onExportMatrix={testVennResult ? () => {
+              const setNames = testColumnMapping.map(ci => testCsvData?.headers[ci] ?? '');
+              const tsv = exportMatrixTsv(testVennResult, testColumnMapping.length, setNames);
+              downloadFile(tsv, `venn_${testColumnMapping.length}set_matrix.tsv`);
+            } : undefined}
           />
         ) : (
           <Sidebar
@@ -849,6 +918,7 @@ export default function App() {
                     }
                     return m;
                   })() : null}
+                  colorMode={mode === 'data' ? cutColorMode : 'depth'}
                 />
               </div>
             ) :
@@ -960,7 +1030,7 @@ export default function App() {
           ) : (
             <div className="canvas-empty">
               <div className="canvas-empty-text">
-                {mode === 'data' ? 'Load CSV data to get started' : 'Open an SVG file to start editing'}
+                {mode === 'data' ? 'Load your data to get started' : 'Open an SVG file to start editing'}
               </div>
               {mode === 'edit' && (
                 <div style={{ display: 'flex', gap: 12 }}>
@@ -970,10 +1040,10 @@ export default function App() {
               )}
               {mode === 'data' && (
                 <div style={{ display: 'flex', gap: 12 }}>
-                  <button className="btn btn-large" onClick={() => handleTestLoadCsv('sample')}>Load Sample</button>
+                  <button className="btn btn-large" onClick={() => handleTestLoadCsv('sample')}>Load Sample Data</button>
                   <label className="btn btn-large" style={{ cursor: 'pointer' }}>
-                    Upload Custom
-                    <input type="file" accept=".csv" style={{ display: 'none' }} onChange={(e) => {
+                    Upload Custom File
+                    <input type="file" accept=".csv,.tsv,.txt" style={{ display: 'none' }} onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file) handleTestFileUpload(file);
                       e.target.value = '';
@@ -999,6 +1069,7 @@ export default function App() {
               canSave={mode === 'data' && testCalculated && viewStyle === 'layer'}
               onSave={handleSave}
               onClearSelection={regionDetection.clearSelection}
+              onExportImage={handleExportImage}
             />
           )
         ) : (
@@ -1082,15 +1153,26 @@ export default function App() {
       {dataOpenDialog && (
         <div className="dialog-overlay" onClick={() => setDataOpenDialog(false)}>
           <div className="confirm-dialog" onClick={e => e.stopPropagation()}>
-            <h3 className="confirm-title">Open CSV Data</h3>
+            <h3 className="confirm-title">Open Data</h3>
             <p className="confirm-text">Choose a data source for Venn diagram calculation.</p>
             <div className="confirm-actions">
-              <button className="btn btn-accent" onClick={() => { setDataOpenDialog(false); handleTestLoadCsv('sample'); }}>Load Sample CSV</button>
-              <button className="btn" onClick={() => { setDataOpenDialog(false); dataFileInputRef.current?.click(); }}>Open Custom CSV</button>
+              <button className="btn btn-accent" onClick={() => { setDataOpenDialog(false); handleTestLoadCsv('sample'); }}>Load Sample Data</button>
+              <button className="btn" onClick={() => { setDataOpenDialog(false); dataFileInputRef.current?.click(); }}>Upload Custom File</button>
               <button className="btn" onClick={() => setDataOpenDialog(false)}>Cancel</button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* CSV Import Dialog */}
+      {csvImportDialog && (
+        <CsvImportDialog
+          isOpen={true}
+          rawText={csvImportDialog.rawText}
+          filename={csvImportDialog.filename}
+          onLoad={handleCsvImportLoad}
+          onCancel={() => setCsvImportDialog(null)}
+        />
       )}
 
       {/* Unsaved changes confirm */}

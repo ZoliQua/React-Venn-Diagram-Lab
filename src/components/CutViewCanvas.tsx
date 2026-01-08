@@ -6,10 +6,10 @@ interface CutViewCanvasProps {
   scale: number;
   onRegionHover: (label: string | null) => void;
   onRegionClick: (label: string) => void;
-  countOverrides?: Map<string, string> | null;  // label → display value (numbers)
+  countOverrides?: Map<string, string> | null;
+  colorMode?: 'depth' | 'heatmap';
 }
 
-/** Convert bitmask index to set label, e.g. 5 with sets [A,B,C] → "AC" */
 function indexToLabel(index: number, sets: string[]): string {
   let label = '';
   for (let i = 0; i < sets.length; i++) {
@@ -18,14 +18,12 @@ function indexToLabel(index: number, sets: string[]): string {
   return label;
 }
 
-/** Count set bits */
 function bitCount(v: number): number {
   let c = 0;
   while (v) { c += v & 1; v >>= 1; }
   return c;
 }
 
-/** Interpolate between two HSL colors */
 function interpolateColor(bg: [number, number, number], fg: [number, number, number], t: number): string {
   const h = bg[0] + (fg[0] - bg[0]) * t;
   const s = bg[1] + (fg[1] - bg[1]) * t;
@@ -33,11 +31,27 @@ function interpolateColor(bg: [number, number, number], fg: [number, number, num
   return `hsl(${h}, ${s}%, ${l}%)`;
 }
 
-/**
- * Cut View: renders pre-computed region SVG paths from JSON data.
- * Each region is a real SVG path with direct mouse events — like venn7.
- */
-export function CutViewCanvas({ regionData, scale, onRegionHover, onRegionClick, countOverrides }: CutViewCanvasProps) {
+/** RdBu diverging color scale: blue (#2166AC) → white (#F7F7F7) → red (#B2182B) */
+function heatmapColor(t: number): string {
+  // Clamp t to 0..1
+  t = Math.max(0, Math.min(1, t));
+  // Interpolate in RGB
+  let r: number, g: number, b: number;
+  if (t <= 0.5) {
+    const s = t / 0.5; // 0..1 within blue→white
+    r = 0x21 + (0xF7 - 0x21) * s;
+    g = 0x66 + (0xF7 - 0x66) * s;
+    b = 0xAC + (0xF7 - 0xAC) * s;
+  } else {
+    const s = (t - 0.5) / 0.5; // 0..1 within white→red
+    r = 0xF7 + (0xB2 - 0xF7) * s;
+    g = 0xF7 + (0x18 - 0xF7) * s;
+    b = 0xF7 + (0x2B - 0xF7) * s;
+  }
+  return `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
+}
+
+export function CutViewCanvas({ regionData, scale, onRegionHover, onRegionClick, countOverrides, colorMode = 'depth' }: CutViewCanvasProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const onHoverRef = useRef(onRegionHover);
   const onClickRef = useRef(onRegionClick);
@@ -46,10 +60,10 @@ export function CutViewCanvas({ regionData, scale, onRegionHover, onRegionClick,
 
   const { n, sets, regions, curves } = regionData;
 
-  // Color scheme: interpolate from dark background to warm center
-  const bgColor: [number, number, number] = [220, 15, 12];   // dark blue-grey
-  const fgColor: [number, number, number] = [0, 45, 45];      // warm red
-  const regionColors = useMemo(() => {
+  // Depth-based color scheme
+  const bgColor: [number, number, number] = [220, 15, 12];
+  const fgColor: [number, number, number] = [0, 45, 45];
+  const depthColors = useMemo(() => {
     const colors: string[] = [];
     for (let i = 0; i <= n; i++) {
       colors.push(interpolateColor(bgColor, fgColor, i / n));
@@ -57,7 +71,34 @@ export function CutViewCanvas({ regionData, scale, onRegionHover, onRegionClick,
     return colors;
   }, [n]);
 
-  // Determine viewBox from coordinate ranges
+  // Heatmap: compute min/max from countOverrides
+  const heatmapRange = useMemo(() => {
+    if (colorMode !== 'heatmap' || !countOverrides) return { min: 0, max: 1 };
+    let min = Infinity, max = -Infinity;
+    for (const [, val] of countOverrides) {
+      const num = parseInt(val, 10);
+      if (!isNaN(num)) {
+        if (num < min) min = num;
+        if (num > max) max = num;
+      }
+    }
+    if (min === Infinity) return { min: 0, max: 1 };
+    return { min, max: max === min ? min + 1 : max };
+  }, [colorMode, countOverrides]);
+
+  // Get fill color for a region index
+  const getRegionFill = useCallback((index: number): string => {
+    if (colorMode === 'heatmap' && countOverrides) {
+      const label = indexToLabel(index, sets);
+      const val = countOverrides.get(label);
+      const num = val ? parseInt(val, 10) : 0;
+      if (isNaN(num) || num === 0) return '#3a3a4a'; // grey for zero
+      const t = (num - heatmapRange.min) / (heatmapRange.max - heatmapRange.min);
+      return heatmapColor(t);
+    }
+    return depthColors[bitCount(index)];
+  }, [colorMode, countOverrides, sets, heatmapRange, depthColors]);
+
   const viewBox = useMemo(() => {
     const margin = 5;
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
@@ -68,18 +109,11 @@ export function CutViewCanvas({ regionData, scale, onRegionHover, onRegionClick,
       for (let i = 0; i < nums.length - 1; i += 2) {
         const x = parseFloat(nums[i]);
         const y = parseFloat(nums[i + 1]);
-        if (x < minX) minX = x;
-        if (y < minY) minY = y;
-        if (x > maxX) maxX = x;
-        if (y > maxY) maxY = y;
+        if (x < minX) minX = x; if (y < minY) minY = y;
+        if (x > maxX) maxX = x; if (y > maxY) maxY = y;
       }
     }
-    return {
-      x: minX - margin,
-      y: minY - margin,
-      w: (maxX - minX) + margin * 2,
-      h: (maxY - minY) + margin * 2,
-    };
+    return { x: minX - margin, y: minY - margin, w: (maxX - minX) + margin * 2, h: (maxY - minY) + margin * 2 };
   }, [regions]);
 
   const displaySize = 700 * scale;
@@ -98,7 +132,6 @@ export function CutViewCanvas({ regionData, scale, onRegionHover, onRegionClick,
     onClickRef.current(indexToLabel(index, sets));
   }, [sets]);
 
-  // Sorted region indices: depth ascending (shallow bottom, deep top)
   const sortedIndices = useMemo(() => {
     const indices: number[] = [];
     for (let i = 1; i < regions.length; i++) {
@@ -107,6 +140,11 @@ export function CutViewCanvas({ regionData, scale, onRegionHover, onRegionClick,
     indices.sort((a, b) => bitCount(a) - bitCount(b) || a - b);
     return indices;
   }, [regions]);
+
+  // Legend position (bottom-left of viewBox)
+  const legendX = viewBox.x + 3;
+  const legendY = viewBox.y + viewBox.h - 8;
+  const legendW = viewBox.w * 0.2;
 
   return (
     <div className="canvas-inner">
@@ -119,12 +157,10 @@ export function CutViewCanvas({ regionData, scale, onRegionHover, onRegionClick,
         style={{ background: '#1a1a2e' }}
         onMouseLeave={handleLeave}
       >
-        {/* Regions: each a pre-computed SVG path */}
         {sortedIndices.map(index => {
           const d = regions[index];
           if (!d) return null;
-          const depth = bitCount(index);
-          const color = regionColors[depth];
+          const color = getRegionFill(index);
           const isHovered = hoveredIndex === index;
           const hasHover = hoveredIndex !== null;
 
@@ -137,17 +173,13 @@ export function CutViewCanvas({ regionData, scale, onRegionHover, onRegionClick,
               strokeWidth={0.15}
               strokeLinejoin="round"
               opacity={hasHover ? (isHovered ? 1 : 0.25) : 1}
-              style={{
-                cursor: 'pointer',
-                transition: 'opacity 0.12s',
-              }}
+              style={{ cursor: 'pointer', transition: 'opacity 0.12s' }}
               onMouseEnter={() => handleEnter(index)}
               onClick={() => handleClick(index)}
             />
           );
         })}
 
-        {/* Hover outline */}
         {hoveredIndex !== null && regions[hoveredIndex] && (
           <path
             d={regions[hoveredIndex]}
@@ -159,7 +191,6 @@ export function CutViewCanvas({ regionData, scale, onRegionHover, onRegionClick,
           />
         )}
 
-        {/* Shape curves — subtle borders */}
         {curves.map((curve, i) => (
           <path
             key={`curve-${i}`}
@@ -174,7 +205,6 @@ export function CutViewCanvas({ regionData, scale, onRegionHover, onRegionClick,
           />
         ))}
 
-        {/* Hovered region label — centered on the region's bounding box */}
         {hoveredIndex !== null && regions[hoveredIndex] && (() => {
           const d = regions[hoveredIndex];
           const nums = d.match(/-?\d+\.?\d*/g);
@@ -204,6 +234,27 @@ export function CutViewCanvas({ regionData, scale, onRegionHover, onRegionClick,
             </text>
           );
         })()}
+
+        {/* Heatmap legend bar */}
+        {colorMode === 'heatmap' && countOverrides && (
+          <>
+            <defs>
+              <linearGradient id="heatmap-legend-grad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#2166AC" />
+                <stop offset="50%" stopColor="#F7F7F7" />
+                <stop offset="100%" stopColor="#B2182B" />
+              </linearGradient>
+            </defs>
+            <rect x={legendX} y={legendY} width={legendW} height={2.5} rx={0.5}
+              fill="url(#heatmap-legend-grad)" stroke="rgba(255,255,255,0.3)" strokeWidth={0.15} />
+            <text x={legendX} y={legendY - 0.8} fill="#aaa" fontSize={2} fontFamily="Tahoma, sans-serif">
+              {heatmapRange.min}
+            </text>
+            <text x={legendX + legendW} y={legendY - 0.8} fill="#aaa" fontSize={2} fontFamily="Tahoma, sans-serif" textAnchor="end">
+              {heatmapRange.max}
+            </text>
+          </>
+        )}
       </svg>
     </div>
   );

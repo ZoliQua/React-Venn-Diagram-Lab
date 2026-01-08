@@ -1,6 +1,7 @@
 import type { VennDocument } from '../types.ts';
 import type { RegionInfo } from '../hooks/useRegionDetection.ts';
 import { shapeIdToLetter } from '../utils/hitTest.ts';
+import { downloadFile } from '../utils/exportData.ts';
 
 interface ViewerInfoPanelProps {
   doc: VennDocument | null;
@@ -11,6 +12,7 @@ interface ViewerInfoPanelProps {
   onSave?: () => void;
   canSave?: boolean;
   onClearSelection?: () => void;
+  onExportImage?: (format: 'png' | 'jpg') => void;
 }
 
 const SHAPE_COLORS: Record<string, string> = {
@@ -23,7 +25,7 @@ const SHAPE_COLOR_NAMES: Record<string, string> = {
   E: 'Brown', F: 'Magenta', G: 'Pink', H: 'Cyan',
 };
 
-export function ViewerInfoPanel({ doc, hoveredRegion, selectedRegion, regionExclusiveItems, regionInclusiveItems, onSave, canSave, onClearSelection }: ViewerInfoPanelProps) {
+export function ViewerInfoPanel({ doc, hoveredRegion, selectedRegion, regionExclusiveItems, regionInclusiveItems, onSave, canSave, onClearSelection, onExportImage }: ViewerInfoPanelProps) {
   // If a region is selected (clicked), lock to it. Otherwise show hover.
   const isLocked = selectedRegion !== null;
   const region = isLocked ? selectedRegion : hoveredRegion;
@@ -183,6 +185,22 @@ export function ViewerInfoPanel({ doc, hoveredRegion, selectedRegion, regionExcl
         );
       })()}
 
+      {/* Region export */}
+      {regionExclusiveItems && (() => {
+        const items = region.isInclusive
+          ? (regionInclusiveItems?.get(region.label) ?? [])
+          : (regionExclusiveItems.get(region.label) ?? []);
+        return items.length > 0 ? (
+          <button className="btn btn-sm" style={{ width: '100%', marginTop: 6 }}
+            onClick={() => {
+              const content = items.join('\n');
+              downloadFile(content, `region_${region.label}_items.txt`, 'text/plain');
+            }}>
+            Export Region Items ({items.length})
+          </button>
+        ) : null;
+      })()}
+
       {/* Action buttons */}
       <div className="panel-section" style={{ marginTop: 'auto', paddingTop: 16 }}>
         <div style={{ display: 'flex', gap: 6 }}>
@@ -193,6 +211,12 @@ export function ViewerInfoPanel({ doc, hoveredRegion, selectedRegion, regionExcl
             <button className="btn" style={{ flex: canSave ? 0 : 1 }} onClick={onClearSelection}>Unlock</button>
           )}
         </div>
+        {canSave && onExportImage && (
+          <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+            <button className="btn" style={{ flex: 1 }} onClick={() => onExportImage('png')}>Export as PNG</button>
+            <button className="btn" style={{ flex: 1 }} onClick={() => onExportImage('jpg')}>Export as JPG</button>
+          </div>
+        )}
       </div>
     </div>
   );

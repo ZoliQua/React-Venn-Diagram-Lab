@@ -2,6 +2,67 @@
 
 All notable changes to the Venn Diagram Lab project.
 
+## [1.5.1] — 2026-01-07
+
+### Added
+- **Credits page**: accessible from Welcome dialog, lists all authors with affiliations and contact email
+- **Welcome dialog**: "Credits" button next to "View All 39 Diagram Models"
+
+### Changed
+- **SVG model comments**: updated GitHub URL to React-Venn-Diagram-Lab across all 39 SVG files
+- **README**: removed emojis, updated Paper.js → Shapely references, refreshed project structure and Python scripts list, updated git clone URL
+- **Python scripts renamed**: `center_texts.py` → `svg_center_texts.py`, `generate_tests.py` → `svg_generate_tests.py`, `normalize_after_illustrator.py` → `svg_normalize_after_illustrator.py`, `rotate_labels.py` → `svg_rotate_labels.py`
+- **Documentation renamed**: `VENN-DIAGRAM-SVG.md` → `VENN-DIAGRAM-SVG-SPECIFICATION.md`, `VENN_PROJECT.md` → `VENN-DIGARAM-PROJECT-STRUCTURE.md`
+- **SummaryDialog**: added Carroll 2000 source references
+- **.gitignore**: added `CLAUDE.md`
+
+### Removed
+- `fix_edwards_shapes.py` and `unify_svgs.py` scripts (no longer needed)
+
+## [1.6.0] — 2026-01-08
+
+### Added
+- **CSV Import Dialog** (`CsvImportDialog.tsx`): 5-section import wizard appearing after file selection
+  - 1. File Type: Binary (0/1) or Aggregated (item names per column)
+  - 2. Delimiters: configurable row delimiter (comma/semicolon/tab/space) + item delimiter for aggregated mode
+  - 3. Header: toggle "First row is header" with custom header name inputs
+  - 4. Data Columns: Select All / Deselect All buttons, checkbox per column with preview table (5 rows)
+  - 5. Data Rows: Import All or Import Selected with row number and skip row specification (supports ranges like `1,3,5-10`)
+- **Aggregated CSV support**: `calculateVennCountsFromAggregated()` — each column is a set, items in cells define membership, intersections computed via bitmask
+- **Delimiter auto-detection**: `detectDelimiter()` heuristic for comma/semicolon/tab/space
+- **Binary/Aggregated validation**: strict column validation before import
+- **CSV parser tests**: 31 new tests in `csvParser.test.ts` covering all parser functions
+- **Sample aggregated dataset**: `data/dataset_gene_sets.csv` — 600 rows, 6 pathway columns with gene names
+- **File format support**: Upload Custom File now accepts `.csv`, `.tsv`, `.txt`
+- **Cut View Heatmap**: RdBu diverging color scale (#2166AC → #F7F7F7 → #B2182B) based on count values
+  - Color mode toggle (Depth / Heatmap) in Cut View sidebar
+  - Legend bar with min/max values
+  - Auto-switches to Heatmap after Calculate
+  - Zero-count regions rendered in grey
+- **Data export** (`exportData.ts`):
+  - Regions Summary TSV: Region, Sets, Depth, Exclusive/Inclusive Count, Percentage, Items
+  - Item Matrix TSV: per-item binary membership + region label
+  - BOM-prefixed UTF-8 for Excel compatibility
+- **Export section** in Data sidebar: "Regions Summary (TSV)" and "Item Matrix (TSV)" buttons
+- **Export Region Items**: button in right panel to download selected region's items as text file
+- **Export as PNG / Export as JPG**: image export with 2x retina quality, white background, clean (no selection highlights)
+- **Data mode toolbar**: Open (dialog with Load Sample Data / Upload Custom File), Save (SVG), Close (reset to empty)
+- **Data Open dialog**: choice between sample and custom file upload
+
+### Changed
+- **Data mode empty state**: "Load your data to get started" with "Load Sample Data" / "Upload Custom File" buttons
+- **Import dialog title**: "Import Custom Dataset: {filename}"
+- **Data sidebar section numbering**: 1. File Info, 2. Model, 3. Column Mapping, 4. View, 5. Export
+- **Data sidebar File Info**: shows Format (Binary/Aggregated) instead of generic CSV
+- **Font type controls**: label and dropdown on single row (inline layout)
+- **Model selection for aggregated**: uses original column list (not binary detection), supports switching between larger/smaller models without losing columns
+- **VennResult state**: full result preserved for export (replaces separate vennCounts state)
+
+### Fixed
+- **Aggregated model selector**: `maxSets` now correctly computed from `columnMapping.length` for aggregated mode (was using `getBinaryColumns` which returned 0)
+- **Model switch column reset**: `onSelectModel` now slices from original import columns instead of current mapping, allowing switch back to larger models
+- **`compatibleModelsBySet` memo**: dependency array includes `fileType` and `binaryColumns.length` for correct reactivity
+
 ## [1.5.0] — 2026-01-06
 
 ### Added
