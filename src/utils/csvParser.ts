@@ -173,7 +173,7 @@ export function calculateVennCountsFromAggregated(
   itemDelimiter: Delimiter = ',',
 ): VennResult {
   const n = selectedColumns.length;
-  const letters = 'ABCDEFGH'.slice(0, n).split('');
+  const letters = 'ABCDEFGHI'.slice(0, n).split('');
 
   // Collect items per set
   const sets: Set<string>[] = selectedColumns.map(() => new Set<string>());
@@ -247,7 +247,7 @@ export function calculateVennCounts(
   selectedColumns: number[],
 ): VennResult {
   const n = selectedColumns.length;
-  const letters = 'ABCDEFGH'.slice(0, n).split('');
+  const letters = 'ABCDEFGHI'.slice(0, n).split('');
 
   const inclusive = new Map<string, number>();
   const exclusive = new Map<string, number>();

@@ -2,7 +2,7 @@
 
 All notable changes to the Venn Diagram Lab project.
 
-## [1.7.1] — 2026-03-30
+## [1.7.1] — 2026-01-10
 
 ### Added
 - **5 new diagram models**: `venn-2e-set-rectangle.svg`, `venn-5e-set-euler.svg` (21/31 Euler), `venn-8a-set-edwards.svg` (255 regions), `venn-9a-set-edwards.svg` (511 regions), `venn-2e-set-carroll-triangle.svg`; total models: 44 (was 39)

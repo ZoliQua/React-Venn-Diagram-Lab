@@ -43,7 +43,7 @@ export function DataSummaryPanel({ vennResult, n, setNames, totalItems }: DataSu
   const [enrichmentOpen, setEnrichmentOpen] = useState(true);
   const [exportOpen, setExportOpen] = useState(true);
 
-  const letters = 'ABCDEFGH'.slice(0, n).split('');
+  const letters = 'ABCDEFGHI'.slice(0, n).split('');
 
   const pairStats = useMemo(() =>
     pairwiseStatistics(vennResult, n, totalItems, setNames),

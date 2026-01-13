@@ -111,7 +111,7 @@ export function pairwiseStatistics(
   totalItems: number,
   setNames: string[],
 ): PairwiseStat[] {
-  const letters = 'ABCDEFGH'.slice(0, n).split('');
+  const letters = 'ABCDEFGHI'.slice(0, n).split('');
   const stats: PairwiseStat[] = [];
 
   for (let i = 0; i < n; i++) {

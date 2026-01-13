@@ -10,7 +10,7 @@ export function exportRegionSummaryTsv(
   setNames: string[],
   totalItems: number,
 ): string {
-  const letters = 'ABCDEFGH'.slice(0, n).split('');
+  const letters = 'ABCDEFGHI'.slice(0, n).split('');
   const header = [
     'Region', 'Sets', 'Depth',
     'Exclusive_Count', 'Inclusive_Count',
@@ -49,7 +49,7 @@ export function exportMatrixTsv(
   n: number,
   setNames: string[],
 ): string {
-  const letters = 'ABCDEFGH'.slice(0, n).split('');
+  const letters = 'ABCDEFGHI'.slice(0, n).split('');
   const headerCols = ['Item', ...letters.map((l, i) => setNames[i] ?? l), 'Region'];
   const header = headerCols.join('\t');
 

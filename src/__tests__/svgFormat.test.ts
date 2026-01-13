@@ -3,7 +3,7 @@ import { readFileSync, readdirSync } from 'fs';
 import { resolve } from 'path';
 
 const SVG_DIR = resolve(__dirname, '../../models/svg');
-const svgFiles = readdirSync(SVG_DIR).filter(f => f.endsWith('.svg'));
+const svgFiles = readdirSync(SVG_DIR).filter(f => f.startsWith('venn') && f.endsWith('.svg'));
 
 const STANDARD_COLORS: Record<string, string> = {
   A: '#FFF200', B: '#2E3192', C: '#ED1C24', D: '#808285',
@@ -13,10 +13,11 @@ const STANDARD_COLORS: Record<string, string> = {
 
 describe('SVG format validation', () => {
   it('has 44 SVG files', () => {
-    expect(svgFiles.length).toBe(43);
+    expect(svgFiles.length).toBe(44);
   });
 
   for (const file of svgFiles) {
+    const isEuler = file.includes('-euler');
     describe(file, () => {
       const content = readFileSync(resolve(SVG_DIR, file), 'utf-8');
 
@@ -50,7 +51,13 @@ describe('SVG format validation', () => {
         const n = shapeMatches.length;
         const expectedCount = Math.pow(2, n) - 1;
         const countMatches = content.match(/id="Count_[A-I]+"/g) ?? [];
-        expect(countMatches.length).toBe(expectedCount);
+        if (isEuler) {
+          // Euler diagrams may have fewer regions than 2^n - 1
+          expect(countMatches.length).toBeGreaterThan(0);
+          expect(countMatches.length).toBeLessThanOrEqual(expectedCount);
+        } else {
+          expect(countMatches.length).toBe(expectedCount);
+        }
       });
 
       it('has standard colors on shapes', () => {
