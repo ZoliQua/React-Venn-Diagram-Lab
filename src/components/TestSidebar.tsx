@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import type { ViewStyle } from '../App.tsx';
 import type { UpsetColorMode, UpsetSortMode } from './UpsetPlot.tsx';
+import type { EdgeWeightMetric } from '../utils/networkData.ts';
 import { MODEL_LIST, getModelsBySetCount } from '../models.ts';
 import type { CsvData } from '../utils/csvParser.ts';
 import { getBinaryColumns } from '../utils/csvParser.ts';
@@ -82,6 +83,20 @@ interface TestSidebarProps {
   onSetUpsetThreshold: (v: number) => void;
   upsetCustomColor: string;
   onSetUpsetCustomColor: (c: string) => void;
+  networkMetric: EdgeWeightMetric;
+  onSetNetworkMetric: (m: EdgeWeightMetric) => void;
+  networkSigOnly: boolean;
+  onSetNetworkSigOnly: (v: boolean) => void;
+  networkEdgeLabels: boolean;
+  onSetNetworkEdgeLabels: (v: boolean) => void;
+  networkNodeSizes: boolean;
+  onSetNetworkNodeSizes: (v: boolean) => void;
+  networkMinWeight: number;
+  onSetNetworkMinWeight: (v: number) => void;
+  networkMoveNodes: boolean;
+  onSetNetworkMoveNodes: (v: boolean) => void;
+  plotBackground: 'dark' | 'white';
+  onSetPlotBackground: (v: 'dark' | 'white') => void;
   onExportRegionSummary?: () => void;
   onExportMatrix?: () => void;
   onSaveSvg?: () => void;
@@ -111,6 +126,13 @@ export function TestSidebar({
   upsetSortMode, onSetUpsetSortMode,
   upsetThreshold, onSetUpsetThreshold,
   upsetCustomColor, onSetUpsetCustomColor,
+  networkMetric, onSetNetworkMetric,
+  networkSigOnly, onSetNetworkSigOnly,
+  networkEdgeLabels, onSetNetworkEdgeLabels,
+  networkNodeSizes, onSetNetworkNodeSizes,
+  networkMinWeight, onSetNetworkMinWeight,
+  networkMoveNodes, onSetNetworkMoveNodes,
+  plotBackground, onSetPlotBackground,
   onExportRegionSummary, onExportMatrix,
   onSaveSvg, onExportImage,
 }: TestSidebarProps) {
@@ -270,7 +292,45 @@ export function TestSidebar({
             <button className={`btn btn-sm btn-view-style ${viewStyle === 'layer' ? 'btn-mode-active' : ''}`} onClick={() => onSetViewStyle('layer')}>Layer</button>
             <button className={`btn btn-sm btn-view-style ${viewStyle === 'cut' ? 'btn-mode-active' : ''}`} onClick={() => onSetViewStyle('cut')}>Cut</button>
             <button className={`btn btn-sm btn-view-style ${viewStyle === 'upset' ? 'btn-mode-active' : ''}`} onClick={() => onSetViewStyle('upset')}>UpSet</button>
+            <button className={`btn btn-sm btn-view-style ${viewStyle === 'network' ? 'btn-mode-active' : ''}`} onClick={() => onSetViewStyle('network')}>Network</button>
           </div>
+          {viewStyle === 'network' && (
+            <div style={{ marginTop: 8 }}>
+              <div className="sidebar-subsection-title">Edge weight</div>
+              <div className="view-style-switcher" style={{ flexWrap: 'wrap' }}>
+                <button className={`btn btn-sm btn-view-style ${networkMetric === 'intersection' ? 'btn-mode-active' : ''}`} onClick={() => onSetNetworkMetric('intersection')}>Count</button>
+                <button className={`btn btn-sm btn-view-style ${networkMetric === 'jaccard' ? 'btn-mode-active' : ''}`} onClick={() => onSetNetworkMetric('jaccard')}>Jaccard</button>
+                <button className={`btn btn-sm btn-view-style ${networkMetric === 'foldEnrichment' ? 'btn-mode-active' : ''}`} onClick={() => onSetNetworkMetric('foldEnrichment')}>FE</button>
+                <button className={`btn btn-sm btn-view-style ${networkMetric === 'overlapCoeff' ? 'btn-mode-active' : ''}`} onClick={() => onSetNetworkMetric('overlapCoeff')}>OC</button>
+              </div>
+              <div className="test-show-inline" style={{ marginTop: 6 }}>
+                <span className="test-show-label">Filter</span>
+                <button className={`btn btn-xs btn-toggle ${networkSigOnly ? 'btn-toggle-active' : ''}`} onClick={() => onSetNetworkSigOnly(!networkSigOnly)}>Sig. only (FDR&lt;0.05)</button>
+              </div>
+              <div className="test-show-inline" style={{ marginTop: 4 }}>
+                <span className="test-show-label">Show</span>
+                <button className={`btn btn-xs btn-toggle ${networkEdgeLabels ? 'btn-toggle-active' : ''}`} onClick={() => onSetNetworkEdgeLabels(!networkEdgeLabels)}>Edge values</button>
+                <button className={`btn btn-xs btn-toggle ${networkNodeSizes ? 'btn-toggle-active' : ''}`} onClick={() => onSetNetworkNodeSizes(!networkNodeSizes)}>Node sizes</button>
+              </div>
+              <div className="sidebar-subsection-title" style={{ marginTop: 6 }}>Min. edge weight</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <input type="range" min="0" max="100" value={networkMinWeight} onChange={e => onSetNetworkMinWeight(parseInt(e.target.value))} style={{ flex: 1 }} />
+                <span style={{ fontSize: 11, color: 'var(--text-secondary)', minWidth: 24, textAlign: 'right' }}>{networkMinWeight}</span>
+              </div>
+              <div className="test-show-inline" style={{ marginTop: 6 }}>
+                <span className="test-show-label">Background</span>
+                <button className={`btn btn-xs btn-toggle ${plotBackground === 'dark' ? 'btn-toggle-active' : ''}`} onClick={() => onSetPlotBackground('dark')}>Dark</button>
+                <button className={`btn btn-xs btn-toggle ${plotBackground === 'white' ? 'btn-toggle-active' : ''}`} onClick={() => onSetPlotBackground('white')}>White</button>
+              </div>
+              <button
+                className={`btn btn-sm ${networkMoveNodes ? 'btn-mode-active' : ''}`}
+                style={{ width: '100%', marginTop: 6 }}
+                onClick={() => onSetNetworkMoveNodes(!networkMoveNodes)}
+              >
+                {networkMoveNodes ? 'Move Nodes (ON)' : 'Move Nodes'}
+              </button>
+            </div>
+          )}
           {viewStyle === 'upset' && (
             <div style={{ marginTop: 8 }}>
               <div className="sidebar-subsection-title">Sort by</div>
@@ -294,6 +354,11 @@ export function TestSidebar({
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <input type="range" min="0" max="100" value={upsetThreshold} onChange={e => onSetUpsetThreshold(parseInt(e.target.value))} style={{ flex: 1 }} />
                 <span style={{ fontSize: 11, color: '#aaa', minWidth: 24, textAlign: 'right' }}>{upsetThreshold}</span>
+              </div>
+              <div className="test-show-inline" style={{ marginTop: 6 }}>
+                <span className="test-show-label">Background</span>
+                <button className={`btn btn-xs btn-toggle ${plotBackground === 'dark' ? 'btn-toggle-active' : ''}`} onClick={() => onSetPlotBackground('dark')}>Dark</button>
+                <button className={`btn btn-xs btn-toggle ${plotBackground === 'white' ? 'btn-toggle-active' : ''}`} onClick={() => onSetPlotBackground('white')}>White</button>
               </div>
             </div>
           )}
@@ -325,6 +390,11 @@ export function TestSidebar({
                   </div>
                 </>
               )}
+              <div className="test-show-inline" style={{ marginTop: 6 }}>
+                <span className="test-show-label">Background</span>
+                <button className={`btn btn-xs btn-toggle ${plotBackground === 'dark' ? 'btn-toggle-active' : ''}`} onClick={() => onSetPlotBackground('dark')}>Dark</button>
+                <button className={`btn btn-xs btn-toggle ${plotBackground === 'white' ? 'btn-toggle-active' : ''}`} onClick={() => onSetPlotBackground('white')}>White</button>
+              </div>
             </div>
           )}
           {viewStyle === 'layer' && (

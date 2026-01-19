@@ -12,6 +12,7 @@ interface CutViewCanvasProps {
   colorMode?: 'depth' | 'heatmap';
   heatmapColors?: { low: string; mid: string; high: string };
   legendPosition?: string;
+  plotBackground?: 'dark' | 'white';
 }
 
 function indexToLabel(index: number, sets: string[]): string {
@@ -56,7 +57,7 @@ function heatmapColorFromPalette(t: number, low: string, mid: string, high: stri
   return lerpRgb(midRgb, highRgb, (t - 0.5) / 0.5);
 }
 
-export function CutViewCanvas({ regionData, scale, onRegionHover, onRegionClick, onBackgroundClick, lockedLabel, countOverrides, colorMode = 'depth', heatmapColors, legendPosition = 'bottom-left' }: CutViewCanvasProps) {
+export function CutViewCanvas({ regionData, scale, onRegionHover, onRegionClick, onBackgroundClick, lockedLabel, countOverrides, colorMode = 'depth', heatmapColors, legendPosition = 'bottom-left', plotBackground = 'dark' }: CutViewCanvasProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const onHoverRef = useRef(onRegionHover);
   const onClickRef = useRef(onRegionClick);
@@ -174,7 +175,7 @@ export function CutViewCanvas({ regionData, scale, onRegionHover, onRegionClick,
         height={displaySize}
         xmlns="http://www.w3.org/2000/svg"
         className="canvas-svg cut-view-svg"
-        style={{ background: '#1a1a2e' }}
+        style={{ background: plotBackground === 'white' ? '#ffffff' : '#1a1a2e' }}
         onMouseLeave={handleLeave}
         onClick={(e) => { if (e.target === e.currentTarget) onBackgroundClick?.(); }}
       >

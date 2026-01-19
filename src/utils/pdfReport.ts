@@ -17,6 +17,9 @@ export interface PdfReportParams {
   upsetImageDataUrl: string;
   upsetImageWidth: number;
   upsetImageHeight: number;
+  networkImageDataUrl: string;
+  networkImageWidth: number;
+  networkImageHeight: number;
   modelName: string;
 }
 
@@ -306,6 +309,7 @@ export async function generatePdfReport(params: PdfReportParams): Promise<Blob> 
     filename, vennResult, n, setNames, totalItems, totalFileRows,
     vennImageDataUrl, vennImageWidth, vennImageHeight,
     upsetImageDataUrl, upsetImageWidth, upsetImageHeight,
+    networkImageDataUrl, networkImageWidth, networkImageHeight,
   } = params;
 
   const letters = 'ABCDEFGHI'.slice(0, n).split('');
@@ -499,8 +503,25 @@ export async function generatePdfReport(params: PdfReportParams): Promise<Blob> 
   pdf.addImage(upsetImageDataUrl, 'PNG', ux, y, upsetW, upsetH);
   y += upsetH + 6;
 
+  // ── Network Diagram ──
+  pdf.addPage();
+  y = M.top;
+  y = sectionTitle(pdf, 'Set Relationship Network', y, 40);
+
+  const netAspect = networkImageHeight / networkImageWidth;
+  let netW = Math.min(CONTENT_W, 160);
+  let netH = netW * netAspect;
+  const netAvailH = PAGE_H - M.bottom - y - 5;
+  if (netH > netAvailH) {
+    netH = netAvailH;
+    netW = netH / netAspect;
+  }
+  const nx = M.left + (CONTENT_W - netW) / 2;
+  pdf.addImage(networkImageDataUrl, 'PNG', nx, y, netW, netH);
+  y += netH + 6;
+
   // ════════════════════════════════════════════
-  // PAGE 3+: Statistics
+  // PAGE 4+: Statistics
   // ════════════════════════════════════════════
   const separateStatPages = n >= 7; // 7-8-9 sets: each table on its own page
 

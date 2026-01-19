@@ -6,6 +6,8 @@ import { buildUpsetSvgString } from '../utils/upsetSvgBuilder.ts';
 import { svgStringToDataUrl } from '../utils/svgToImage.ts';
 import { generatePdfReport } from '../utils/pdfReport.ts';
 import { saveSvg } from '../parser/saveSvg.ts';
+import { buildNetworkData } from '../utils/networkData.ts';
+import { buildNetworkSvgString } from '../utils/networkSvgBuilder.ts';
 
 interface PdfReportDialogProps {
   isOpen: boolean;
@@ -69,6 +71,15 @@ export function PdfReportDialog({
 
         if (cancelled) return;
 
+        // Step 2b: Build Network diagram
+        setStep('Rendering Network diagram...');
+
+        const netData = buildNetworkData(vennResult, n, totalItems, setNames, 'intersection');
+        const netSvgString = buildNetworkSvgString(netData, 'intersection');
+        const networkImage = await svgStringToDataUrl(netSvgString);
+
+        if (cancelled) return;
+
         // Step 3: Generate PDF
         setStep('Building PDF...');
 
@@ -86,6 +97,9 @@ export function PdfReportDialog({
           upsetImageDataUrl: upsetImage.dataUrl,
           upsetImageWidth: upsetImage.width,
           upsetImageHeight: upsetImage.height,
+          networkImageDataUrl: networkImage.dataUrl,
+          networkImageWidth: networkImage.width,
+          networkImageHeight: networkImage.height,
           modelName,
         });
 

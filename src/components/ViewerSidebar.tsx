@@ -87,6 +87,7 @@ export function ViewerSidebar({
               <button className={`btn btn-sm btn-view-style ${viewStyle === 'layer' ? 'btn-mode-active' : ''}`} onClick={() => onSetViewStyle('layer')}>Layer</button>
               <button className={`btn btn-sm btn-view-style ${viewStyle === 'cut' ? 'btn-mode-active' : ''}`} onClick={() => onSetViewStyle('cut')}>Cut</button>
               <button className={`btn btn-sm btn-view-style ${viewStyle === 'upset' ? 'btn-mode-active' : ''}`} onClick={() => onSetViewStyle('upset')}>UpSet</button>
+              <button className={`btn btn-sm btn-view-style ${viewStyle === 'network' ? 'btn-mode-active' : ''}`} onClick={() => onSetViewStyle('network')}>Network</button>
             </div>
             <button className="btn btn-sm" style={{ marginTop: 4, width: '100%' }} onClick={onEditThis}>Edit this diagram</button>
           </>

@@ -17,6 +17,7 @@ interface UpsetPlotProps {
   onRegionHover?: (label: string | null) => void;
   onRegionClick?: (label: string) => void;
   lockedLabel?: string | null;
+  plotBackground?: 'dark' | 'white';
 }
 
 // Standard Venn colors for sets
@@ -63,7 +64,24 @@ export function UpsetPlot({
   onRegionHover,
   onRegionClick,
   lockedLabel,
+  plotBackground = 'dark',
 }: UpsetPlotProps) {
+  const isWhite = plotBackground === 'white';
+  const clr = {
+    text: isWhite ? '#222' : '#aaa',
+    textBright: isWhite ? '#000' : '#fff',
+    textDim: isWhite ? '#555' : '#888',
+    textFaint: isWhite ? '#777' : '#666',
+    grid: isWhite ? '#e0e0e0' : '#2a2a3a',
+    axis: isWhite ? '#bbb' : '#444',
+    dot: isWhite ? '#333' : '#aaa',
+    dotEmpty: isWhite ? '#ccc' : '#3a3a4a',
+    dotEmptyStroke: isWhite ? '#bbb' : '#3a3a4a',
+    line: isWhite ? '#555' : '#777',
+    tooltipBg: isWhite ? 'rgba(255,255,255,0.95)' : 'rgba(0,0,0,0.85)',
+    tooltipBorder: isWhite ? '#ccc' : '#555',
+    tooltipText: isWhite ? '#222' : '#fff',
+  };
   const [page, setPage] = useState(0);
   const [hoveredLabel, setHoveredLabel] = useState<string | null>(null);
   const [tooltipInfo, setTooltipInfo] = useState<{ x: number; y: number; label: string; size: number; members: string[] } | null>(null);
@@ -142,7 +160,7 @@ export function UpsetPlot({
         height={displaySize * aspectRatio}
         xmlns="http://www.w3.org/2000/svg"
         className="canvas-svg upset-plot-svg"
-        style={{ background: '#1a1a2e' }}
+        style={{ background: plotBackground === 'white' ? '#ffffff' : '#1a1a2e' }}
       >
         {/* ── Set size bars (horizontal, left side) ── */}
         {data.sets.map((set, i) => {
@@ -158,7 +176,7 @@ export function UpsetPlot({
               <text
                 x={MARGIN.left + 4}
                 y={y + ROW_H / 2}
-                fill={isActive ? '#fff' : '#aaa'}
+                fill={isActive ? clr.textBright : clr.text}
                 fontSize={12}
                 fontFamily="Tahoma, sans-serif"
                 fontWeight={isActive ? 'bold' : 'normal'}
@@ -171,7 +189,7 @@ export function UpsetPlot({
               <text
                 x={MARGIN.left + LEFT_LABEL_W + SET_NUM_W - 6}
                 y={y + ROW_H / 2}
-                fill="#888"
+                fill={clr.textDim}
                 fontSize={10}
                 fontFamily="Tahoma, sans-serif"
                 textAnchor="end"
@@ -200,13 +218,13 @@ export function UpsetPlot({
           y1={matrixY - 2}
           x2={MARGIN.left + LEFT_LABEL_W + SET_NUM_W + SET_BAR_W}
           y2={matrixY - 2}
-          stroke="#444"
+          stroke={clr.axis}
           strokeWidth={1}
         />
         <text
           x={MARGIN.left + LEFT_LABEL_W + SET_NUM_W + SET_BAR_W / 2}
           y={matrixY - 6}
-          fill="#666"
+          fill={clr.textFaint}
           fontSize={9}
           fontFamily="Tahoma, sans-serif"
           textAnchor="middle"
@@ -241,7 +259,7 @@ export function UpsetPlot({
               <text
                 x={x + COL_W / 2}
                 y={barY - 3}
-                fill={hasActive ? (isActive ? '#fff' : '#555') : '#aaa'}
+                fill={hasActive ? (isActive ? clr.textBright : clr.textDim) : clr.text}
                 fontSize={8}
                 fontFamily="Tahoma, sans-serif"
                 textAnchor="middle"
@@ -257,7 +275,7 @@ export function UpsetPlot({
         <text
           x={matrixX + matrixW / 2}
           y={MARGIN.top + 6}
-          fill="#666"
+          fill={clr.textFaint}
           fontSize={9}
           fontFamily="Tahoma, sans-serif"
           textAnchor="middle"
@@ -273,7 +291,7 @@ export function UpsetPlot({
             x2={matrixX + matrixW}
             y1={matrixY + i * ROW_H + ROW_H / 2}
             y2={matrixY + i * ROW_H + ROW_H / 2}
-            stroke="#2a2a3a"
+            stroke={clr.grid}
             strokeWidth={1}
           />
         ))}
@@ -306,7 +324,7 @@ export function UpsetPlot({
                   y1={matrixY + minRow * ROW_H + ROW_H / 2}
                   x2={cx}
                   y2={matrixY + maxRow * ROW_H + ROW_H / 2}
-                  stroke={hasActive ? (isActive ? '#e0e0e0' : '#333') : '#777'}
+                  stroke={hasActive ? (isActive ? clr.dot : clr.textDim) : clr.line}
                   strokeWidth={2}
                   style={{ transition: 'stroke 0.12s' }}
                 />
@@ -323,10 +341,10 @@ export function UpsetPlot({
                     cy={cy}
                     r={DOT_R}
                     fill={isMember
-                      ? (hasActive ? (isActive ? '#e0e0e0' : '#444') : '#aaa')
+                      ? (hasActive ? (isActive ? clr.dot : clr.textDim) : clr.dot)
                       : 'transparent'
                     }
-                    stroke={isMember ? 'none' : (hasActive ? (isActive ? '#666' : '#2a2a3a') : '#3a3a4a')}
+                    stroke={isMember ? 'none' : (hasActive ? (isActive ? clr.textFaint : clr.grid) : clr.dotEmptyStroke)}
                     strokeWidth={1.5}
                     style={{ transition: 'fill 0.12s, stroke 0.12s' }}
                   />
@@ -345,14 +363,14 @@ export function UpsetPlot({
               width={80}
               height={24}
               rx={4}
-              fill="rgba(0,0,0,0.85)"
-              stroke="#555"
+              fill={clr.tooltipBg}
+              stroke={clr.tooltipBorder}
               strokeWidth={0.5}
             />
             <text
               x={tooltipInfo.x}
               y={tooltipInfo.y - 24}
-              fill="#fff"
+              fill={clr.tooltipText}
               fontSize={9}
               fontFamily="Tahoma, sans-serif"
               textAnchor="middle"
@@ -368,7 +386,7 @@ export function UpsetPlot({
           <text
             x={matrixX + matrixW / 2}
             y={totalH - 6}
-            fill="#666"
+            fill={clr.textFaint}
             fontSize={9}
             fontFamily="Tahoma, sans-serif"
             textAnchor="middle"

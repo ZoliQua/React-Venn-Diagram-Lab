@@ -2,7 +2,7 @@
 
 Interactive viewer and editor for Venn diagrams — from 2-set to 9-set, covering all known construction methods. Built with React, TypeScript, and Vite.
 
-**Version:** 1.8.7 | **Models:** 44 SVG diagrams | **License:** MIT
+**Version:** 1.9.0 | **Models:** 44 SVG diagrams | **License:** MIT
 
 ## Features
 
@@ -11,7 +11,7 @@ Interactive viewer and editor for Venn diagrams — from 2-set to 9-set, coverin
 | Mode | Description |
 |------|-------------|
 | **Summary** | Gallery view of all 44 diagrams with SVG previews, grouped by set count, with publication references |
-| **View** | Interactive diagram viewer with region detection. Three sub-modes: **Layer** (transparent overlapping shapes), **Cut** (pre-computed intersection regions from JSON data), and **UpSet** (UpSet plot visualization) |
+| **View** | Interactive diagram viewer with region detection. Four sub-modes: **Layer** (transparent overlapping shapes), **Cut** (pre-computed intersection regions), **UpSet** (UpSet plot), and **Network** (force-directed relationship graph) |
 | **Edit** | Full SVG editor with drag-to-position, text editing, undo/redo, validation, and export |
 | **Data** | Load CSV/TSV/GMT/GMX data, paste gene lists, fetch from URL, map columns to Venn sets (up to 9), auto-calculate on model selection, export as TSV/PDF |
 
@@ -36,6 +36,15 @@ Interactive viewer and editor for Venn diagrams — from 2-set to 9-set, coverin
 - Sort by intersection size (descending) or by degree (number of member sets)
 - Color modes: **Depth** (blue-to-red by member count), **Heatmap**, or **Custom** single color
 - Adjustable minimum count threshold filter
+
+### View Mode — Network Diagram
+- **Force-directed network graph** of pairwise set relationships
+- Nodes sized by set cardinality, colored by standard Venn colors, draggable
+- Edges weighted by: intersection count, Jaccard index, Fold Enrichment, or Overlap Coefficient
+- Significance coloring: green (FDR<0.05), grey (not significant), red (under-represented)
+- Click node → select set region; click edge → select intersection region in right panel
+- Filters: significant edges only, minimum weight threshold
+- Dark/White background toggle
 
 ### Edit Mode
 - Open/Save SVG files
@@ -86,6 +95,7 @@ Interactive viewer and editor for Venn diagrams — from 2-set to 9-set, coverin
 │   │   ├── Canvas.tsx         SVG rendering + interaction
 │   │   ├── CutViewCanvas.tsx  Region-based rendering (Cut View)
 │   │   ├── UpsetPlot.tsx      UpSet plot SVG rendering
+│   │   ├── NetworkPlot.tsx    Force-directed network graph
 │   │   ├── PdfReportDialog.tsx PDF report generation dialog
 │   │   ├── PasteImportDialog.tsx Paste gene lists import
 │   │   ├── UrlImportDialog.tsx  URL data import with validation
@@ -110,7 +120,9 @@ Interactive viewer and editor for Venn diagrams — from 2-set to 9-set, coverin
 │   │   ├── upsetData.ts       UpSet data conversion + sorting
 │   │   ├── pdfReport.ts       PDF report generation (jsPDF)
 │   │   ├── svgToImage.ts      SVG-to-PNG capture utility
-│   │   └── upsetSvgBuilder.ts Print-optimized UpSet SVG builder
+│   │   ├── upsetSvgBuilder.ts Print-optimized UpSet SVG builder
+│   │   ├── networkData.ts     Network data model + force layout algorithm
+│   │   └── networkSvgBuilder.ts Print-optimized Network SVG builder
 │   └── __tests__/             Test suites
 ├── models/
 │   ├── svg/                   44 SVG Venn diagram models

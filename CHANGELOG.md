@@ -2,6 +2,28 @@
 
 All notable changes to the Venn Diagram Lab project.
 
+## [1.9.0] — 2026-01-19
+
+### Added
+- **Network Diagram**: 4th visualization mode — force-directed network graph of pairwise set relationships
+  - Nodes sized by set cardinality, colored by standard Venn colors
+  - Edges weighted by intersection size, Jaccard index, Fold Enrichment, or Overlap Coefficient
+  - Force-directed layout with normalized weights and boundary clamping (no node clipping)
+  - Interactive: hover tooltips (intersection, Jaccard, FE, FDR), click node/edge to select region in right panel
+  - Filters: "Sig. only (FDR<0.05)" toggle, minimum edge weight slider
+  - Show/hide: edge values, node sizes toggle buttons
+  - Drag & move nodes (ON by default), positions persist during session
+  - Network tab in View and Data mode sidebars with full controls
+  - Network diagram in PDF report (own page, print-optimized SVG)
+- **Background toggle**: Dark/White background selector for Cut View, UpSet Plot, and Network Diagram
+- **SVG export fix**: SVG export now saves the currently visible view (Cut/UpSet/Network SVG from DOM) instead of always exporting the Venn diagram document model
+
+### Changed
+- **Force layout**: Normalized edge weights (0-1 range), stronger center gravity, dynamic ideal distance — stable for any count values
+- **Edge rendering**: Minimum 0.5px stroke width for any non-zero intersection, concrete hex colors instead of CSS variables in SVG
+- **Selection on view switch**: Region selection clears automatically when switching between Layer/Cut/UpSet/Network
+- **Background click**: Clicking empty area in Network view clears region selection
+
 ## [1.8.7] — 2026-01-18
 
 ### Added

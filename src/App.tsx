@@ -31,13 +31,16 @@ import { exportRegionSummaryTsv, exportMatrixTsv, downloadFile } from './utils/e
 import { UpsetPlot } from './components/UpsetPlot.tsx';
 import type { UpsetColorMode, UpsetSortMode } from './components/UpsetPlot.tsx';
 import { upsetDataFromRegionData, upsetDataFromVennResult } from './utils/upsetData.ts';
+import { NetworkPlot } from './components/NetworkPlot.tsx';
+import type { EdgeWeightMetric } from './utils/networkData.ts';
+import { buildNetworkData } from './utils/networkData.ts';
 import { PdfReportDialog } from './components/PdfReportDialog.tsx';
 import { SampleDataDialog } from './components/SampleDataDialog.tsx';
 import type { SampleDataset } from './components/SampleDataDialog.tsx';
 import { PasteImportDialog } from './components/PasteImportDialog.tsx';
 import { UrlImportDialog } from './components/UrlImportDialog.tsx';
 
-export type ViewStyle = 'layer' | 'cut' | 'upset';
+export type ViewStyle = 'layer' | 'cut' | 'upset' | 'network';
 export type AppMode = 'view' | 'edit' | 'data';
 
 export type ThemeMode = 'dark' | 'light';
@@ -63,7 +66,7 @@ export default function App() {
   const [currentModel, setCurrentModel] = useState<string | null>(null);
   const [isLoadingModel, setIsLoadingModel] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
-  const [viewStyle, setViewStyle] = useState<ViewStyle>('layer');
+  const [viewStyle, setViewStyleRaw] = useState<ViewStyle>('layer');
   const [cutColorMode, setCutColorMode] = useState<'depth' | 'heatmap'>('depth');
   const [heatmapColors, setHeatmapColors] = useState({ low: '#2166AC', mid: '#F7F7F7', high: '#B2182B' });
   const [heatmapLegendPosition, setHeatmapLegendPosition] = useState('bottom-left');
@@ -71,6 +74,13 @@ export default function App() {
   const [upsetSortMode, setUpsetSortMode] = useState<UpsetSortMode>('size');
   const [upsetThreshold, setUpsetThreshold] = useState(0);
   const [upsetCustomColor, setUpsetCustomColor] = useState('#4a90d9');
+  const [networkMetric, setNetworkMetric] = useState<EdgeWeightMetric>('intersection');
+  const [networkSigOnly, setNetworkSigOnly] = useState(false);
+  const [networkEdgeLabels, setNetworkEdgeLabels] = useState(true);
+  const [networkNodeSizes, setNetworkNodeSizes] = useState(true);
+  const [networkMinWeight, setNetworkMinWeight] = useState(0);
+  const [networkMoveNodes, setNetworkMoveNodes] = useState(true);
+  const [plotBackground, setPlotBackground] = useState<'dark' | 'white'>('dark');
   const [hoverColor, setHoverColor] = useState('#00ff88');
   const [dataRightPanel, setDataRightPanel] = useState<'properties' | 'statistics'>('properties');
   const [regionData, setRegionData] = useState<RegionData | null>(null);
@@ -132,6 +142,11 @@ export default function App() {
 
   // Viewer region detection
   const regionDetection = useRegionDetection(doc);
+
+  const setViewStyle = useCallback((style: ViewStyle) => {
+    setViewStyleRaw(style);
+    regionDetection.clearSelection();
+  }, [regionDetection]);
 
   const dragCallbacksRef = useRef({
     onDragMove: (id: string, x: number, y: number) => {
@@ -406,6 +421,27 @@ export default function App() {
 
   const handleSave = useCallback(() => {
     if (!doc) return;
+    // In cut/upset/network view, export the visible SVG from DOM
+    if ((mode === 'view' || mode === 'data') && viewStyle !== 'layer') {
+      const svgEl = document.querySelector('.canvas-svg') as SVGSVGElement | null;
+      if (svgEl) {
+        const clone = svgEl.cloneNode(true) as SVGSVGElement;
+        clone.querySelectorAll('.selection-rect, [data-hover]').forEach(el => el.remove());
+        const serializer = new XMLSerializer();
+        const svgString = serializer.serializeToString(clone);
+        const blob = new Blob([svgString], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = doc.filename.replace('.svg', `_${viewStyle}.svg`);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        return;
+      }
+    }
+    // Layer/Edit mode: save from document model
     const svgString = svgDoc.saveToString();
     const blob = new Blob([svgString], { type: 'image/svg+xml' });
     const url = URL.createObjectURL(blob);
@@ -417,7 +453,7 @@ export default function App() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     svgDoc.markSaved();
-  }, [doc, svgDoc]);
+  }, [doc, svgDoc, mode, viewStyle]);
 
   const handleExportImage = useCallback((format: 'png' | 'jpg') => {
     const svgEl = document.querySelector('.canvas-svg') as SVGSVGElement | null;
@@ -1001,6 +1037,20 @@ export default function App() {
             onSetUpsetThreshold={setUpsetThreshold}
             upsetCustomColor={upsetCustomColor}
             onSetUpsetCustomColor={setUpsetCustomColor}
+            networkMetric={networkMetric}
+            onSetNetworkMetric={setNetworkMetric}
+            networkSigOnly={networkSigOnly}
+            onSetNetworkSigOnly={setNetworkSigOnly}
+            networkEdgeLabels={networkEdgeLabels}
+            onSetNetworkEdgeLabels={setNetworkEdgeLabels}
+            networkNodeSizes={networkNodeSizes}
+            onSetNetworkNodeSizes={setNetworkNodeSizes}
+            networkMinWeight={networkMinWeight}
+            onSetNetworkMinWeight={setNetworkMinWeight}
+            networkMoveNodes={networkMoveNodes}
+            onSetNetworkMoveNodes={setNetworkMoveNodes}
+            plotBackground={plotBackground}
+            onSetPlotBackground={setPlotBackground}
             onSaveSvg={handleSave}
             onExportImage={handleExportImage}
           />
@@ -1033,6 +1083,33 @@ export default function App() {
             </div>
           )}
           {doc ? (
+            (mode === 'view' || mode === 'data') && viewStyle === 'network' && testVennResult && testCsvData ? (
+              <div className="canvas-container" ref={zoomPan.setContainerRef} onWheel={zoomPan.onWheel}>
+                <NetworkPlot
+                  data={buildNetworkData(
+                    testVennResult,
+                    testColumnMapping.length,
+                    testCsvData.rows.length,
+                    testColumnMapping.map(i => testCsvData.headers[i] ?? ''),
+                    networkMetric,
+                  )}
+                  scale={zoomPan.state.scale}
+                  edgeMetric={networkMetric}
+                  showSigOnly={networkSigOnly}
+                  showEdgeLabels={networkEdgeLabels}
+                  showNodeSizes={networkNodeSizes}
+                  minEdgeWeight={networkMinWeight}
+                  moveNodes={networkMoveNodes}
+                  plotBackground={plotBackground}
+                  onNodeClick={(nodeId) => regionDetection.setSelectByLabel(nodeId)}
+                  onEdgeClick={(src, tgt) => {
+                    const label = [src, tgt].sort().join('');
+                    regionDetection.setSelectByLabel(label);
+                  }}
+                  onBackgroundClick={regionDetection.clearSelection}
+                />
+              </div>
+            ) :
             (mode === 'view' || mode === 'data') && viewStyle === 'upset' && regionData ? (
               <div className="canvas-container" ref={zoomPan.setContainerRef} onWheel={zoomPan.onWheel}>
                 <UpsetPlot
@@ -1049,6 +1126,7 @@ export default function App() {
                   onRegionHover={regionDetection.setHoverByLabel}
                   onRegionClick={regionDetection.setSelectByLabel}
                   lockedLabel={regionDetection.selectedRegion?.label ?? null}
+                  plotBackground={plotBackground}
                 />
               </div>
             ) :
@@ -1072,6 +1150,7 @@ export default function App() {
                   colorMode={mode === 'data' ? cutColorMode : 'depth'}
                   heatmapColors={heatmapColors}
                   legendPosition={heatmapLegendPosition}
+                  plotBackground={plotBackground}
                 />
               </div>
             ) :
@@ -1135,7 +1214,7 @@ export default function App() {
                 moveShapes={moveShapes || rotateShapes || resizeShapes}
                 shapeCursor={rotateShapes ? 'grab' : resizeShapes ? 'nwse-resize' : 'move'}
                 readOnly={mode === 'view' || mode === 'data'}
-                viewStyle={(mode === 'view' || mode === 'data') ? (viewStyle === 'upset' ? 'layer' : viewStyle) : 'layer'}
+                viewStyle={(mode === 'view' || mode === 'data') ? (viewStyle === 'upset' || viewStyle === 'network' ? 'layer' : viewStyle) : 'layer'}
                 hoveredRegion={activeRegion}
                 hoverColor={mode === 'data' ? hoverColor : undefined}
                 onRegionHover={regionDetection.onHover}
