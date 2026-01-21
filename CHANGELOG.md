@@ -2,6 +2,25 @@
 
 All notable changes to the Venn Diagram Lab project.
 
+## [1.9.2] — 2026-01-21
+
+### Added
+- **Google Analytics 4 integration** with cookie consent banner (GDPR compliant)
+  - Consent banner at bottom: Accept/Decline with localStorage persistence
+  - GA4 script only loads after user accepts; no tracking on decline
+  - Event tracking: mode switch, view switch, calculate, PDF export, image export
+- **Data mode text move tools**: "Move" row in Group Names & Numbers section
+  - Move Names: drag Name labels to reposition
+  - Move Numbers: drag Count and CountSUM labels to reposition
+  - Mutually exclusive toggles; cursor changes to 'move' on draggable elements
+- **Sample dataset format badges**: BINARY (blue) or AGGREGATED (green) badge on each sample dataset card
+  - Selecting an aggregated dataset auto-sets the file type in CsvImportDialog
+- **Help menus updated**: All three mode help pages reflect v1.8-1.9 features (UpSet, Network, proportional, 4 import methods, item search, PDF report, theme toggle, etc.)
+
+### Changed
+- **Dark mode as default**: OS preference check removed; always starts in dark mode unless user explicitly chose light
+- **Bullet opacity**: updateShapeStyle now also searches bullets; opacity slider syncs shapes + bullets
+
 ## [1.9.1] — 2026-01-20
 
 ### Added

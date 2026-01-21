@@ -72,6 +72,10 @@ interface TestSidebarProps {
   onTitleFontSizeChange: (size: number) => void;
   titleFontFamily: string;
   onTitleFontFamilyChange: (font: string) => void;
+  moveNames: boolean;
+  onSetMoveNames: (v: boolean) => void;
+  moveNumbers: boolean;
+  onSetMoveNumbers: (v: boolean) => void;
   shapeColors: Record<string, string>;
   onShapeColorChange: (letter: string, color: string) => void;
   shapeOpacity: number;
@@ -122,6 +126,8 @@ export function TestSidebar({
   nameFontFamily, onNameFontFamilyChange,
   titleFontSize, onTitleFontSizeChange,
   titleFontFamily, onTitleFontFamilyChange,
+  moveNames, onSetMoveNames,
+  moveNumbers, onSetMoveNumbers,
   shapeColors, onShapeColorChange,
   shapeOpacity, onShapeOpacityChange,
   upsetColorMode, onSetUpsetColorMode,
@@ -439,6 +445,11 @@ export function TestSidebar({
                 <span className="test-show-label">Show</span>
                 <button className={`btn btn-xs btn-toggle ${showNames ? 'btn-toggle-active' : ''}`} onClick={onToggleNames}>Names</button>
                 <button className={`btn btn-xs btn-toggle ${showSums ? 'btn-toggle-active' : ''}`} onClick={onToggleSums}>SUM Numbers</button>
+              </div>
+              <div className="test-show-inline" style={{ marginTop: 4 }}>
+                <span className="test-show-label">Move</span>
+                <button className={`btn btn-xs btn-toggle ${moveNames ? 'btn-toggle-active' : ''}`} onClick={() => { onSetMoveNames(!moveNames); if (!moveNames) onSetMoveNumbers(false); }}>Names</button>
+                <button className={`btn btn-xs btn-toggle ${moveNumbers ? 'btn-toggle-active' : ''}`} onClick={() => { onSetMoveNumbers(!moveNumbers); if (!moveNumbers) onSetMoveNames(false); }}>Numbers</button>
               </div>
               <div className="test-font-size">
                 <label>Font-size: {nameFontSize}px</label>

@@ -5,6 +5,23 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Venn Diagram Lab</title>
+    <!-- Google Analytics (loaded after consent) -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      window.vdlLoadGA = function() {
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-DFWS6J78RD';
+        document.head.appendChild(s);
+        gtag('js', new Date());
+        gtag('config', 'G-DFWS6J78RD');
+      };
+      // Auto-load if previously consented
+      if (localStorage.getItem('vdl-cookie-consent') === 'accepted') {
+        window.vdlLoadGA();
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

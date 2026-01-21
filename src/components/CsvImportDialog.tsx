@@ -16,6 +16,7 @@ interface CsvImportDialogProps {
   rawText: string;
   filename: string;
   geneSetFormat?: GeneSetFormat;
+  defaultFileType?: 'binary' | 'aggregated';
   onLoad: (result: CsvImportResult) => void;
   onCancel: () => void;
 }
@@ -46,7 +47,7 @@ function parseRowSpec(spec: string): Set<number> {
   return result;
 }
 
-export function CsvImportDialog({ isOpen, rawText, filename, geneSetFormat, onLoad, onCancel }: CsvImportDialogProps) {
+export function CsvImportDialog({ isOpen, rawText, filename, geneSetFormat, defaultFileType, onLoad, onCancel }: CsvImportDialogProps) {
   const isGeneSet = !!geneSetFormat;
   const detectedDelimiter = useMemo(() => detectDelimiter(rawText), [rawText]);
 
@@ -60,7 +61,7 @@ export function CsvImportDialog({ isOpen, rawText, filename, geneSetFormat, onLo
     }
   }, [rawText, geneSetFormat]);
 
-  const [fileType, setFileType] = useState<FileType>('binary');
+  const [fileType, setFileType] = useState<FileType>(defaultFileType ?? 'binary');
   const [rowDelimiter, setRowDelimiter] = useState<Delimiter>(detectedDelimiter);
   const [itemDelimiter, setItemDelimiter] = useState<Delimiter>(',');
   const [hasHeader, setHasHeader] = useState(true);

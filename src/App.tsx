@@ -39,6 +39,8 @@ import type { ProportionalAccuracy, ProportionalCircle } from './utils/proportio
 import { generateProportionalModel } from './utils/proportionalModel.ts';
 import { generate2SetRegions, generate3SetRegions } from './utils/proportionalRegions.ts';
 import { PdfReportDialog } from './components/PdfReportDialog.tsx';
+import { CookieConsent } from './components/CookieConsent.tsx';
+import { trackEvent } from './utils/analytics.ts';
 
 const PROPORTIONAL_MODEL = '__proportional__';
 import { SampleDataDialog } from './components/SampleDataDialog.tsx';
@@ -55,7 +57,6 @@ export default function App() {
   const [theme, setTheme] = useState<ThemeMode>(() => {
     const saved = localStorage.getItem('vdl-theme');
     if (saved === 'dark' || saved === 'light') return saved;
-    if (window.matchMedia?.('(prefers-color-scheme: light)').matches) return 'light';
     return 'dark';
   });
 
@@ -87,6 +88,8 @@ export default function App() {
   const [networkMinWeight, setNetworkMinWeight] = useState(0);
   const [networkMoveNodes, setNetworkMoveNodes] = useState(true);
   const [plotBackground, setPlotBackground] = useState<'dark' | 'white'>('dark');
+  const [dataMoveNames, setDataMoveNames] = useState(false);
+  const [dataMoveNumbers, setDataMoveNumbers] = useState(false);
   const [proportionalAccuracy, setProportionalAccuracy] = useState<ProportionalAccuracy | null>(null);
   const [hoverColor, setHoverColor] = useState('#00ff88');
   const [dataRightPanel, setDataRightPanel] = useState<'properties' | 'statistics'>('properties');
@@ -102,7 +105,7 @@ export default function App() {
   const [urlDialog, setUrlDialog] = useState(false);
   const [modeSwitchTarget, setModeSwitchTarget] = useState<AppMode | null>(null);
   const [dataOpenDialog, setDataOpenDialog] = useState(false);
-  const [csvImportDialog, setCsvImportDialog] = useState<{ rawText: string; filename: string; geneSetFormat?: GeneSetFormat } | null>(null);
+  const [csvImportDialog, setCsvImportDialog] = useState<{ rawText: string; filename: string; geneSetFormat?: GeneSetFormat; defaultFileType?: 'binary' | 'aggregated' } | null>(null);
   const [validationDialog, setValidationDialog] = useState<{ filename: string; content: string } | null>(null);
   const [originalSvgContent, setOriginalSvgContent] = useState<string | null>(null);
 
@@ -153,6 +156,7 @@ export default function App() {
   const setViewStyle = useCallback((style: ViewStyle) => {
     setViewStyleRaw(style);
     regionDetection.clearSelection();
+    trackEvent('view_switch', 'navigation', style);
   }, [regionDetection]);
 
   const dragCallbacksRef = useRef({
@@ -463,6 +467,7 @@ export default function App() {
   }, [doc, svgDoc, mode, viewStyle]);
 
   const handleExportImage = useCallback((format: 'png' | 'jpg') => {
+    trackEvent('export_image', 'export', format);
     const svgEl = document.querySelector('.canvas-svg') as SVGSVGElement | null;
     if (!svgEl || !doc) return;
     // Clone the SVG to avoid modifying the DOM
@@ -671,7 +676,7 @@ export default function App() {
       const resp = await fetch(`./data/${dataset.filename}`);
       const text = await resp.text();
       const geneSetFormat = detectGeneSetFormat(dataset.filename);
-      setCsvImportDialog({ rawText: text, filename: dataset.filename, geneSetFormat: geneSetFormat ?? undefined });
+      setCsvImportDialog({ rawText: text, filename: dataset.filename, geneSetFormat: geneSetFormat ?? undefined, defaultFileType: dataset.dataFormat });
     } catch (e) {
       setTestError(`Failed to load sample: ${e}`);
     }
@@ -851,6 +856,7 @@ export default function App() {
       if (!testShowSums && svgDoc.doc) svgDoc.toggleGroupVisibility('sums');
 
       setTestCalculated(true);
+      trackEvent('calculate', 'data', `${testModel}_${testColumnMapping.length}set`);
       setCutColorMode('heatmap');
       regionDetection.clearSelection();
     } catch (e) {
@@ -934,6 +940,7 @@ export default function App() {
             svgDoc.markSaved();
           }
           setMode(newMode);
+          trackEvent('mode_switch', 'navigation', newMode);
         }}
         onSummary={() => { setSummarySelectMode(false); setSummaryOpen(true); }}
         onHelp={() => setHelpOpen(true)}
@@ -964,7 +971,7 @@ export default function App() {
         onUndo={svgDoc.undo}
         onRedo={svgDoc.redo}
         onReport={() => setReportOpen(true)}
-        onDataReport={() => setPdfReportOpen(true)}
+        onDataReport={() => { setPdfReportOpen(true); trackEvent('export_pdf', 'export'); }}
         theme={theme}
         onToggleTheme={handleToggleTheme}
       />
@@ -1039,6 +1046,10 @@ export default function App() {
                 }
               }
             }}
+            moveNames={dataMoveNames}
+            onSetMoveNames={setDataMoveNames}
+            moveNumbers={dataMoveNumbers}
+            onSetMoveNumbers={setDataMoveNumbers}
             shapeColors={testShapeColors}
             onShapeColorChange={(letter, color) => {
               setTestShapeColors(prev => ({ ...prev, [letter]: color }));
@@ -1230,7 +1241,14 @@ export default function App() {
                 onPanPointerDown={zoomPan.onPointerDown}
                 onPanPointerMove={zoomPan.onPointerMove}
                 onPanPointerUp={zoomPan.onPointerUp}
-                onDragTextStart={textTool === 'move' ? drag.onPointerDown : textTool ? handleTextToolStart : undefined}
+                onDragTextStart={
+                  mode === 'data' && (dataMoveNames || dataMoveNumbers)
+                    ? (e: React.PointerEvent, id: string, origX: number, origY: number) => {
+                        if (dataMoveNames && id.startsWith('Name')) drag.onPointerDown(e, id, origX, origY);
+                        else if (dataMoveNumbers && (id.startsWith('Count') || id.startsWith('CountSUM'))) drag.onPointerDown(e, id, origX, origY);
+                      }
+                    : textTool === 'move' ? drag.onPointerDown : textTool ? handleTextToolStart : undefined
+                }
                 onDragShapeStart={moveShapes ? handleShapeDragStart : rotateShapes ? handleShapeRotateStart : resizeShapes ? handleShapeResizeStart : undefined}
                 onShapeDragMove={resizeShapes ? handleShapeResizeMove : rotateShapes ? handleShapeRotateMove : moveShapes ? (e: React.PointerEvent) => {
                   if (!shapeDragRef.current) return;
@@ -1277,6 +1295,7 @@ export default function App() {
                 moveShapes={moveShapes || rotateShapes || resizeShapes}
                 shapeCursor={rotateShapes ? 'grab' : resizeShapes ? 'nwse-resize' : 'move'}
                 readOnly={mode === 'view' || mode === 'data'}
+                dataMoveText={mode === 'data' && (dataMoveNames || dataMoveNumbers)}
                 viewStyle={(mode === 'view' || mode === 'data') ? (viewStyle === 'upset' || viewStyle === 'network' ? 'layer' : viewStyle) : 'layer'}
                 hoveredRegion={activeRegion}
                 hoverColor={mode === 'data' ? hoverColor : undefined}
@@ -1594,6 +1613,7 @@ export default function App() {
           rawText={csvImportDialog.rawText}
           filename={csvImportDialog.filename}
           geneSetFormat={csvImportDialog.geneSetFormat}
+          defaultFileType={csvImportDialog.defaultFileType}
           onLoad={handleCsvImportLoad}
           onCancel={() => setCsvImportDialog(null)}
         />
@@ -1681,6 +1701,8 @@ export default function App() {
           {textToolSize}px
         </div>
       )}
+
+      <CookieConsent />
     </div>
   );
 }

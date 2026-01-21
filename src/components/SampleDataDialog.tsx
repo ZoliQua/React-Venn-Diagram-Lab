@@ -5,6 +5,7 @@ export interface SampleDataset {
   filename: string;
   name: string;
   type: 'real' | 'mock';
+  dataFormat: 'binary' | 'aggregated';
   description: string;
   reference?: string;
 }
@@ -15,6 +16,7 @@ export const SAMPLE_DATASETS: SampleDataset[] = [
     filename: 'dataset_real_msigdb_cancer_pathways.tsv',
     name: 'MSigDB Hallmark gene collection - Cancer',
     type: 'real',
+    dataFormat: 'binary',
     description: 'Curated cancer-related hallmark gene sets from the Molecular Signatures Database (MSigDB). Includes key oncogenic pathways such as P53, MYC targets, and cell cycle regulation.',
     reference: '',
   },
@@ -23,6 +25,7 @@ export const SAMPLE_DATASETS: SampleDataset[] = [
     filename: 'dataset_real_msigdb_immune_pathways.tsv',
     name: 'MSigDB Hallmark gene collection - Immune signaling',
     type: 'real',
+    dataFormat: 'binary',
     description: 'Immune signaling hallmark gene sets from MSigDB. Covers interferon response, TNF-alpha signaling, inflammatory response, and complement pathways.',
     reference: '',
   },
@@ -31,6 +34,7 @@ export const SAMPLE_DATASETS: SampleDataset[] = [
     filename: 'dataset_real_cancer_drivers_4.tsv',
     name: 'Cancer dataset (COSMIC, OncoKB, IntOGen, Vogelstein)',
     type: 'real',
+    dataFormat: 'binary',
     description: 'Cancer driver genes compiled from four major databases: COSMIC Cancer Gene Census, OncoKB, IntOGen, and Vogelstein et al. Useful for cross-database comparison of oncogene and tumor suppressor annotations.',
     reference: '',
   },
@@ -39,6 +43,7 @@ export const SAMPLE_DATASETS: SampleDataset[] = [
     filename: 'dataset_mock_gene_sets.csv',
     name: 'Test - Mock data - Pathways',
     type: 'mock',
+    dataFormat: 'aggregated',
     description: 'Synthetic gene set data for testing the import and Venn calculation pipeline. Contains mock pathway memberships with controlled overlaps.',
   },
   {
@@ -46,6 +51,7 @@ export const SAMPLE_DATASETS: SampleDataset[] = [
     filename: 'dataset_mock_streaming_platforms.csv',
     name: 'Test - Mock data - Streaming platforms',
     type: 'mock',
+    dataFormat: 'binary',
     description: 'Fictional movie/show availability across streaming platforms. Binary format with controlled overlaps, ideal for quick demos and testing.',
   },
 ];
@@ -89,7 +95,15 @@ export function SampleDataDialog({ isOpen, onSelect, onClose }: SampleDataDialog
               onMouseLeave={() => setHoveredId(null)}
               onClick={() => onSelect(d)}
             >
-              <div style={{ fontSize: 13, fontWeight: 'bold', marginBottom: 3 }}>{d.name}</div>
+              <div style={{ fontSize: 13, fontWeight: 'bold', marginBottom: 3 }}>
+                {d.name}
+                <span style={{
+                  display: 'inline-block', fontSize: 9, fontWeight: 'bold', padding: '1px 5px',
+                  borderRadius: 3, marginLeft: 8, verticalAlign: 'middle', letterSpacing: 0.5,
+                  background: d.dataFormat === 'aggregated' ? '#66bb6a' : 'var(--accent)',
+                  color: '#fff',
+                }}>{d.dataFormat === 'aggregated' ? 'AGGREGATED' : 'BINARY'}</span>
+              </div>
               <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.4 }}>{d.description}</div>
               {d.reference && (
                 <div style={{ fontSize: 10, color: 'var(--success)', marginTop: 3 }}>Ref: {d.reference}</div>
@@ -117,7 +131,15 @@ export function SampleDataDialog({ isOpen, onSelect, onClose }: SampleDataDialog
               onMouseLeave={() => setHoveredId(null)}
               onClick={() => onSelect(d)}
             >
-              <div style={{ fontSize: 13, fontWeight: 'bold', marginBottom: 3 }}>{d.name}</div>
+              <div style={{ fontSize: 13, fontWeight: 'bold', marginBottom: 3 }}>
+                {d.name}
+                <span style={{
+                  display: 'inline-block', fontSize: 9, fontWeight: 'bold', padding: '1px 5px',
+                  borderRadius: 3, marginLeft: 8, verticalAlign: 'middle', letterSpacing: 0.5,
+                  background: d.dataFormat === 'aggregated' ? '#66bb6a' : 'var(--accent)',
+                  color: '#fff',
+                }}>{d.dataFormat === 'aggregated' ? 'AGGREGATED' : 'BINARY'}</span>
+              </div>
               <div style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.4 }}>{d.description}</div>
             </div>
           ))}

@@ -24,6 +24,7 @@ interface CanvasProps {
   onDragPointerUp: (e: React.PointerEvent) => void;
   onDoubleClickText: (id: string) => void;
   readOnly?: boolean;
+  dataMoveText?: boolean;
   moveShapes?: boolean;
   shapeCursor?: string;
   viewStyle?: 'layer' | 'cut';
@@ -133,6 +134,7 @@ function TextElement({
   viewerHighlight,
   hoverColor,
   readOnly,
+  dataMoveText,
   isCutView,
   onPointerDown,
   onClick,
@@ -144,6 +146,7 @@ function TextElement({
   viewerHighlight?: boolean;
   hoverColor?: string;
   readOnly?: boolean;
+  dataMoveText?: boolean;
   isCutView?: boolean;
   onPointerDown: (e: React.PointerEvent) => void;
   onClick: () => void;
@@ -177,7 +180,7 @@ function TextElement({
           fontWeight: viewerHighlight ? 'bold' : isCut ? 'bold' : styleObj['font-weight'],
           fontStyle: styleObj['font-style'],
           textAnchor: (styleObj['text-anchor'] as 'start' | 'middle' | 'end') || undefined,
-          cursor: readOnly ? 'default' : 'move',
+          cursor: readOnly ? (dataMoveText ? 'move' : 'default') : 'move',
         }}
         onPointerDown={onPointerDown}
         onClick={(e) => {
@@ -283,6 +286,7 @@ export function Canvas({
   onDragPointerUp,
   onDoubleClickText,
   readOnly,
+  dataMoveText,
   moveShapes,
   shapeCursor,
   viewStyle,
@@ -410,13 +414,14 @@ export function Canvas({
         viewerHighlight={readOnly === true && highlightedCountId === t.id}
         hoverColor={hoverColor}
         readOnly={readOnly}
+        dataMoveText={dataMoveText}
         isCutView={isCutView}
-        onPointerDown={readOnly || !onDragTextStart ? () => {} : (e) => onDragTextStart(e, t.id, t.x, t.y)}
+        onPointerDown={!onDragTextStart ? () => {} : (readOnly && !dataMoveText) ? () => {} : (e) => onDragTextStart(e, t.id, t.x, t.y)}
         onClick={handleTextClick}
         onDoubleClick={readOnly ? () => {} : () => onDoubleClickText(t.id)}
       />
     );
-  }, [selectedId, onDragTextStart, onSelect, onDoubleClickText, readOnly, isCutView, highlightedCountId, showValidation, invalidIds, onReadOnlyTextClick]);
+  }, [selectedId, onDragTextStart, onSelect, onDoubleClickText, readOnly, dataMoveText, isCutView, highlightedCountId, showValidation, invalidIds, onReadOnlyTextClick]);
 
   return (
     <div
