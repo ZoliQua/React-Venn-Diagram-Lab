@@ -520,6 +520,32 @@ export async function generatePdfReport(params: PdfReportParams): Promise<Blob> 
   pdf.addImage(networkImageDataUrl, 'PNG', nx, y, netW, netH);
   y += netH + 6;
 
+  // Significant edges list
+  const sigEdges = stats.filter(s => s.fdr < 0.05);
+  if (sigEdges.length > 0) {
+    if (y + 10 > PAGE_H - M.bottom) { pdf.addPage(); y = M.top; }
+    pdf.setFontSize(9);
+    pdf.setFont(FONT, 'bold');
+    pdf.setTextColor(40, 40, 40);
+    pdf.text('Significant edges:', M.left, y + 4);
+    y += 6;
+    pdf.setFont(FONT, 'normal');
+    pdf.setFontSize(8);
+    pdf.setTextColor(60, 60, 60);
+    const sigText = sigEdges.map(s => {
+      const a = trimmedNames[s.a.charCodeAt(0) - 65];
+      const b = trimmedNames[s.b.charCodeAt(0) - 65];
+      return `${a} - ${b} Jaccard: ${s.jaccard.toFixed(3)}`;
+    }).join('; ');
+    const sigLines = pdf.splitTextToSize(sigText, CONTENT_W);
+    for (const line of sigLines) {
+      if (y + 4 > PAGE_H - M.bottom) { pdf.addPage(); y = M.top; }
+      pdf.text(line, M.left, y + 3);
+      y += 3.5;
+    }
+    y += 4;
+  }
+
   // ════════════════════════════════════════════
   // PAGE 4+: Statistics
   // ════════════════════════════════════════════
@@ -605,23 +631,35 @@ export async function generatePdfReport(params: PdfReportParams): Promise<Blob> 
       text: 'Venn Diagram Lab is an interactive tool for visualizing set relationships using Venn diagrams. It supports 2 to 9 overlapping sets across 44 diagram models, covering all major construction methods (Venn, Edwards, Anderson, Carroll, Bannier-Bodin, Grunbaum, Mamakani, and SUMO-Venn). Users can import their own datasets in CSV, TSV, GMT, or GMX format, map data columns to diagram sets, and generate intersection counts automatically. The tool calculates both exclusive counts (items belonging to exactly one specific combination of sets) and inclusive counts (all items in a given set, regardless of overlap).',
     },
     {
-      title: 'Venn Diagrams',
+      title: 'Plots',
+      text: '',
+    },
+    {
+      title: '1. Venn Diagrams',
       text: 'A Venn diagram displays all possible logical relations between a finite collection of sets. Each set is represented as a closed shape, and overlapping areas represent intersections -- items that belong to multiple sets simultaneously. For n sets, there are (2^n)-1 possible non-empty regions. The diagram allows researchers to visually identify which items are shared between groups, which are unique to a single group, and how extensively the groups overlap. In this report, exclusive region counts are shown: each item is counted exactly once, in the region corresponding to its precise combination of set memberships.',
     },
     {
-      title: 'UpSet Plots',
+      title: '2. UpSet Plots',
       text: 'An UpSet plot is a scalable alternative to Venn diagrams for quantifying set intersections. Instead of overlapping shapes, it uses a matrix layout: rows represent the sets, columns represent specific intersections, and filled dots connected by lines indicate which sets participate in each intersection. Vertical bars above the matrix show the size (item count) of each intersection, sorted by size in descending order. Horizontal bars on the left show the total size of each set. UpSet plots are particularly useful for more than 4 sets, where traditional Venn diagrams become visually complex. This report shows the top 20 intersections by size.',
     },
     {
-      title: 'Pairwise Jaccard Index',
+      title: '3. Set Relationship Network',
+      text: 'The network diagram is a force-directed graph that visualizes pairwise relationships between sets. Each node represents a set, sized proportionally to its cardinality and colored with the standard Venn color scheme. Edges connect pairs of sets that share items, with edge thickness proportional to the chosen weight metric (intersection count, Jaccard index, Fold Enrichment, or Overlap Coefficient). Edge color indicates statistical significance: green edges are significant (FDR < 0.05), grey edges are not. The layout is computed using a spring-embedder algorithm with repulsive forces between all nodes and attractive forces along edges. This visualization is especially useful for identifying clusters of related sets and understanding the overall topology of set relationships at a glance.',
+    },
+    {
+      title: 'Statistics',
+      text: '',
+    },
+    {
+      title: '1. Pairwise Jaccard Index',
       text: 'The Jaccard similarity index measures the overlap between two sets as the ratio of their intersection size to their union size: J(A,B) = |A inter B| / |A union B|. Values range from 0 (no shared items) to 1 (identical sets). A Jaccard index above 0.7 suggests high similarity, while below 0.1 indicates very little overlap. The Overlap Coefficient is a related measure: OC(A,B) = |A inter B| / min(|A|, |B|), which is more useful when one set is much smaller than the other.',
     },
     {
-      title: 'Sorensen-Dice Index',
+      title: '2. Sorensen-Dice Index',
       text: 'The Sorensen-Dice coefficient is another similarity measure, defined as D(A,B) = 2*|A inter B| / (|A| + |B|). It gives more weight to shared items than the Jaccard index and is widely used in ecological and bioinformatics studies. Like Jaccard, values range from 0 to 1, with higher values indicating greater similarity between sets.',
     },
     {
-      title: 'Intersection Enrichment (Hypergeometric Test)',
+      title: '3. Intersection Enrichment (Hypergeometric Test)',
       text: 'The hypergeometric test evaluates whether the observed overlap between two sets is greater than expected by chance. Given a total population of N items, where set A contains K items and set B contains n items, the test calculates the probability of observing k or more shared items under a random null model (sampling without replacement). The Fold Enrichment (FE) is the ratio of observed to expected overlap: FE = (k/n) / (K/N). An FE > 1 indicates more overlap than expected. The p-values are corrected for multiple testing using the Benjamini-Hochberg False Discovery Rate (FDR) method. Significance levels are marked as: *** (FDR < 0.001), ** (FDR < 0.01), * (FDR < 0.05), ns (not significant).',
     },
   ];
@@ -640,7 +678,8 @@ export async function generatePdfReport(params: PdfReportParams): Promise<Blob> 
     pdf.text(section.title, M.left, y + 5);
     y += 7;
 
-    // Section text — wrap manually
+    // Section text — wrap manually (skip if empty)
+    if (!section.text) { y += 2; continue; }
     pdf.setFontSize(8);
     pdf.setFont(FONT, 'normal');
     pdf.setTextColor(60, 60, 60);

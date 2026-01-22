@@ -2,7 +2,7 @@
 
 All notable changes to the Venn Diagram Lab project.
 
-## [1.9.2] — 2026-01-21
+## [1.9.2] — 2026-01-22
 
 ### Added
 - **Google Analytics 4 integration** with cookie consent banner (GDPR compliant)
@@ -16,10 +16,14 @@ All notable changes to the Venn Diagram Lab project.
 - **Sample dataset format badges**: BINARY (blue) or AGGREGATED (green) badge on each sample dataset card
   - Selecting an aggregated dataset auto-sets the file type in CsvImportDialog
 - **Help menus updated**: All three mode help pages reflect v1.8-1.9 features (UpSet, Network, proportional, 4 import methods, item search, PDF report, theme toggle, etc.)
+- **PDF Report — Significant edges**: Listed below the Network diagram with Jaccard values
+- **PDF Report — Network explanation**: "Set Relationship Network" section added to About This Report
+- **PDF Report — Section-only titles**: Empty-text sections render title only (no blank space)
 
 ### Changed
 - **Dark mode as default**: OS preference check removed; always starts in dark mode unless user explicitly chose light
 - **Bullet opacity**: updateShapeStyle now also searches bullets; opacity slider syncs shapes + bullets
+- **Welcome dialog**: Data mode description updated ("Load your data to map columns...")
 
 ## [1.9.1] — 2026-01-20
 

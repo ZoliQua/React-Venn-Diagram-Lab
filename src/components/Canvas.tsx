@@ -429,8 +429,8 @@ export function Canvas({
       className="canvas-container"
       onWheel={onZoomWheel}
       onPointerDown={onPanPointerDown}
-      onPointerMove={(e) => { onPanPointerMove(e); if (!readOnly) onDragPointerMove(e); if (onShapeDragMove) onShapeDragMove(e); }}
-      onPointerUp={(e) => { onPanPointerUp(); if (!readOnly) onDragPointerUp(e); if (onShapeDragEnd) onShapeDragEnd(e); }}
+      onPointerMove={(e) => { onPanPointerMove(e); if (!readOnly || dataMoveText) onDragPointerMove(e); if (onShapeDragMove) onShapeDragMove(e); }}
+      onPointerUp={(e) => { onPanPointerUp(); if (!readOnly || dataMoveText) onDragPointerUp(e); if (onShapeDragEnd) onShapeDragEnd(e); }}
       onClick={handleBackgroundClick}
       onMouseLeave={handleViewerLeave}
     >

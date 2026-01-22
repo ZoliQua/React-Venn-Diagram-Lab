@@ -100,7 +100,7 @@ export function WelcomeDialog({ isOpen, onSelectMode, onSummary }: WelcomeDialog
           <button className="welcome-mode-card" onClick={() => onSelectMode('data')}>
             <div className="welcome-mode-icon">📊</div>
             <div className="welcome-mode-name">Data</div>
-            <div className="welcome-mode-desc">Load CSV data, map columns to sets, and calculate Venn intersections</div>
+            <div className="welcome-mode-desc">Load your data to map columns to sets, and calculate Venn intersections</div>
           </button>
         </div>
 

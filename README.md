@@ -73,7 +73,7 @@ Interactive viewer and editor for Venn diagrams — from 2-set to 9-set, coverin
 - **In-region filter**: filter items within a selected region with highlighted matches
 - UpSet Plot sub-mode available after calculation (max 20 intersections in print export)
 - Export: **SVG / PNG / JPG** image export + **Regions Summary TSV** + **Item Matrix TSV**
-- **PDF Report**: Multi-page A4 report with data overview, pie chart, Venn diagram, UpSet plot, and full statistical tables (Jaccard, Dice, Enrichment)
+- **PDF Report**: Multi-page A4 report with data overview, pie chart, Venn diagram, UpSet plot, Network diagram with significant edges, full statistical tables (Jaccard, Dice, Enrichment), and methodology explanations
 - Export individual region items via right panel
 - Sample datasets: binary (streaming platforms) and aggregated (gene sets)
 - Supports up to **9 sets** (A through I)
