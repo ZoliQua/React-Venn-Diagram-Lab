@@ -1,4 +1,4 @@
-# CLAUDE.md — Venn Diagram Lab
+# AGENTS.md — Venn Diagram Lab
 
 ## Project Overview
 
@@ -10,8 +10,6 @@ Venn Diagram Lab — interactive viewer, editor, and data visualization tool for
 
 ## Recent Notes
 
-- `index.html` now contains a restrictive Content Security Policy. Keep GA consent loading, local assets, and `blob:` / `data:` export flows working when modifying it.
-- `src/utils/exportData.ts` escapes spreadsheet-style formula prefixes in TSV text cells. Preserve that hardening when changing export behavior.
 - The welcome screen now includes `AboutVennDialog.tsx`. Its educational text should stay source-grounded, English, and visually balanced for long-form reading.
 - `vite.config.ts` now copies `publications/*.pdf` into `dist/publications`. Preserve that if the About dialog keeps linking to local PDFs.
 
@@ -27,7 +25,7 @@ Venn Diagram Lab — interactive viewer, editor, and data visualization tool for
 
 ### 2. Commit Rules
 - All commits go under the user's name only (Zoltan Dul).
-- Claude does NOT appear as co-author in commits.
+- Codex does NOT appear as co-author in commits.
 - Only commit when explicitly asked.
 
 ### 3. Version Tracking
@@ -93,7 +91,6 @@ Venn Diagram Lab — interactive viewer, editor, and data visualization tool for
 │   │   └── svgToImage.ts        SVG-to-PNG capture utility
 │   └── __tests__/
 │       ├── aboutVennContent.test.ts About dialog content consistency tests
-│       ├── exportData.test.ts  TSV export hardening tests
 │       ├── models.test.ts       Model catalog integrity (44 models)
 │       ├── svgFormat.test.ts    SVG format validation (venn*.svg only, Euler exception)
 │       ├── regions.test.ts      Region enumeration logic

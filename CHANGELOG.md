@@ -2,6 +2,23 @@
 
 All notable changes to the Venn Diagram Lab project.
 
+## [1.9.3] — 2026-03-24
+
+### Added
+- **About Venn Diagrams dialog** on the welcome screen
+  - New button placed before "View All 44 Diagram Models"
+  - Three tabbed sections covering historical background, formal definition, and later research directions
+  - Source-backed references section with clickable local PDF links
+- **Custom About visuals** in `public/about-venn/`
+  - Repo-native explanatory SVG illustrations replace lecture slide screenshots for the main educational graphics
+  - Primary-source image from Venn's 1880 paper retained
+- **About dialog content tests**: `aboutVennContent.test.ts` validates section/reference consistency and prose coverage
+
+### Changed
+- **Build output now includes publication PDFs**: Vite copy step exports `publications/*.pdf` into `dist/publications` so the About dialog references open correctly in the built app
+- **About dialog typography/layout** refined for longer prose blocks, cleaner paragraph spacing, improved quote separation, and a lighter Key Takeaways block
+- **Welcome dialog** now includes an educational entry point in addition to model browsing and credits
+
 ## [1.9.2] — 2026-01-22
 
 ### Added

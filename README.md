@@ -2,7 +2,7 @@
 
 Interactive viewer and editor for Venn diagrams — from 2-set to 9-set, covering all known construction methods. Built with React, TypeScript, and Vite.
 
-**Version:** 1.9.2 | **Models:** 44 SVG diagrams + proportional | **License:** MIT
+**Version:** 1.9.3 | **Models:** 44 SVG diagrams + proportional | **License:** MIT
 
 ## Features
 
@@ -85,6 +85,12 @@ Interactive viewer and editor for Venn diagrams — from 2-set to 9-set, coverin
 - Grouped by set count (2-set through 9-set)
 - Source references linked to publication PDFs (multi-line labels supported)
 
+### About Venn Diagrams
+- Welcome-screen dialog introducing the history, definition, and later mathematical development of Venn diagrams
+- Three tabbed sections with long-form explanatory text
+- Custom in-app explanatory SVG illustrations plus a retained primary-source image from Venn's 1880 paper
+- References section with clickable local PDF links in the built app
+
 ## Security Notes
 
 - `index.html` defines a restrictive Content Security Policy that keeps the current GA consent loader, local assets, and `blob:` / `data:` export paths working.
@@ -110,6 +116,7 @@ Interactive viewer and editor for Venn diagrams — from 2-set to 9-set, coverin
 │   │   ├── ViewerSidebar.tsx  Model selector + region list
 │   │   ├── ViewerInfoPanel.tsx Region info display
 │   │   ├── SummaryDialog.tsx  Gallery dialog + SOURCES table
+│   │   ├── AboutVennDialog.tsx Educational welcome-screen dialog
 │   │   ├── Sidebar.tsx        Editor layer tree
 │   │   ├── PropertyPanel.tsx  Editor property editor
 │   │   └── ...                Other editor components
@@ -134,10 +141,12 @@ Interactive viewer and editor for Venn diagrams — from 2-set to 9-set, coverin
 │   │   ├── proportionalModel.ts  VennDocument generator for proportional
 │   │   └── proportionalRegions.ts Cut View region paths for proportional
 │   └── __tests__/             Test suites
+│       ├── aboutVennContent.test.ts About dialog content consistency tests
 │       ├── exportData.test.ts  TSV export hardening tests
 ├── models/
 │   ├── svg/                   44 SVG Venn diagram models
 │   └── json/                  44 JSON pre-computed region data
+├── public/about-venn/         Custom educational SVG/PNG assets for the About dialog
 ├── publications/              Research papers (PDF)
 ├── samples/                   Source SVG samples for model generation
 ├── *.py                       Python utility scripts

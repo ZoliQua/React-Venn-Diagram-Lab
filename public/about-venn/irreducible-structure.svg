@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 900 560">
+  <!-- Generator: Adobe Illustrator 30.3.0, SVG Export Plug-In . SVG Version: 2.1.3 Build 182)  -->
+  <rect y="0" width="900" height="560" rx="26" ry="26" style="fill: #f9f5f3;"/>
+  <text transform="translate(44 58)" style="fill: #3a2823; font-family: Georgia, Georgia; font-size: 33px; isolation: isolate;"><tspan x="0" y="0">Reducibility and Irreducibility</tspan></text>
+  <text transform="translate(44 94)" style="fill: #69554b; font-family: Tahoma, Tahoma; font-size: 17px; isolation: isolate;"><tspan x="0" y="0">Custom conceptual sketch based on the definitions and examples attributed to Grunbaum (1984).</tspan></text>
+  <g>
+    <rect x="72" y="150" width="330" height="322.8" rx="20" ry="20" style="fill: #fff; stroke: #d5c9c1;"/>
+    <text transform="translate(152.3 192.7)" style="fill: #402d28; font-family: Tahoma-Bold, Tahoma; font-size: 23px; font-weight: 700; isolation: isolate;"><tspan x="0" y="0">Reducible idea</tspan></text>
+    <circle cx="189.7" cy="268.8" r="56.7" style="fill: none; stroke: #d7a800; stroke-width: 4px;"/>
+    <circle cx="259" cy="268.8" r="56.7" style="fill: none; stroke: #2f48b8; stroke-width: 4px;"/>
+    <circle cx="221.6" cy="322" r="56.7" style="fill: none; stroke: #cc4e3d; stroke-width: 4px;"/>
+    <text transform="translate(139 409.4)" style="fill: #5b4b44; font-family: Tahoma, Tahoma; isolation: isolate;"><tspan style="font-size: 14px;"><tspan x="0" y="0">If one curve can be removed and</tspan></tspan><tspan style="font-size: 14px;"><tspan x="-33" y="16.8">the remaining family is still a Venn diagram,</tspan></tspan><tspan x="1.2" y="38.4" style="font-size: 14px;">the original diagram is reducible</tspan><tspan x="199.2" y="38.4" style="font-size: 18px;">.</tspan></text>
+  </g>
+  <g>
+    <rect x="484" y="150" width="344" height="322.8" rx="20" ry="20" style="fill: #fff; stroke: #d5c9c1;"/>
+    <text transform="translate(564.2 187.3)" style="fill: #402d28; font-family: Tahoma-Bold, Tahoma; font-size: 23px; font-weight: 700; isolation: isolate;"><tspan x="0" y="0">Irreducible idea</tspan></text>
+    <text transform="translate(508.3 418.6)" style="fill: #5b4b44; font-family: Tahoma, Tahoma; font-size: 14px; isolation: isolate;"><tspan x="0" y="0">Grunbaum&apos;s 1984 paper is cited for the theorem</tspan><tspan x="30" y="16.8" xml:space="preserve"> that simple irreducible Venn diagrams</tspan><tspan x="88.3" y="33.6">exist for all n &gt;= 5.</tspan></text>
+    <g id="Shapes">
+      <ellipse id="ShapeA" cx="664" cy="290" rx="87.3" ry="45" transform="translate(372.1 953.2) rotate(-89.8)" style="fill: none; isolation: isolate; stroke: #f5ff15; stroke-miterlimit: 10; stroke-width: 3px;"/>
+      <ellipse id="ShapeB" cx="675.2" cy="307.3" rx="87.3" ry="45" transform="translate(-61.7 221.7) rotate(-17.8)" style="fill: none; isolation: isolate; stroke: #2e3192; stroke-miterlimit: 10; stroke-width: 3px;"/>
+      <ellipse id="ShapeC" cx="657.2" cy="322" rx="45" ry="87.3" transform="translate(-64.1 445.8) rotate(-35.8)" style="fill: none; isolation: isolate; stroke: #ed1c24; stroke-miterlimit: 10; stroke-width: 3px;"/>
+      <ellipse id="ShapeD" cx="636.9" cy="310.8" rx="87.3" ry="45" transform="translate(10.2 641.6) rotate(-53.8)" style="fill: none; isolation: isolate; stroke: #9e1f63; stroke-miterlimit: 10; stroke-width: 3px;"/>
+      <ellipse id="ShapeE" cx="647.1" cy="292.2" rx="45" ry="87.3" transform="translate(167.9 816) rotate(-71.8)" style="fill: none; isolation: isolate; stroke: #ff6aca; stroke-miterlimit: 10; stroke-width: 3px;"/>
+    </g>
+  </g>
+</svg>

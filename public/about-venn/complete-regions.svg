@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 900 560">
+  <!-- Generator: Adobe Illustrator 30.3.0, SVG Export Plug-In . SVG Version: 2.1.3 Build 182)  -->
+  <rect y="0" width="900" height="560" rx="26" ry="26" style="fill: #f6f7fb;"/>
+  <text transform="translate(46 60)" style="fill: #20263b; font-family: Georgia, Georgia; font-size: 33px; isolation: isolate;"><tspan x="0" y="0">Every Membership Pattern Needs a Region</tspan></text>
+  <text transform="translate(46 95)" style="fill: #55607b; font-family: Tahoma, Tahoma; font-size: 17px; isolation: isolate;"><tspan x="0" y="0">Custom explanatory figure based on the standard modern definition used in Griggs-Killian-Savage (2004).</tspan></text>
+  <g>
+    <rect x="70" y="145" width="340" height="320" rx="20" ry="20" style="fill: #fff; stroke: #c4cad8;"/>
+    <circle cx="200" cy="290" r="95" style="fill: #fff200; fill-opacity: .5; stroke: #6b6500; stroke-width: 4px;"/>
+    <circle cx="280" cy="290" r="95" style="fill: #2e3192; fill-opacity: .3; stroke: #1c1e60; stroke-width: 4px;"/>
+    <text transform="translate(155.6 185.2)" style="fill: #4c4600; font-family: Tahoma-Bold, Tahoma; font-size: 26px; font-weight: 700; isolation: isolate;"><tspan x="0" y="0">A</tspan></text>
+    <text transform="translate(304.8 183)" style="fill: #1c1e60; font-family: Tahoma-Bold, Tahoma; font-size: 26px; font-weight: 700; isolation: isolate;"><tspan x="0" y="0">B</tspan></text>
+    <text transform="translate(118.8 300)" style="fill: #3a3600; font-family: Tahoma-Bold, Tahoma; font-size: 18px; font-weight: 700; isolation: isolate;"><tspan x="0" y="0">A only</tspan></text>
+    <text transform="translate(223 297.9)" style="fill: #14174a; font-family: Tahoma-Bold, Tahoma; font-size: 24px; font-weight: 700; isolation: isolate;"><tspan x="0" y="0">AB</tspan></text>
+    <text transform="translate(309.6 300.5)" style="fill: #14174a; font-family: Tahoma-Bold, Tahoma; font-size: 18px; font-weight: 700; isolation: isolate;"><tspan x="0" y="0">B only</tspan></text>
+    <text transform="translate(176.8 433.4)" style="fill: #4d556e; font-family: Tahoma, Tahoma; font-size: 22px; isolation: isolate;"><tspan x="0" y="0">Outside both</tspan></text>
+  </g>
+  <g>
+    <rect x="470" y="145" width="370" height="320" rx="20" ry="20" style="fill: #fff; stroke: #c4cad8;"/>
+    <text transform="translate(496 191)" style="fill: #1f2840; font-family: Tahoma-Bold, Tahoma; font-size: 23px; font-weight: 700; isolation: isolate;"><tspan x="0" y="0">Why this matters</tspan></text>
+    <text transform="translate(496 235)" style="fill: #414d6a; font-family: Tahoma, Tahoma; font-size: 18px; isolation: isolate;"><tspan x="0" y="0">1. Each subset of the index set must have </tspan><tspan x="0" y="21.6" xml:space="preserve">    a nonempty connected region.</tspan></text>
+    <text transform="translate(496 285)" style="fill: #414d6a; font-family: Tahoma, Tahoma; font-size: 18px; isolation: isolate;"><tspan x="0" y="0">2. For 2 sets, that means 4 regions; </tspan><tspan x="0" y="21.6" xml:space="preserve">    for n sets, it means 2^n regions.</tspan></text>
+    <text transform="translate(496 335)" style="fill: #414d6a; font-family: Tahoma, Tahoma; font-size: 18px; isolation: isolate;"><tspan x="0" y="0">3. This is why a Venn diagram is stricter </tspan><tspan x="0" y="21.6" xml:space="preserve">    than a selective Euler-style picture.</tspan></text>
+    <text transform="translate(496 395)" style="fill: #414d6a; font-family: Tahoma, Tahoma; font-size: 18px; isolation: isolate;"><tspan x="0" y="0">4. The geometric challenge grows quickly</tspan><tspan x="0" y="21.6" xml:space="preserve">    as n increases.</tspan></text>
+  </g>
+</svg>

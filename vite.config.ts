@@ -34,6 +34,15 @@ function copyModelsPlugin() {
           copyFileSync(resolve(jsonSrc, file), resolve(jsonDst, file))
         }
       }
+      // Copy publications/*.pdf
+      const publicationsSrc = resolve(__dirname, 'publications')
+      const publicationsDst = resolve(__dirname, 'dist/publications')
+      mkdirSync(publicationsDst, { recursive: true })
+      for (const file of readdirSync(publicationsSrc)) {
+        if (file.endsWith('.pdf')) {
+          copyFileSync(resolve(publicationsSrc, file), resolve(publicationsDst, file))
+        }
+      }
     }
   }
 }

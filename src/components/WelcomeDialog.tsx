@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { APP_NAME, APP_VERSION } from '../version.ts';
 import type { AppMode } from '../App.tsx';
+import { AboutVennDialog } from './AboutVennDialog.tsx';
 
 interface WelcomeDialogProps {
   isOpen: boolean;
@@ -10,8 +11,13 @@ interface WelcomeDialogProps {
 
 export function WelcomeDialog({ isOpen, onSelectMode, onSummary }: WelcomeDialogProps) {
   const [showCredits, setShowCredits] = useState(false);
+  const [showAboutVenn, setShowAboutVenn] = useState(false);
 
   if (!isOpen) return null;
+
+  if (showAboutVenn) {
+    return <AboutVennDialog isOpen={showAboutVenn} onClose={() => setShowAboutVenn(false)} />;
+  }
 
   if (showCredits) {
     return (
@@ -105,6 +111,9 @@ export function WelcomeDialog({ isOpen, onSelectMode, onSummary }: WelcomeDialog
         </div>
 
         <div className="welcome-bottom-buttons">
+          <button className="btn welcome-summary-btn" onClick={() => setShowAboutVenn(true)}>
+            About Venn Diagrams
+          </button>
           <button className="btn welcome-summary-btn" onClick={onSummary}>
             View All 44 Diagram Models
           </button>

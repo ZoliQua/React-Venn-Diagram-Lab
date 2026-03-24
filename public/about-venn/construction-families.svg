@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 900 560">
+  <!-- Generator: Adobe Illustrator 30.3.0, SVG Export Plug-In . SVG Version: 2.1.3 Build 182)  -->
+  <rect y="0" width="900" height="560" rx="26" ry="26" style="fill: #fbf7ef;"/>
+  <text transform="translate(48 58)" style="fill: #2e2418; font-family: Georgia, Georgia; font-size: 30px; isolation: isolate;"><tspan x="0" y="0">Why More Than One Curve Family Appears in the Literature</tspan></text>
+  <text transform="translate(48 93)" style="fill: #665847; font-family: Tahoma, Tahoma; font-size: 17px; isolation: isolate;"><tspan x="0" y="0">Custom overview inspired by the impossibility and construction results cited in the repository sources.</tspan></text>
+  <g>
+    <rect x="54" y="140" width="182" height="320" rx="18" ry="18" style="fill: #fffdf8; stroke: #d5ccbb;"/>
+    <text transform="translate(100.2 182)" style="fill: #4a3f2b; font-family: Tahoma-Bold, Tahoma; font-size: 23px; font-weight: 700; isolation: isolate;"><tspan x="0" y="0">Circles</tspan></text>
+    <circle cx="132" cy="260" r="42" style="fill: none; stroke: #a97b00; stroke-width: 4px;"/>
+    <circle cx="168" cy="260" r="42" style="fill: none; stroke: #4450b8; stroke-width: 4px;"/>
+    <text transform="translate(68.3 349)" style="fill: #544836; font-family: Tahoma, Tahoma; font-size: 14px; isolation: isolate;"><tspan x="0" y="0">Natural and familiar, but</tspan><tspan x="8.4" y="16.8">heavily constrained in</tspan><tspan x="15.8" y="33.6">higher-order cases.</tspan></text>
+  </g>
+  <g>
+    <rect x="260" y="140" width="182" height="320" rx="18" ry="18" style="fill: #fffdf8; stroke: #d5ccbb;"/>
+    <text transform="translate(309.7 182.7)" style="fill: #4a3f2b; font-family: Tahoma-Bold, Tahoma; font-size: 23px; font-weight: 700; isolation: isolate;"><tspan x="0" y="0">Ellipses</tspan></text>
+    <ellipse cx="342" cy="258" rx="52" ry="34" style="fill: none; stroke: #aa3f2e; stroke-width: 4px;"/>
+    <ellipse cx="376" cy="258" rx="52" ry="34" transform="translate(-61.3 128.8) rotate(-18)" style="fill: none; stroke: #2e6d8a; stroke-miterlimit: 4; stroke-width: 4px;"/>
+    <text transform="translate(296.7 348)" style="fill: #544836; font-family: Tahoma, Tahoma; font-size: 14px; isolation: isolate;"><tspan x="0" y="0">More flexible than</tspan><tspan x="-14.8" y="16.8">circles, but still subject</tspan><tspan x="-13.4" y="33.6">to strong lower-bound</tspan><tspan x="19.4" y="50.4">restrictions.</tspan></text>
+  </g>
+  <g>
+    <rect x="466" y="140" width="182" height="320" rx="18" ry="18" style="fill: #fffdf8; stroke: #d5ccbb;"/>
+    <text transform="translate(510.3 181.3)" style="fill: #4a3f2b; font-family: Tahoma-Bold, Tahoma; font-size: 23px; font-weight: 700; isolation: isolate;"><tspan x="0" y="0">Polygons</tspan></text>
+    <polygon points="507 285.8 543 213.8 579 285.8 507 285.8" style="fill: none; stroke: #4b8a46; stroke-width: 4px;"/>
+    <polygon points="530.6 303.8 570.6 227.8 608.6 303.8 530.6 303.8" style="fill: none; stroke: #82469c; stroke-width: 4px;"/>
+    <text transform="translate(497.6 348.2)" style="fill: #544836; font-family: Tahoma, Tahoma; font-size: 14px; isolation: isolate;"><tspan x="0" y="0">Triangle and k-gon</tspan><tspan x="-23.5" y="16.8">constructions are possible,</tspan><tspan x="-3" y="33.6">but only under tight</tspan><tspan x="-3.6" y="50.4">combinatorial limits.</tspan></text>
+  </g>
+  <g>
+    <rect x="672" y="140" width="182" height="320" rx="18" ry="18" style="fill: #fffdf8; stroke: #d5ccbb;"/>
+    <text transform="translate(688 178.8)" style="fill: #4a3f2b; font-family: Tahoma-Bold, Tahoma; font-size: 19px; font-weight: 700; isolation: isolate;"><tspan x="0" y="0">Freeform Curves</tspan></text>
+    <path d="M693.4,259.3c4-72,80-82,90-20,16,76-68,108-90,20Z" style="fill: none; stroke: #cc5c34; stroke-width: 4px;"/>
+    <path d="M755.8,274.5c-30-82,68-100,66-22,0,62-58,84-66,22Z" style="fill: none; stroke: #215d8f; stroke-width: 4px;"/>
+    <text transform="translate(692 347.1)" style="fill: #544836; font-family: Tahoma, Tahoma; font-size: 14px; isolation: isolate;"><tspan x="0" y="0">As n grows, researchers</tspan><tspan x="15.3" y="16.8">often turn to richer</tspan><tspan x="23.4" y="33.6">curve families to</tspan><tspan x="-9.5" y="50.4">realize all required regions.</tspan></text>
+  </g>
+</svg>
