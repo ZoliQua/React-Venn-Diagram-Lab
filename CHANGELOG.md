@@ -2,6 +2,23 @@
 
 All notable changes to the Venn Diagram Lab project.
 
+## [1.9.4] — 2026-03-26
+
+### Added
+- **PDF Report — Proportional accuracy**: When area-proportional model is active, the PDF now shows pairwise and overall accuracy percentages below the Venn diagram image
+- **3-set triple intersection accuracy**: `solve3SetLayout` now computes the triple intersection area via grid sampling (200x200) and reports it in the accuracy display
+- **Proportional solver unit tests**: 15 tests covering `circleIntersectionArea`, `solve2SetLayout`, `solve3SetLayout` (disjoint, containment, normal overlap, symmetry, triple accuracy, canvas bounds)
+- **Reset to Defaults button**: In Data mode sidebar, restores all visual settings (font sizes, colors, opacity, hover color, visibility toggles) to their original values
+- **Help — About Venn Diagrams**: Welcome screen "About Venn Diagrams" button now mentioned in View mode help
+- **Help — Data mode additions**: Move Names/Numbers, Ctrl+Z undo, and Reset to Defaults documented
+
+### Changed
+- **Sidebar width**: 260px → 290px for better readability
+- **Proportional model info**: ModelInfo now shows correct "Venn type: N sets", "Form: area-proportional", "Regions: N regions" for `__proportional__` models
+- **Computed Models section**: Always visible in model browser (not just ≤3 sets), title "Computed Models (2 or 3 sets)", uses first 3 columns when >3 available
+- **Help corrections**: View mode "Summary" section updated with current button labels; Edit mode shape references verified for 9-set; Data mode column mapping section expanded
+- **Welcome dialog text updates**: "CSV data" → "data", "44 Venn diagram" → "our Venn diagram", "View All 44" → "List all Venn Diagram Models"
+
 ## [1.9.3] — 2026-03-24
 
 ### Added

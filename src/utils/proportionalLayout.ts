@@ -126,7 +126,7 @@ export function solve2SetLayout(
 export function solve3SetLayout(
   sizes: [number, number, number],
   intersections: { AB: number; AC: number; BC: number },
-  _tripleIntersection: number,
+  tripleIntersection: number,
   canvasSize: number,
 ): ProportionalLayout {
   const [sA, sB, sC] = sizes;
@@ -204,11 +204,41 @@ export function solve3SetLayout(
     return Math.min(a, t) / Math.max(a, t);
   })() : 1;
 
+  // Triple accuracy: sample grid to measure actual triple intersection area
+  let tripleAcc: number | undefined;
+  if (tripleIntersection > 0) {
+    const totalArea = Math.PI * circles[0].r ** 2 + Math.PI * circles[1].r ** 2 + Math.PI * circles[2].r ** 2;
+    const targetTripleArea = totalArea * (tripleIntersection / (sizes[0] + sizes[1] + sizes[2]));
+    // Grid sample to estimate actual triple area
+    const res = 200;
+    const step = canvasSize / res;
+    let tripleCount = 0, totalCount = 0;
+    for (let gy = 0; gy < res; gy++) {
+      for (let gx = 0; gx < res; gx++) {
+        const px = gx * step + step / 2;
+        const py = gy * step + step / 2;
+        let inAll = true;
+        for (const c of circles) {
+          const dx = px - c.cx, dy = py - c.cy;
+          if (dx * dx + dy * dy > c.r * c.r) { inAll = false; break; }
+        }
+        if (inAll) tripleCount++;
+        totalCount++;
+      }
+    }
+    const actualTripleArea = (tripleCount / totalCount) * canvasSize * canvasSize;
+    tripleAcc = targetTripleArea > 0 && actualTripleArea > 0
+      ? Math.min(actualTripleArea, targetTripleArea) / Math.max(actualTripleArea, targetTripleArea)
+      : actualTripleArea === 0 && targetTripleArea === 0 ? 1 : 0;
+  }
+
   const pairwise = new Map([['AB', accAB], ['AC', accAC], ['BC', accBC]]);
-  const overall = (accAB + accAC + accBC) / 3;
+  const items = [accAB, accAC, accBC];
+  if (tripleAcc !== undefined) items.push(tripleAcc);
+  const overall = items.reduce((a, b) => a + b, 0) / items.length;
 
   return {
     circles,
-    accuracy: { pairwise, triple: undefined, overall },
+    accuracy: { pairwise, triple: tripleAcc, overall },
   };
 }

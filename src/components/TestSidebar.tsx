@@ -24,8 +24,17 @@ function detectVennType(filename: string): { setCount: number; form: string } {
   return { setCount, form };
 }
 
-function ModelInfo({ filename }: { filename: string | null }) {
+function ModelInfo({ filename, n }: { filename: string | null; n?: number }) {
   if (!filename) return null;
+  if (filename === '__proportional__' && n) {
+    return (
+      <div className="sidebar-file-info" style={{ marginTop: 6 }}>
+        <div><span className="file-info-label">Venn type:</span> {n} sets</div>
+        <div><span className="file-info-label">Form:</span> area-proportional</div>
+        <div><span className="file-info-label">Regions:</span> {Math.pow(2, n) - 1} regions</div>
+      </div>
+    );
+  }
   const vt = detectVennType(filename);
   return (
     <div className="sidebar-file-info" style={{ marginTop: 6 }}>
@@ -103,6 +112,7 @@ interface TestSidebarProps {
   plotBackground: 'dark' | 'white';
   onSetPlotBackground: (v: 'dark' | 'white') => void;
   proportionalAccuracy: ProportionalAccuracy | null;
+  onResetDefaults: () => void;
   onExportRegionSummary?: () => void;
   onExportMatrix?: () => void;
   onSaveSvg?: () => void;
@@ -142,6 +152,7 @@ export function TestSidebar({
   networkMoveNodes, onSetNetworkMoveNodes,
   plotBackground, onSetPlotBackground,
   proportionalAccuracy,
+  onResetDefaults,
   onExportRegionSummary, onExportMatrix,
   onSaveSvg, onExportImage,
 }: TestSidebarProps) {
@@ -252,7 +263,7 @@ export function TestSidebar({
                   ))
                 }
               </select>
-              <ModelInfo filename={selectedModel} />
+              <ModelInfo filename={selectedModel} n={n} />
             </>
           ) : (
             <div className="test-error">{fileType === 'aggregated' ? 'Need at least 2 data columns' : 'Need at least 2 binary columns'}</div>
@@ -494,6 +505,15 @@ export function TestSidebar({
             </>
           )}
           </>}
+        </div>
+      )}
+
+      {/* Reset to Defaults */}
+      {isCalculated && (
+        <div className="sidebar-section" style={{ paddingTop: 0 }}>
+          <button className="btn btn-sm" style={{ width: '100%' }} onClick={onResetDefaults}>
+            Reset to Defaults
+          </button>
         </div>
       )}
 

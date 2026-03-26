@@ -1125,6 +1125,21 @@ export default function App() {
             plotBackground={plotBackground}
             onSetPlotBackground={setPlotBackground}
             proportionalAccuracy={proportionalAccuracy}
+            onResetDefaults={() => {
+              setTestShapeOpacity(0.2);
+              setTestShapeColors({ A: '#FFF200', B: '#2E3192', C: '#ED1C24', D: '#808285', E: '#3C2415', F: '#9E1F63', G: '#CA4B9B', H: '#21AED1', I: '#F7941E' });
+              setTestNameFontSize(24);
+              setTestNameFontFamily('Tahoma');
+              setTestTitleFontSize(24);
+              setTestTitleFontFamily('Tahoma');
+              setHoverColor('#00ff88');
+              setTestShowTitle(true);
+              setTestShowNames(true);
+              setTestShowSums(true);
+              setDataMoveNames(false);
+              setDataMoveNumbers(false);
+              setTestPendingCalculate(true);
+            }}
             onSaveSvg={handleSave}
             onExportImage={handleExportImage}
           />
@@ -1349,10 +1364,10 @@ export default function App() {
                 <div className="canvas-model-browser-inner">
                   <h2 className="canvas-model-browser-title">Select Venn Diagram Model</h2>
                   <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginTop: -8, marginBottom: 16, fontSize: 13 }}>for your dataset</p>
-                  {testOriginalColumns.length <= 3 && (
+                  {testOriginalColumns.length >= 2 && (
                     <div className="summary-group">
                       <h3 className="summary-group-title">
-                        Computed Models
+                        Computed Models (2 or 3 sets)
                         <span className="summary-group-count">data-driven layout</span>
                       </h3>
                       <div className="summary-grid">
@@ -1361,7 +1376,7 @@ export default function App() {
                           onClick={() => {
                             setTestModel(PROPORTIONAL_MODEL);
                             setTestCalculated(false);
-                            setTestColumnMapping(testOriginalColumns.slice(0, testOriginalColumns.length));
+                            setTestColumnMapping(testOriginalColumns.slice(0, Math.min(testOriginalColumns.length, 3)));
                             setTestPendingCalculate(true);
                           }}
                         >
@@ -1655,6 +1670,7 @@ export default function App() {
           filename={testCsvFilename ?? 'data'}
           title={doc.texts.header?.content ?? testCsvFilename ?? 'Venn Diagram Report'}
           modelName={testModel ?? ''}
+          proportionalAccuracy={proportionalAccuracy}
         />
       )}
 

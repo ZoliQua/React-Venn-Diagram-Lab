@@ -88,13 +88,13 @@ export function WelcomeDialog({ isOpen, onSelectMode, onSummary }: WelcomeDialog
         <h1 className="welcome-title">{APP_NAME}</h1>
         <p className="welcome-subtitle">v{APP_VERSION}</p>
 
-        <p className="welcome-about">A collection of 44 Venn diagram SVG models from 2-set to 9-set, based on constructions by Venn, Edwards, Anderson, Grünbaum, Bannier &amp; Bodin, and others. View diagrams interactively, edit their SVG structure, or load your own CSV data to visualize set intersections.</p>
+        <p className="welcome-about">A collection of 44 Venn diagram SVG models from 2-set to 9-set, based on constructions by Venn, Edwards, Anderson, Grünbaum, Bannier &amp; Bodin, and others. View diagrams interactively, edit their SVG structure, or load your own data to visualize set intersections.</p>
 
         <div className="welcome-modes">
           <button className="welcome-mode-card" onClick={() => onSelectMode('view')}>
             <div className="welcome-mode-icon">👁</div>
             <div className="welcome-mode-name">View</div>
-            <div className="welcome-mode-desc">Browse and explore 44 Venn diagram models with interactive region detection</div>
+            <div className="welcome-mode-desc">Browse and explore our Venn diagram models with interactive region detection</div>
           </button>
 
           <button className="welcome-mode-card" onClick={() => onSelectMode('edit')}>
@@ -115,7 +115,7 @@ export function WelcomeDialog({ isOpen, onSelectMode, onSummary }: WelcomeDialog
             About Venn Diagrams
           </button>
           <button className="btn welcome-summary-btn" onClick={onSummary}>
-            View All 44 Diagram Models
+            List all Venn Diagram Models
           </button>
           <button className="btn welcome-summary-btn" onClick={() => setShowCredits(true)}>
             Credits

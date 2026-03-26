@@ -229,7 +229,7 @@ html, body, #root {
 /* ---- Sidebar ---- */
 
 .sidebar {
-  width: 260px;
+  width: 290px;
   min-width: 200px;
   max-width: 450px;
   flex-shrink: 0;

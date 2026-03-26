@@ -104,15 +104,22 @@ const HELP: Record<AppMode, HelpPage> = {
         ],
       },
       {
-        heading: 'Theme',
+        heading: 'About Venn Diagrams',
         items: [
-          { content: 'Click the sun/moon button (☀/☾) in the toolbar to toggle between dark and light mode. Preference is saved.' },
+          { content: 'Click "About Venn Diagrams" on the welcome screen to open an educational dialog with the history, formal definition, and later mathematical development of Venn diagrams, including source-backed references.' },
         ],
       },
       {
-        heading: 'Summary',
+        heading: 'Theme',
         items: [
-          { content: 'Click the ☰ icon in the toolbar to open the Summary dialog showing all 44 models with SVG previews, grouped by set count, with links to source publications.' },
+          { content: 'Click the sun/moon button (☀/☾) in the toolbar to toggle between dark and light mode. Preference is saved to localStorage.' },
+        ],
+      },
+      {
+        heading: 'Summary & Credits',
+        items: [
+          { content: 'Click "List all Venn Diagram Models" on the welcome screen or the ☰ icon in the toolbar to open the full gallery with SVG previews, grouped by set count, with source publication links.' },
+          { content: 'Click "Credits" on the welcome screen to see the authors with profile photos and affiliations.' },
         ],
       },
     ],
@@ -289,6 +296,8 @@ const HELP: Record<AppMode, HelpPage> = {
           { content: 'Shape and bullet opacity slider (synced).' },
           { content: 'Calculation is automatic: triggers on model selection and column changes. No manual Calculate button needed.' },
           { content: 'Long set names (>8 characters) automatically reduce the name font size to 14px.' },
+          { content: 'Move Names / Move Numbers: drag text labels to reposition them on the diagram. Use Ctrl+Z to undo moves.' },
+          { content: 'Reset to Defaults: button at the bottom of the View section restores all visual settings (fonts, colors, opacity) to their original values.' },
         ],
       },
       {

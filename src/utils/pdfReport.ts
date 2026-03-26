@@ -18,6 +18,7 @@ export interface PdfReportParams {
   upsetImageWidth: number;
   upsetImageHeight: number;
   networkImageDataUrl: string;
+  proportionalAccuracy?: { pairwise: Map<string, number>; triple?: number; overall: number } | null;
   networkImageWidth: number;
   networkImageHeight: number;
   modelName: string;
@@ -483,7 +484,21 @@ export async function generatePdfReport(params: PdfReportParams): Promise<Blob> 
 
   const vennX = M.left + (CONTENT_W - vennW) / 2;
   pdf.addImage(vennImageDataUrl, 'PNG', vennX, y, vennW, vennH);
-  y += vennH + 6;
+  y += vennH + 4;
+
+  // Proportional accuracy info (if applicable)
+  if (params.proportionalAccuracy) {
+    const pa = params.proportionalAccuracy;
+    pdf.setFontSize(8);
+    pdf.setFont(FONT, 'normal');
+    pdf.setTextColor(80, 80, 80);
+    const accParts = [...pa.pairwise.entries()].map(([k, v]) => `${k}: ${(v * 100).toFixed(1)}%`);
+    if (pa.triple !== undefined) accParts.push(`ABC: ${(pa.triple * 100).toFixed(1)}%`);
+    accParts.push(`Overall: ${(pa.overall * 100).toFixed(1)}%`);
+    pdf.text(`Proportional Accuracy — ${accParts.join('  |  ')}`, PAGE_W / 2, y + 3, { align: 'center' });
+    y += 6;
+  }
+  y += 2;
 
   // ── UpSet Plot Image ──
   y = sectionTitle(pdf, 'UpSet Plot', y, 40);

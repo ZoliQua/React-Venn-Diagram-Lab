@@ -21,12 +21,13 @@ interface PdfReportDialogProps {
   filename: string;
   title: string;
   modelName: string;
+  proportionalAccuracy?: { pairwise: Map<string, number>; triple?: number; overall: number } | null;
 }
 
 export function PdfReportDialog({
   isOpen, onClose,
   vennResult, doc, n, setNames, totalItems, totalFileRows,
-  filename, title, modelName,
+  filename, title, modelName, proportionalAccuracy,
 }: PdfReportDialogProps) {
   const [step, setStep] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -101,6 +102,7 @@ export function PdfReportDialog({
           networkImageWidth: networkImage.width,
           networkImageHeight: networkImage.height,
           modelName,
+          proportionalAccuracy,
         });
 
         if (cancelled) return;
