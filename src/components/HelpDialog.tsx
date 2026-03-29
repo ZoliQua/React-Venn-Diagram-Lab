@@ -1,4 +1,5 @@
 import type { AppMode } from '../App.tsx';
+import { METHODS_HELP } from './methodsHelpContent.ts';
 
 interface HelpDialogProps {
   isOpen: boolean;
@@ -428,6 +429,23 @@ export function HelpDialog({ isOpen, mode, onClose }: HelpDialogProps) {
               ))}
             </div>
           ))}
+          {mode !== 'edit' && (
+            <div className="help-group">
+              <h3 className="help-heading">Statistical Methods</h3>
+              <p className="help-text">
+                Venn Diagram Lab computes the following similarity and enrichment measures for every pair of sets in Data mode.
+                The same values are included in the exported TSV statistics and the PDF report.
+              </p>
+              {METHODS_HELP.map(method => (
+                <div key={method.id} className="help-method-entry">
+                  <h4 className="help-subheading">{method.name}</h4>
+                  <code className="help-formula">{method.formula}</code>
+                  <p className="help-text">{method.description}</p>
+                  {method.range && <p className="help-text help-range">Range: {method.range}</p>}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

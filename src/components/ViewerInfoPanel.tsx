@@ -54,8 +54,21 @@ export function ViewerInfoPanel({
   const [globalSearch, setGlobalSearch] = useState('');
   const [globalOpen, setGlobalOpen] = useState(true);
 
+  // Copy-to-clipboard feedback
+  const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
+
   // Reset in-region filter when region changes
   useEffect(() => { setItemFilter(''); }, [region?.label]);
+
+  const handleCopyItems = async (items: string[]) => {
+    try {
+      await navigator.clipboard.writeText(items.join('\n'));
+      setCopyFeedback(`Copied ${items.length} items`);
+    } catch {
+      setCopyFeedback('Copy failed');
+    }
+    setTimeout(() => setCopyFeedback(null), 2000);
+  };
 
   // Global search results
   const globalResults = useMemo(() => {
@@ -304,20 +317,35 @@ export function ViewerInfoPanel({
             );
           })()}
 
-          {/* Region export */}
+          {/* Region export + copy */}
           {regionExclusiveItems && (() => {
             const items = region.isInclusive
               ? (regionInclusiveItems?.get(region.label) ?? [])
               : (regionExclusiveItems.get(region.label) ?? []);
-            return items.length > 0 ? (
-              <button className="btn btn-sm" style={{ width: '100%', marginTop: 6 }}
-                onClick={() => {
-                  const content = items.join('\n');
-                  downloadFile(content, `region_${region.label}_items.txt`, 'text/plain');
-                }}>
-                Export Region Items ({items.length})
-              </button>
-            ) : null;
+            if (items.length === 0) return null;
+            return (
+              <>
+                <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+                  <button className="btn btn-sm" style={{ flex: 1 }}
+                    onClick={() => {
+                      const content = items.join('\n');
+                      downloadFile(content, `region_${region.label}_items.txt`, 'text/plain');
+                    }}>
+                    Export ({items.length})
+                  </button>
+                  <button className="btn btn-sm" style={{ flex: 1 }}
+                    onClick={() => handleCopyItems(items)}
+                    title="Copy items to clipboard as newline-separated text">
+                    Copy
+                  </button>
+                </div>
+                {copyFeedback && (
+                  <div className="item-search-count" style={{ marginTop: 4, textAlign: 'center' }}>
+                    {copyFeedback}
+                  </div>
+                )}
+              </>
+            );
           })()}
 
           {/* Action buttons */}

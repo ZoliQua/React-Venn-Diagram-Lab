@@ -2,6 +2,15 @@
 
 All notable changes to the Venn Diagram Lab project.
 
+## [1.9.7] — 2026-03-29
+
+### Added
+- **Copy region items to clipboard**: New "Copy" button next to "Export" in the region info panel. Copies the region's items as newline-separated text to the system clipboard. A short status message confirms the action.
+- **Help — Statistical Methods section**: View mode and Data mode Help dialogs now document the statistical measures used in Data mode (Jaccard index, Sørensen–Dice coefficient, Szymkiewicz–Simpson overlap coefficient, hypergeometric enrichment test, fold enrichment, Benjamini–Hochberg FDR). Each entry shows name, formula, short description, and value range.
+
+### Changed
+- **Region export label**: The "Export Region Items" button label shortened to "Export" to accommodate the new "Copy" button next to it.
+
 ## [1.9.5] — 2026-03-27
 
 ### Added
