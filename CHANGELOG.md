@@ -2,6 +2,30 @@
 
 All notable changes to the Venn Diagram Lab project.
 
+## [1.12.0] — 2026-04-02
+
+### Added
+- **Full Report (zip) export** (Data mode): new toolbar button next to *Report PDF*. Downloads a single zip archive named `venn_report_{baseName}.zip` containing everything at the archive root:
+  - `venn_report_{n}-sets.pdf` — the full multi-page PDF report (identical to the standalone *Report PDF* output).
+  - `regions_summary.tsv`, `items_matrix.tsv` — the Region Summary and Item Matrix TSVs (plain UTF-8, no BOM).
+  - `venn_diagram_{n}-sets.svg`, `upset_plot_{n}-sets.svg`, `venn_network_{n}-sets.svg` — standalone diagram SVGs.
+  - `enrichment_statistics_{n}-sets.xlsx` — Excel workbook with three sheets (Pairwise Jaccard, Sorensen-Dice, Intersection Enrichment). Each sheet has its own sort (Jaccard desc / Dice desc / FDR asc), bold frozen header row, and auto-sized columns.
+  - `stat_bar_chart.svg`, `stat_lollipop_chart.svg`, `stat_heatmap_chart.svg` — the three enrichment plots using default styling (matches the PDF).
+  - `README.txt` — provenance info (timestamp, app version, source filename, set count, set names, list of files) followed by the full *About This Report* text from the PDF.
+- **Progress indicator**: the zip report dialog shows a live percentage bar (0–100%) plus step description; the user sees the tool is working throughout the multi-step bundle build.
+- **Shared helpers**:
+  - `src/utils/reportArtefacts.ts` — `buildReportArtefacts()` / `prepareVennSvgForPdf()`, single source of truth for every SVG that goes into either the PDF or the zip.
+  - `src/utils/aboutReport.ts` — `ABOUT_REPORT_SECTIONS`, the About-This-Report content, now consumed by both the PDF last page and the zip README.
+- Lazy-loaded deps: `jszip` and `exceljs` are only fetched when the user clicks *Full Report (zip)*.
+
+### Changed
+- **Toolbar labels**: `Report` → `Report PDF`; new `Full Report (zip)` button next to it.
+- **`PdfReportDialog`** refactored to use `buildReportArtefacts()` — PDF output remains byte-identical to v1.11.0.
+
+### Dependencies
+- `jszip ^3.10` (MIT) — zip archive assembly
+- `exceljs ^4.4` (MIT) — xlsx workbook writer
+
 ## [1.11.0] — 2026-04-01
 
 ### Added
