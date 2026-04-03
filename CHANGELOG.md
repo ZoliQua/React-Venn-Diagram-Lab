@@ -2,6 +2,24 @@
 
 All notable changes to the Venn Diagram Lab project.
 
+## [1.13.0] — 2026-04-03
+
+### Added
+- **Guided Tour**: new fourth welcome-screen card (alongside View / Edit / Data). Launches a 12-step coach-mark walkthrough of Data mode using the pre-loaded Cancer Drivers sample (COSMIC, OncoKB, IntOGen, Vogelstein) on a 4-set Edwards diagram.
+  - Covers: Open toolbar button → File Info → Venn diagram model → Column Mapping → View switcher (auto-cycles Cut / UpSet / Network / Layer) → Properties panel with the ABCD full intersection selected → Statistics tab → Enrichment Plots card (auto-cycles Bar → Lollipop → Heatmap, then scrolls to the pairwise stats tables) → Plot editor highlighted while the Heatmap stays active → Report PDF / Full Report (zip).
+  - Every step highlights the real UI element via a box-shadow cutout ring; progress dots, Back / Skip / Next + ESC exits safely.
+  - **Replay button** on the two auto-cycle steps (View cycle, Plot editor cycle).
+  - `right-top` tooltip placement anchors the card near the top of the viewport on tall or bottom-positioned targets (readable on short browser windows).
+- **Tour from Help**: all three Help dialogs (View / Edit / Data) now show a *Getting Started → Start the tour* button at the top. Help closes and the tour launches without interrupting the user.
+- **Data-tour anchors**: unobtrusive `data-tour="..."` attributes on 9 UI elements (toolbar, sidebar sections, right-panel tabs, enrichment plots card, plot editor, stats tables) so the tour has stable selectors across future refactors.
+- **Sidebar `forceOpen` prop** and **DataSummaryPanel `forceEnrichmentPlotsOpen` prop**: tour-only overrides that keep sidebar/right-panel sections open while a step needs them visible; normal user state is untouched.
+- **Font-size 16 px auto-applied** on tour start so the 4-set Edwards labels render clearly out of the box.
+
+### Notes
+- The tour bypasses the CsvImportDialog flow (direct `parseCsvWithDelimiter` + state seed) so every step lands in a known configuration.
+- Finish / Skip / ESC all route through `handleTourFinish` → `handleDataClose` → welcome screen. No partial state can remain.
+- No new npm dependencies; the overlay is a local ~220-line component.
+
 ## [1.12.0] — 2026-04-02
 
 ### Added
