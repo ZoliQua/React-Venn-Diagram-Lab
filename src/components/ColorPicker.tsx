@@ -14,13 +14,6 @@ export function ColorPicker({ value, onChange, onCommit, label }: ColorPickerPro
   const [isDirty, setIsDirty] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // Sync from props when element changes
-  useEffect(() => {
-    setCurrentColor(value);
-    setOriginalColor(value);
-    setIsDirty(false);
-  }, [value]);
-
   const handleOpen = () => {
     setOriginalColor(currentColor);
     setIsDirty(false);

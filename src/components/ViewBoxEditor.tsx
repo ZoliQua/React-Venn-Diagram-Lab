@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 interface ViewBoxEditorProps {
   viewBox: { x: number; y: number; w: number; h: number };
@@ -12,15 +12,6 @@ export function ViewBoxEditor({ viewBox, onUpdate }: ViewBoxEditorProps) {
     w: String(viewBox.w),
     h: String(viewBox.h),
   });
-
-  useEffect(() => {
-    setValues({
-      x: String(viewBox.x),
-      y: String(viewBox.y),
-      w: String(viewBox.w),
-      h: String(viewBox.h),
-    });
-  }, [viewBox.x, viewBox.y, viewBox.w, viewBox.h]);
 
   const commit = () => {
     const x = parseFloat(values.x);

@@ -67,15 +67,11 @@ export function ReportDialog({ isOpen, doc, onClose, onSelect }: ReportDialogPro
   const shapeIds = useMemo(() => doc?.shapes.map(s => s.id) ?? [], [doc]);
 
   useEffect(() => {
-    if (!isOpen || !doc) {
-      setRows([]);
-      return;
-    }
-
-    setComputing(true);
+    if (!isOpen || !doc) return;
 
     // Compute after a frame to ensure DOM is rendered
-    requestAnimationFrame(() => {
+    const frame = requestAnimationFrame(() => {
+      setComputing(true);
       const newRows: ReportRow[] = [];
 
       for (const t of doc.texts.values) {
@@ -95,6 +91,7 @@ export function ReportDialog({ isOpen, doc, onClose, onSelect }: ReportDialogPro
       setRows(newRows);
       setComputing(false);
     });
+    return () => cancelAnimationFrame(frame);
   }, [isOpen, doc, shapeIds]);
 
   if (!isOpen) return null;

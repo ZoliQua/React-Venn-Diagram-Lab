@@ -124,19 +124,6 @@ function TextProperties({
   const [bold, setBold] = useState(styleObj['font-weight'] === 'bold' || parseInt(styleObj['font-weight'] || '0') >= 700);
   const [italic, setItalic] = useState(styleObj['font-style'] === 'italic');
 
-  useEffect(() => {
-    setContent(t.content);
-    setX(String(t.x));
-    setY(String(t.y));
-    const s = parseStyleString(t.style);
-    setFontFamily(s['font-family']?.replace(/'/g, '') || 'Tahoma');
-    setFontSize(parseFontSize(s['font-size']));
-    setAnchor(s['text-anchor'] || 'start');
-    setFill(s['fill'] || '#262262');
-    setBold(s['font-weight'] === 'bold' || parseInt(s['font-weight'] || '0') >= 700);
-    setItalic(s['font-style'] === 'italic');
-  }, [t.id, t.content, t.x, t.y, t.style]);
-
   const commitContent = () => {
     if (content !== t.content) {
       onUpdateContent(t.id, content);
@@ -257,6 +244,7 @@ function TextProperties({
       <div className="prop-row">
         <label>Fill</label>
         <ColorPicker
+          key={fill}
           value={fill}
           onChange={(c) => { setFill(c); onUpdateStyle(t.id, 'fill', c); }}
           onCommit={(c) => { setFill(c); onUpdateStyle(t.id, 'fill', c); }}
@@ -382,12 +370,6 @@ function ShapeProperties({
   const [shapeFill, setShapeFill] = useState(styleObj['fill'] || '#000000');
   const [shapeStroke, setShapeStroke] = useState(styleObj['stroke'] || '#000000');
 
-  useEffect(() => {
-    const so = parseStyleString(s.style);
-    setShapeFill(so['fill'] || '#000000');
-    setShapeStroke(so['stroke'] || '#000000');
-  }, [s.id, s.style]);
-
   const handleFillChange = useCallback((c: string) => { setShapeFill(c); onUpdateStyle(s.id, 'fill', c); }, [s.id, onUpdateStyle]);
   const handleStrokeChange = useCallback((c: string) => { setShapeStroke(c); onUpdateStyle(s.id, 'stroke', c); }, [s.id, onUpdateStyle]);
 
@@ -404,6 +386,7 @@ function ShapeProperties({
       <div className="prop-row">
         <label>Fill</label>
         <ColorPicker
+          key={`fill-${shapeFill}`}
           value={shapeFill}
           onChange={handleFillChange}
           onCommit={handleFillChange}
@@ -423,6 +406,7 @@ function ShapeProperties({
       <div className="prop-row">
         <label>Stroke</label>
         <ColorPicker
+          key={`stroke-${shapeStroke}`}
           value={shapeStroke}
           onChange={handleStrokeChange}
           onCommit={handleStrokeChange}
@@ -453,11 +437,6 @@ function BulletProperties({
 
   const [cx, setCx] = useState(String(b.cx));
   const [cy, setCy] = useState(String(b.cy));
-
-  useEffect(() => {
-    setCx(String(b.cx));
-    setCy(String(b.cy));
-  }, [b.cx, b.cy]);
 
   const commitPosition = () => {
     const ncx = parseFloat(cx);
@@ -593,7 +572,7 @@ export function PropertyPanel({
       <div className="prop-title">Properties</div>
       {selected.type === 'text' && (
         <TextProperties
-          key={selected.element.id}
+          key={`${selected.element.id}:${selected.element.content}:${selected.element.x}:${selected.element.y}:${selected.element.style}`}
           sel={selected}
           shapes={shapes}
           onUpdatePosition={onUpdateTextPosition}
@@ -603,12 +582,14 @@ export function PropertyPanel({
       )}
       {selected.type === 'shape' && (
         <ShapeProperties
+          key={`${selected.element.id}:${selected.element.style}`}
           sel={selected}
           onUpdateStyle={onUpdateShapeStyle}
         />
       )}
       {selected.type === 'bullet' && (
         <BulletProperties
+          key={`${selected.element.id}:${selected.element.cx}:${selected.element.cy}`}
           sel={selected}
           onUpdatePosition={onUpdateBulletPosition}
         />

@@ -201,6 +201,8 @@ function TextElement({
   );
 }
 
+const EMPTY_INVALID_IDS = new Set<string>();
+
 function HighlightRect({ targetId }: { targetId: string }) {
   const rectRef = useRef<SVGRectElement>(null);
   useEffect(() => {
@@ -341,7 +343,6 @@ export function Canvas({
 
   useEffect(() => {
     if (!showValidation) {
-      setInvalidIds(new Set());
       return;
     }
 
@@ -384,6 +385,8 @@ export function Canvas({
     return () => cancelAnimationFrame(timer);
   }, [showValidation, doc.texts.values, shapeIds, doc.viewBox, zoomPan.scale]);
 
+  const effectiveInvalidIds = showValidation ? invalidIds : EMPTY_INVALID_IDS;
+
   const handleBackgroundClick = useCallback((e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClearSelection();
@@ -410,7 +413,7 @@ export function Canvas({
         key={t.id}
         t={t}
         isSelected={!readOnly && selectedId === t.id}
-        errorHighlight={!readOnly && showValidation && invalidIds.has(t.id)}
+        errorHighlight={!readOnly && showValidation && effectiveInvalidIds.has(t.id)}
         viewerHighlight={readOnly === true && highlightedCountId === t.id}
         hoverColor={hoverColor}
         readOnly={readOnly}
@@ -421,7 +424,7 @@ export function Canvas({
         onDoubleClick={readOnly ? () => {} : () => onDoubleClickText(t.id)}
       />
     );
-  }, [selectedId, onDragTextStart, onSelect, onDoubleClickText, readOnly, dataMoveText, isCutView, highlightedCountId, showValidation, invalidIds, onReadOnlyTextClick]);
+  }, [selectedId, onDragTextStart, onSelect, onDoubleClickText, readOnly, dataMoveText, isCutView, highlightedCountId, hoverColor, showValidation, effectiveInvalidIds, onReadOnlyTextClick]);
 
   return (
     <div

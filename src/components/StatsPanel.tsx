@@ -36,6 +36,8 @@ function combinations(letters: string[], k: number): string[] {
 }
 
 export function StatsPanel({ doc, onAddText }: StatsPanelProps) {
+  const [collapsed, setCollapsed] = useState(false);
+
   const stats = useMemo(() => {
     // Get shape letters from IDs
     const shapeLetters = doc.shapes.map(s => s.id.replace('Shape', '')).sort();
@@ -81,8 +83,6 @@ export function StatsPanel({ doc, onAddText }: StatsPanelProps) {
 
   const totalExpected = stats.reduce((s, r) => s + r.expected, 0);
   const totalFound = stats.reduce((s, r) => s + r.found, 0);
-
-  const [collapsed, setCollapsed] = useState(false);
 
   return (
     <div className="stats-panel">

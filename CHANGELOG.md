@@ -2,6 +2,18 @@
 
 All notable changes to the Venn Diagram Lab project.
 
+## [1.13.5] — 2026-04-23
+
+### Fixed
+- **PDF report overview wording**: replaced the ambiguous `Total items in the file` label with separate rows for source data rows, background universe, and items assigned to Venn regions. This prevents aggregated GMT/GMX/paste imports from reporting the longest padded column as an item count.
+- **Summary dialog set range**: updated the gallery subtitle from `2-set to 8-set` to `2-set to 9-set`.
+- **Carroll publication filename consistency**: standardized the Carroll 2000 publication filename and updated all in-app and README links.
+- **Release metadata consistency**: aligned `src/version.ts`, `package.json`, `package-lock.json`, `README.md`, and `CITATION.cff` to version `1.13.5`.
+
+### Changed
+- **Generated model provenance**: repository-generated models without external publications are now explicitly labelled as `Repository-generated (no external source)` in the gallery and README model table.
+- **Publication reproducibility documentation**: added a README section with the reviewed environment, verification commands, and an archival GitHub release / DOI workflow.
+
 ## [1.13.4] — 2026-04-10
 
 ### Fixed

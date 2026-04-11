@@ -113,7 +113,7 @@ export function PdfReportDialog({
 
     generate();
     return () => { cancelled = true; };
-  }, [isOpen]);
+  }, [doc, filename, isOpen, modelName, n, onClose, proportionalAccuracy, setNames, title, totalFileRows, totalItems, vennResult]);
 
   if (!isOpen) return null;
 

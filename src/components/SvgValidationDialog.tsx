@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 
 interface SvgValidationDialogProps {
   isOpen: boolean;
@@ -70,13 +70,7 @@ function validateSvg(content: string): CheckResult[] {
 }
 
 export function SvgValidationDialog({ isOpen, svgContent, filename, onAccept, onCancel }: SvgValidationDialogProps) {
-  const [results, setResults] = useState<CheckResult[]>([]);
-
-  useEffect(() => {
-    if (isOpen && svgContent) {
-      setResults(validateSvg(svgContent));
-    }
-  }, [isOpen, svgContent]);
+  const results = useMemo(() => isOpen && svgContent ? validateSvg(svgContent) : [], [isOpen, svgContent]);
 
   if (!isOpen) return null;
 

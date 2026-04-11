@@ -393,8 +393,9 @@ export async function generatePdfReport(params: PdfReportParams): Promise<Blob> 
   const overviewRows: [string, string][] = [
     ['Date', timestamp],
     ['Source file', filename],
-    ['Total items in the file', String(totalFileRows)],
-    ['Total items processed', String(processedItems)],
+    ['Source data rows', String(totalFileRows)],
+    ['Background universe', String(totalItems)],
+    ['Items assigned to Venn regions', String(processedItems)],
     ['Number of sets', String(n)],
     ['Total regions', String(totalRegions)],
     ['Core intersection (' + fullLabel + ')', String(coreCount)],

@@ -2,7 +2,7 @@
 
 Interactive viewer and editor for Venn diagrams — from 2-set to 9-set, covering all known construction methods. Built with React, TypeScript, and Vite.
 
-**Version:** 1.13.4 | **Models:** 44 SVG diagrams + proportional | **License:** MIT
+**Version:** 1.13.5 | **Models:** 44 SVG diagrams + proportional | **License:** MIT
 
 ## Features
 
@@ -223,7 +223,7 @@ All 44 models use a standardized SVG structure. See [VENN-DIAGRAM-SVG-SPECIFICAT
 | `venn-2-set.svg` | Classic two-circle | Venn, 1880 |
 | `venn-2a-set-edwards.svg` | Edwards construction | Edwards, 1996 |
 | `venn-2e-set-carroll-triangle.svg` | Carroll triangle | Carroll, 2000 |
-| `venn-2e-set-rectangle.svg` | Rectangle layout | — |
+| `venn-2e-set-rectangle.svg` | Rectangle layout | Repository-generated (no external source) |
 
 ### 3-Set (7 regions)
 | File | Type | Source |
@@ -231,8 +231,8 @@ All 44 models use a standardized SVG structure. See [VENN-DIAGRAM-SVG-SPECIFICAT
 | `venn-3-set.svg` | Classic three-circle | Venn, 1880 |
 | `venn-3a-set-edwards.svg` | Edwards construction | Edwards, 1996 |
 | `venn-3b-set-anderson.svg` | Anderson construction | Anderson, 1988 |
-| `venn-3e-set-rectangles.svg` | Rectangles | — |
-| `venn-3e-set-rectangle-curved.svg` | Curved rectangles | — |
+| `venn-3e-set-rectangles.svg` | Rectangles | Repository-generated (no external source) |
+| `venn-3e-set-rectangle-curved.svg` | Curved rectangles | Repository-generated (no external source) |
 | `venn-3e-set-carroll-triangle.svg` | Carroll triangle | Carroll, 2000 |
 
 ### 4-Set (15 regions)
@@ -241,8 +241,8 @@ All 44 models use a standardized SVG structure. See [VENN-DIAGRAM-SVG-SPECIFICAT
 | `venn-4-set.svg` | Classic overlapping ellipses | Venn, 1880 |
 | `venn-4a-set-edwards.svg` | Edwards construction | Edwards, 1996 |
 | `venn-4b-set-anderson.svg` | Anderson construction | Anderson, 1988 |
-| `venn-4e-set-euler.svg` | Euler diagram variant | — |
-| `venn-4e-set-rectangle.svg` | Rectangle layout | — |
+| `venn-4e-set-euler.svg` | Euler diagram variant | Repository-generated (no external source) |
+| `venn-4e-set-rectangle.svg` | Rectangle layout | Repository-generated (no external source) |
 | `venn-4e-set-carroll-triangle.svg` | Carroll triangle | Carroll, 2000 |
 | `venn-4f-set.svg` | Original Venn construction | Venn, 1880 |
 
@@ -253,9 +253,9 @@ All 44 models use a standardized SVG structure. See [VENN-DIAGRAM-SVG-SPECIFICAT
 | `venn-5a-set-edwards.svg` | Edwards construction | Edwards, 1996 |
 | `venn-5b-set-anderson.svg` | Anderson construction | Anderson, 1988 |
 | `venn-5d-set-bannier.svg` | Bannier-Bodin variant | Bannier & Bodin, 2017 |
-| `venn-5e-set.svg` | Organic/freeform | — |
+| `venn-5e-set.svg` | Organic/freeform | Repository-generated (no external source) |
 | `venn-5e-set-carroll-triangle.svg` | Carroll triangle | Carroll, 2000 |
-| `venn-5e-set-euler.svg` | Euler diagram (21/31 regions) | — |
+| `venn-5e-set-euler.svg` | Euler diagram (21/31 regions) | Repository-generated (no external source) |
 | `venn-5f-set.svg` | Original Venn construction | Venn, 1880 |
 
 ### 6-Set (63 regions)
@@ -303,12 +303,40 @@ All 44 models use a standardized SVG structure. See [VENN-DIAGRAM-SVG-SPECIFICAT
 | `Anderson-1988.pdf` | Anderson, I. (1988). *Combinatorics of Finite Sets.* |
 | `Anderson-and-Cleaver-1965.pdf` | Anderson, I. & Cleaver (1965). *Venn type diagrams for arguments of n terms.* |
 | `Edwards-1996.pdf` | Edwards, A.W.F. (1996). *Seven-set Venn diagrams with rotational and polar symmetry.* |
-| `Caroll-2000.pdf` | Carroll, C. (2000). *Venn diagrams using convex polygons.* |
+| `Carroll-2000.pdf` | Carroll, C. (2000). *Venn diagrams using convex polygons.* |
 | `Mamakani-et-al-2012.pdf` | Mamakani, K. et al. (2012). *New roses: simple symmetric Venn diagrams.* |
 | `Mamakani-and-Ruskey-2012.pdf` | Mamakani, K. & Ruskey, F. (2012). *A new rose: the first simple symmetric 11-Venn diagram.* |
 | `Bannier-and-Bodin-2017.pdf` | Bannier, D. & Bodin, A. (2017). *Venn diagram constructions for higher set counts.* |
 | `Griggs-et-al-2004.pdf` | Griggs, J. et al. (2004). *Venn diagrams and symmetric chain decompositions.* |
 | `Farrokhi-lecture-2023.pdf` | Farrokhi, M. (2023). *Lecture notes on Venn diagram constructions.* |
+
+## Publication Reproducibility
+
+This repository is intended to be released as a citable software artifact. For a manuscript-facing release, use a tagged commit where `src/version.ts`, `package.json`, `package-lock.json`, `README.md`, `CHANGELOG.md`, and `CITATION.cff` all report the same SemVer version.
+
+### Verified Environment
+- Operating system used for this review: macOS Darwin 25.4.0, arm64
+- Node.js used for this review: v25.9.0
+- npm used for this review: 11.12.1
+- Minimum expected runtime: Node.js 18+ and npm 9+
+
+### Verification Commands
+
+```bash
+npm install
+npm test
+npm run build
+npm run lint
+```
+
+Release candidates should pass `npm test`, `npm run build`, and `npm run lint` before archiving. If lint is intentionally deferred, the release notes should state the exact lint status and why it does not affect the archived scientific outputs.
+
+### Archival Release / DOI Workflow
+1. Update `src/version.ts`, `package.json`, `package-lock.json`, `README.md`, `CHANGELOG.md`, and `CITATION.cff` to the same SemVer version and release date.
+2. Run the verification commands above from a clean checkout.
+3. Create a signed Git tag such as `v1.13.5` and a GitHub release from that tag.
+4. Archive the GitHub release with Zenodo or another DOI provider.
+5. Add the DOI to `CITATION.cff`, the GitHub release notes, and the manuscript software availability statement.
 
 ## Python Scripts
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import type { VennDocument } from '../types.ts';
 import type { RegionInfo } from '../hooks/useRegionDetection.ts';
 import { shapeIdToLetter } from '../utils/hitTest.ts';
@@ -48,7 +48,11 @@ export function ViewerInfoPanel({
   const region = isLocked ? selectedRegion : hoveredRegion;
 
   // Mode A: in-region filter
-  const [itemFilter, setItemFilter] = useState('');
+  const [itemFilterState, setItemFilterState] = useState({ regionLabel: '', value: '' });
+  const itemFilter = itemFilterState.regionLabel === (region?.label ?? '') ? itemFilterState.value : '';
+  const setItemFilter = (value: string) => {
+    setItemFilterState({ regionLabel: region?.label ?? '', value });
+  };
 
   // Mode B: global search
   const [globalSearch, setGlobalSearch] = useState('');
@@ -57,9 +61,6 @@ export function ViewerInfoPanel({
   // Copy-to-clipboard feedback (tied to a source key so the feedback only
   // appears under the button pair that was clicked)
   const [copyFeedback, setCopyFeedback] = useState<{ source: string; text: string } | null>(null);
-
-  // Reset in-region filter when region changes
-  useEffect(() => { setItemFilter(''); }, [region?.label]);
 
   const handleCopyItems = async (items: string[], source: string) => {
     try {

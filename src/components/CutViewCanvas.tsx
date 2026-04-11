@@ -1,6 +1,9 @@
 import { useMemo, useRef, useEffect, useCallback, useState } from 'react';
 import type { RegionData } from '../models.ts';
 
+const DEPTH_BG_COLOR: [number, number, number] = [220, 15, 12];
+const DEPTH_FG_COLOR: [number, number, number] = [0, 45, 45];
+
 interface CutViewCanvasProps {
   regionData: RegionData;
   scale: number;
@@ -67,12 +70,10 @@ export function CutViewCanvas({ regionData, scale, onRegionHover, onRegionClick,
   const { n, sets, regions, curves } = regionData;
 
   // Depth-based color scheme
-  const bgColor: [number, number, number] = [220, 15, 12];
-  const fgColor: [number, number, number] = [0, 45, 45];
   const depthColors = useMemo(() => {
     const colors: string[] = [];
     for (let i = 0; i <= n; i++) {
-      colors.push(interpolateColor(bgColor, fgColor, i / n));
+      colors.push(interpolateColor(DEPTH_BG_COLOR, DEPTH_FG_COLOR, i / n));
     }
     return colors;
   }, [n]);
@@ -106,7 +107,7 @@ export function CutViewCanvas({ regionData, scale, onRegionHover, onRegionClick,
       return heatmapColorFromPalette(t, low, mid, high);
     }
     return depthColors[bitCount(index)];
-  }, [colorMode, countOverrides, sets, heatmapRange, depthColors]);
+  }, [colorMode, countOverrides, sets, heatmapRange, depthColors, heatmapColors?.low, heatmapColors?.mid, heatmapColors?.high]);
 
   const viewBox = useMemo(() => {
     const margin = 5;

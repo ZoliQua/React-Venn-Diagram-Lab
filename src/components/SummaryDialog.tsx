@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { getModelsBySetCount, MODEL_LIST } from '../models.ts';
 import { APP_NAME } from '../version.ts';
+import { SOURCES, renderLabel } from './summarySources.tsx';
 
 interface SummaryDialogProps {
   isOpen: boolean;
@@ -9,53 +10,6 @@ interface SummaryDialogProps {
   selectMode?: boolean; // true = "Select for Edit" header
   onOpenCustom?: () => void;
 }
-
-export function renderLabel(label: string) {
-  if (!label.includes('\n')) return label;
-  return label.split('\n').map((line, i, arr) =>
-    i < arr.length - 1 ? <span key={i}>{line}<br/></span> : <span key={i}>{line}</span>
-  );
-}
-
-export const SOURCES: Record<string, { label: string; url?: string }> = {
-  'venn-2-set.svg': { label: 'Venn, 1880', url: 'publications/Venn-1880.pdf' },
-  'venn-3-set.svg': { label: 'Venn, 1880', url: 'publications/Venn-1880.pdf' },
-  'venn-4-set.svg': { label: 'Venn, 1880', url: 'publications/Venn-1880.pdf' },
-  'venn-4f-set.svg': { label: 'Venn, 1880', url: 'publications/Venn-1880.pdf' },
-  'venn-5f-set.svg': { label: 'Venn, 1880', url: 'publications/Venn-1880.pdf' },
-  'venn-2a-set-edwards.svg': { label: 'Edwards, 1989', url: 'https://archive.org/details/sim_new-scientist_january-07-march-25-1989_121_index/page/n5/mode/2up' },
-  'venn-3a-set-edwards.svg': { label: 'Edwards, 1989', url: 'https://archive.org/details/sim_new-scientist_january-07-march-25-1989_121_index/page/n5/mode/2up' },
-  'venn-4a-set-edwards.svg': { label: 'Edwards, 1989', url: 'https://archive.org/details/sim_new-scientist_january-07-march-25-1989_121_index/page/n5/mode/2up' },
-  'venn-5a-set-edwards.svg': { label: 'Edwards, 1989', url: 'https://archive.org/details/sim_new-scientist_january-07-march-25-1989_121_index/page/n5/mode/2up' },
-  'venn-6a-set-edwards.svg': { label: 'Edwards, 1989', url: 'https://archive.org/details/sim_new-scientist_january-07-march-25-1989_121_index/page/n5/mode/2up' },
-  'venn-7a-set-edwards.svg': { label: 'Edwards, 1989', url: 'https://archive.org/details/sim_new-scientist_january-07-march-25-1989_121_index/page/n5/mode/2up' },
-  'venn-8a-set-edwards.svg': { label: 'Edwards, 1989', url: 'https://archive.org/details/sim_new-scientist_january-07-march-25-1989_121_index/page/n5/mode/2up' },
-  'venn-9a-set-edwards.svg': { label: 'Edwards, 1989', url: 'https://archive.org/details/sim_new-scientist_january-07-march-25-1989_121_index/page/n5/mode/2up' },
-  'venn-3b-set-anderson.svg': { label: 'Anderson, 1988', url: 'publications/Anderson-1988.pdf' },
-  'venn-4b-set-anderson.svg': { label: 'Anderson, 1988', url: 'publications/Anderson-1988.pdf' },
-  'venn-5b-set-anderson.svg': { label: 'Anderson, 1988', url: 'publications/Anderson-1988.pdf' },
-  'venn-6b-set-anderson.svg': { label: 'Anderson, 1988', url: 'publications/Anderson-1988.pdf' },
-  'venn-5-set-grunbaum.svg': { label: 'Grünbaum, 1984', url: 'publications/Grunbaum-1984.pdf' },
-  'venn-7-set-grunbaum.svg': { label: 'Grünbaum, 1992', url: 'publications/Grunbaum-1992.pdf' },
-  'venn-5d-set-bannier.svg': { label: 'Bannier & Bodin, 2017', url: 'publications/Bannier-and-Bodin-2017.pdf' },
-  'venn-6d-set-bannier.svg': { label: 'Bannier & Bodin, 2017', url: 'publications/Bannier-and-Bodin-2017.pdf' },
-  'venn-7d-set-bannier.svg': { label: 'Bannier & Bodin, 2017', url: 'publications/Bannier-and-Bodin-2017.pdf' },
-  'venn-8d-set-bannier.svg': { label: 'Bannier & Bodin, 2017', url: 'publications/Bannier-and-Bodin-2017.pdf' },
-  'venn-7c-set-adelaide.svg': { label: 'Edwards, 1996;\n Mamakani et al., 2012', url: 'publications/Mamakani-et-al-2012.pdf' },
-  'venn-7e-set-adelaide.svg': { label: 'Edwards, 1996;\n Mamakani et al., 2012', url: 'publications/Mamakani-et-al-2012.pdf' },
-  'venn-7e-set-hamilton.svg': { label: 'Edwards, 1996;\n Mamakani et al., 2012', url: 'publications/Mamakani-et-al-2012.pdf' },
-  'venn-7e-set-manawatu.svg': { label: 'Edwards, 1996;\n Mamakani et al., 2012', url: 'publications/Mamakani-et-al-2012.pdf' },
-  'venn-7e-set-massey.svg': { label: 'Edwards, 1996;\n Mamakani et al., 2012', url: 'publications/Mamakani-et-al-2012.pdf' },
-  'venn-7e-set-palmerston-north.svg': { label: 'Edwards, 1996;\n Mamakani et al., 2012', url: 'publications/Mamakani-et-al-2012.pdf' },
-  'venn-7e-set-victoria.svg': { label: 'Edwards, 1996;\n Mamakani et al., 2012', url: 'publications/Mamakani-et-al-2012.pdf' },
-  'venn-2e-set-carroll-triangle.svg': { label: 'Carroll, 2000', url: 'publications/Caroll-2000.pdf' },
-  'venn-3e-set-carroll-triangle.svg': { label: 'Carroll, 2000', url: 'publications/Caroll-2000.pdf' },
-  'venn-4e-set-carroll-triangle.svg': { label: 'Carroll, 2000', url: 'publications/Caroll-2000.pdf' },
-  'venn-5e-set-carroll-triangle.svg': { label: 'Carroll, 2000', url: 'publications/Caroll-2000.pdf' },
-  'venn-6e-set-carroll-triangle.svg': { label: 'Carroll, 2000', url: 'publications/Caroll-2000.pdf' },
-  'venn-6-set.svg': { label: 'SUMO-Venn' },
-  'venn-8-set.svg': { label: 'SUMO-Venn' },
-};
 
 export function SvgPreview({ filename }: { filename: string }) {
   const [svgContent, setSvgContent] = useState<string>('');
@@ -93,7 +47,7 @@ export function SummaryDialog({ isOpen, onClose, onSelectModel, selectMode, onOp
       <div className="summary-dialog" onClick={e => e.stopPropagation()}>
         <div className="summary-header">
           <h1 className="summary-title">{selectMode ? 'Select SVG Model' : APP_NAME}</h1>
-          <p className="summary-subtitle">{selectMode ? 'Choose a diagram to open in the editor' : `${MODEL_LIST.length} Venn diagram models from 2-set to 8-set`}</p>
+          <p className="summary-subtitle">{selectMode ? 'Choose a diagram to open in the editor' : `${MODEL_LIST.length} Venn diagram models from 2-set to 9-set`}</p>
           <div className="summary-header-buttons">
             {selectMode && onOpenCustom && <button className="btn btn-toolbar" onClick={onOpenCustom}>Open Custom SVG</button>}
             <button className="btn btn-toolbar summary-close-btn" onClick={onClose}>Close</button>

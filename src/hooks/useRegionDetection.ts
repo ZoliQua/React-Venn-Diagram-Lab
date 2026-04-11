@@ -60,17 +60,13 @@ export function useRegionDetection(doc: VennDocument | null) {
     setSelectedRegion(null);
   }, []);
 
-  /** Lock the current hover as the selection (no re-computation) */
-  const hoveredRef = useRef<RegionInfo | null>(null);
-  hoveredRef.current = hoveredRegion;
-
   const lockHover = useCallback(() => {
-    if (hoveredRef.current) {
-      setSelectedRegion({ ...hoveredRef.current });
+    if (hoveredRegion) {
+      setSelectedRegion({ ...hoveredRegion });
     } else {
       setSelectedRegion(null);
     }
-  }, []);
+  }, [hoveredRegion]);
 
   // Direct label-based setters (for CutView where hit-testing is not needed)
   const buildRegionFromLabel = useCallback((label: string): RegionInfo | null => {

@@ -16,7 +16,8 @@ import { ViewerInfoPanel } from './components/ViewerInfoPanel.tsx';
 import { fetchModel, fetchRegionData, getModelsBySetCount, MODEL_LIST } from './models.ts';
 import type { RegionData } from './models.ts';
 import { CutViewCanvas } from './components/CutViewCanvas.tsx';
-import { SummaryDialog, SvgPreview, SOURCES, renderLabel } from './components/SummaryDialog.tsx';
+import { SummaryDialog, SvgPreview } from './components/SummaryDialog.tsx';
+import { SOURCES, renderLabel } from './components/summarySources.tsx';
 import { WelcomeDialog } from './components/WelcomeDialog.tsx';
 import { HelpDialog } from './components/HelpDialog.tsx';
 import { SvgValidationDialog } from './components/SvgValidationDialog.tsx';
@@ -401,7 +402,7 @@ export default function App() {
     shapeRotateRef.current = null;
     setRotateAngle(null);
     setRotateCursor(null);
-  }, [rotateAngle, svgDoc]);
+  }, [doc?.shapes, doc?.shapesExtras, rotateAngle, svgDoc]);
 
   // Shape resize state
   const shapeResizeRef = useRef<{ id: string; centerX: number; centerY: number; startDist: number; origTransform: string } | null>(null);
@@ -941,7 +942,7 @@ export default function App() {
       default:
         break;
     }
-  }, [regionDetection]);
+  }, [regionDetection, setViewStyle]);
 
   const handleTestCalculate = useCallback(async () => {
     if (!testCsvData || !testModel || testColumnMapping.length < 2) return;
@@ -1148,7 +1149,7 @@ export default function App() {
   }, [testColumnMapping, testCsvData, testNameMaxChars]);
 
   // Viewer: region list hover/click
-  const handleSidebarHoverRegion = useCallback((_region: Region | null) => {
+  const handleSidebarHoverRegion = useCallback(() => {
     // Sidebar hover could drive canvas highlight in the future
   }, []);
 
@@ -1568,7 +1569,7 @@ export default function App() {
                     el.setAttribute('transform', `translate(${dx},${dy}) ${shapeDragRef.current.origTransform}`.trim());
                   }
                 } : undefined}
-                onShapeDragEnd={resizeShapes ? ((_e: React.PointerEvent) => { handleShapeResizeEnd(); }) : rotateShapes ? ((_e: React.PointerEvent) => { handleShapeRotateEnd(); }) : moveShapes ? (e: React.PointerEvent) => {
+                onShapeDragEnd={resizeShapes ? (() => { handleShapeResizeEnd(); }) : rotateShapes ? (() => { handleShapeRotateEnd(); }) : moveShapes ? (e: React.PointerEvent) => {
                   if (!shapeDragRef.current) return;
                   const svg = document.querySelector('.canvas-svg') as SVGSVGElement | null;
                   if (!svg) return;
@@ -1787,7 +1788,7 @@ export default function App() {
             </div>
           )}
           {doc && mode === 'edit' && (
-            <ViewBoxEditor viewBox={doc.viewBox} onUpdate={svgDoc.updateViewBox} />
+            <ViewBoxEditor key={`${doc.viewBox.x}:${doc.viewBox.y}:${doc.viewBox.w}:${doc.viewBox.h}`} viewBox={doc.viewBox} onUpdate={svgDoc.updateViewBox} />
           )}
         </div>
 
@@ -1893,6 +1894,7 @@ export default function App() {
       />
 
       <TextEditDialog
+        key={editDialog?.id ?? 'closed'}
         isOpen={editDialog !== null}
         elementId={editDialog?.id ?? ''}
         currentContent={editDialog?.content ?? ''}

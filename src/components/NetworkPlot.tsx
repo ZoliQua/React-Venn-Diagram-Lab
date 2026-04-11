@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback, useRef } from 'react';
-import type { NetworkData, NetworkEdge, EdgeWeightMetric } from '../utils/networkData.ts';
+import type { NetworkData, NetworkEdge, NetworkNode, EdgeWeightMetric } from '../utils/networkData.ts';
 import { layoutNetwork } from '../utils/networkData.ts';
 
 const SET_COLORS: Record<string, string> = {
@@ -68,6 +68,7 @@ export function NetworkPlot({
   const [hoveredEdge, setHoveredEdge] = useState<string | null>(null);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const [tooltip, setTooltip] = useState<{ x: number; y: number; content: string } | null>(null);
+  const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
 
   // Drag state: overrides for node positions
   const [nodeOverrides, setNodeOverrides] = useState<Record<string, { x: number; y: number }>>({});
@@ -122,6 +123,7 @@ export function NetworkPlot({
     const node = getNode(nodeId);
     const svgPt = screenToSvg(e.clientX, e.clientY);
     dragRef.current = { id: nodeId, startX: svgPt.x, startY: svgPt.y, origX: node.x, origY: node.y };
+    setDraggingNodeId(nodeId);
     (e.target as Element).setPointerCapture(e.pointerId);
     e.stopPropagation();
   }, [moveNodes, getNode, screenToSvg]);
@@ -138,6 +140,7 @@ export function NetworkPlot({
 
   const handleDragEnd = useCallback(() => {
     dragRef.current = null;
+    setDraggingNodeId(null);
   }, []);
 
   const handleEdgeEnter = useCallback((edge: NetworkEdge) => {
@@ -152,7 +155,7 @@ export function NetworkPlot({
     });
   }, [getNode]);
 
-  const handleNodeEnter = useCallback((node: typeof layoutData.nodes[0]) => {
+  const handleNodeEnter = useCallback((node: NetworkNode) => {
     setHoveredNode(node.id);
     setTooltip({
       x: node.x, y: node.y - node.radius - 12,
@@ -232,17 +235,17 @@ export function NetworkPlot({
           const isHovered = hoveredNode === node.id;
           const isConnectedToHoveredEdge = hoveredEdge !== null && hoveredEdge.includes(node.id);
           const dimmed = hasActive && !isHovered && !isConnectedToHoveredEdge;
-          const isDragging = dragRef.current?.id === node.id;
+          const isDragging = draggingNodeId === node.id;
 
           return (
             <g
               key={node.id}
               style={{ cursor: moveNodes ? (isDragging ? 'grabbing' : 'grab') : 'pointer', transition: isDragging ? 'none' : 'opacity 0.12s' }}
               opacity={dimmed ? 0.3 : 1}
-              onMouseEnter={() => { if (!dragRef.current) handleNodeEnter(node); }}
+              onMouseEnter={() => { if (draggingNodeId === null) handleNodeEnter(node); }}
               onMouseLeave={handleLeave}
               onPointerDown={(e) => handleDragStart(e, node.id)}
-              onClick={(e) => { if (!dragRef.current) { e.stopPropagation(); onNodeClick?.(node.id); } }}
+              onClick={(e) => { if (draggingNodeId === null) { e.stopPropagation(); onNodeClick?.(node.id); } }}
             >
               <circle
                 cx={node.x} cy={node.y}

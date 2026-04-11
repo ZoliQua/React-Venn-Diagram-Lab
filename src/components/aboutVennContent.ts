@@ -66,7 +66,7 @@ export const ABOUT_VENN_REFERENCES: AboutVennReference[] = [
     id: 'carroll2000',
     title: 'Carroll, J. - Drawing Venn triangles',
     details: 'HP Labs Technical Report HPL-2000-73 (2000). Used here for the 6-Venn triangle construction.',
-    file: 'publications/Caroll-2000.pdf',
+    file: 'publications/Carroll-2000.pdf',
   },
 ];
 

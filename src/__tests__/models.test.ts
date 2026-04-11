@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { MODEL_LIST, getModelsBySetCount } from '../models.ts';
+import { SOURCES } from '../components/summarySources.tsx';
 import { existsSync } from 'fs';
 import { resolve } from 'path';
 
@@ -34,6 +35,12 @@ describe('MODEL_LIST', () => {
       const jsonName = m.filename.replace('.svg', '.json');
       const path = resolve(__dirname, '../../models/json', jsonName);
       expect(existsSync(path), `Missing: ${jsonName}`).toBe(true);
+    }
+  });
+
+  it('every model has gallery provenance text', () => {
+    for (const m of MODEL_LIST) {
+      expect(SOURCES[m.filename]?.label, `Missing source/provenance: ${m.filename}`).toBeTruthy();
     }
   });
 });

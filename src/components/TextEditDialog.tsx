@@ -13,10 +13,6 @@ export function TextEditDialog({ isOpen, elementId, currentContent, onConfirm, o
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setValue(currentContent);
-  }, [currentContent, elementId]);
-
-  useEffect(() => {
     if (isOpen) {
       // Focus and select on open
       setTimeout(() => {
