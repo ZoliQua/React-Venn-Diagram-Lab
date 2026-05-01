@@ -9,7 +9,8 @@ All notable changes to the Venn Diagram Lab project.
 - No functional changes to the web application.
 
 ### Python (alpha — not on PyPI)
-- (preparation for upcoming Python package — see Phase 0+ plans)
+- 2026-05-01 (0.1.0): Phase 0 -- package skeleton (pyproject.toml, version.py, sync_data.py, smoke tests, CI workflow). No functional code.
+- 2026-05-01 (0.2.0): Phase 1 -- Core. New modules: io (load_csv/tsv/gmt/gmx + Dataset), statistics (jaccard, dice, overlap_coefficient, hypergeometric, BH-FDR, fold_enrichment, StatisticsResult, compute_pairwise), analysis (analyze, RegionResult, RegionData, list_models, ModelInfo), samples (load_sample, list_samples). Public API exposed via venn_diagram_lab.__init__. ~100 unit + integration tests, ported from the web tool's csvParser/statistics test suites for numerical parity.
 
 ## [1.13.5] — 2026-04-12
 

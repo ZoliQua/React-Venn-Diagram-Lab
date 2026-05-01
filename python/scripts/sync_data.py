@@ -26,36 +26,61 @@ def repo_root() -> Path:
     return Path(__file__).resolve().parent.parent.parent
 
 
+# Dataset files shipped with the Python package. Keep this list in sync with
+# the `force-include` block for `../data/...` in pyproject.toml.
+SAMPLE_FILES = (
+    "dataset_mock_gene_sets.csv",
+    "dataset_mock_streaming_platforms.csv",
+    "dataset_real_cancer_drivers_4.tsv",
+    "dataset_real_msigdb_cancer_pathways.tsv",
+    "dataset_real_msigdb_immune_pathways.tsv",
+)
+
+
+def _replace_dir(dest: Path) -> None:
+    if dest.is_symlink():
+        dest.unlink()
+    elif dest.is_dir():
+        shutil.rmtree(dest)
+    elif dest.exists():
+        raise RuntimeError(f"unexpected file at destination: {dest}")
+
+
 def sync(use_symlinks: bool = False) -> None:
     root = repo_root()
     pkg_data = root / "python" / "src" / "venn_diagram_lab" / "_data"
-    sources_to_destinations = [
+
+    folder_pairs = [
         (root / "models" / "svg", pkg_data / "models" / "svg"),
         (root / "models" / "json", pkg_data / "models" / "json"),
-        (root / "data", pkg_data / "samples"),
     ]
-
-    for src, dest in sources_to_destinations:
+    for src, dest in folder_pairs:
         if not src.exists():
             print(f"WARN: source missing: {src}", file=sys.stderr)
             continue
-
-        if dest.exists() or dest.is_symlink():
-            if dest.is_symlink():
-                dest.unlink()
-            elif dest.is_dir():
-                shutil.rmtree(dest)
-            else:
-                print(f"ERROR: unexpected file at destination: {dest}", file=sys.stderr)
-                continue
-
+        _replace_dir(dest)
         dest.parent.mkdir(parents=True, exist_ok=True)
-
         if use_symlinks:
             dest.symlink_to(src, target_is_directory=True)
             print(f"symlink: {dest} -> {src}")
         else:
             shutil.copytree(src, dest)
+            print(f"copy:    {src} -> {dest}")
+
+    samples_dest = pkg_data / "samples"
+    _replace_dir(samples_dest)
+    samples_dest.mkdir(parents=True, exist_ok=True)
+    for name in SAMPLE_FILES:
+        src = root / "data" / name
+        dest = samples_dest / name
+        if not src.exists():
+            print(f"WARN: source missing: {src}", file=sys.stderr)
+            continue
+        if use_symlinks:
+            dest.symlink_to(src)
+            print(f"symlink: {dest} -> {src}")
+        else:
+            shutil.copy2(src, dest)
             print(f"copy:    {src} -> {dest}")
 
 
