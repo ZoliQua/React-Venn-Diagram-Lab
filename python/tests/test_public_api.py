@@ -58,3 +58,8 @@ def test_render_phase3_symbols_exposed_at_top_level() -> None:
     assert callable(vdl.generate_proportional_svg)
     for sym in ("MplImage", "render_upset", "render_network", "generate_proportional_svg"):
         assert sym in vdl.__all__, f"{sym} missing from __all__"
+
+
+def test_render_pdf_report_exposed_at_top_level() -> None:
+    assert callable(vdl.render_pdf_report)
+    assert "render_pdf_report" in vdl.__all__

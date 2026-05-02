@@ -134,7 +134,7 @@ _DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05
 
 
 def render_network(
-    result,  # type: ignore[no-untyped-def]
+    result: RegionResult,
     *,
     edge_metric: EdgeMetric = "intersection",
     seed: int = 42,

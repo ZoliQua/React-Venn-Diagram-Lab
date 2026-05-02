@@ -17,6 +17,8 @@ from venn_diagram_lab.errors import UnknownModelError
 if TYPE_CHECKING:
     from lxml.etree import _Element  # type: ignore[import-untyped]
 
+    from venn_diagram_lab.analysis import RegionResult
+
 # Module-level constant duplicating analysis._LETTERS so render.svg has no
 # import dependency on analysis (cycle avoidance for D1's RegionResult.render_venn).
 _LETTERS = "ABCDEFGHI"
@@ -170,7 +172,7 @@ def _apply_counts(root: _Element, result, *, show: bool) -> None:
 
 
 def render_venn_svg(
-    result,
+    result: RegionResult,
     *,
     model: str | None = None,
     set_names: Mapping[str, str] | None = None,

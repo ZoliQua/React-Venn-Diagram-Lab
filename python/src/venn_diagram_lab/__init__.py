@@ -31,6 +31,7 @@ from venn_diagram_lab.io import (
 from venn_diagram_lab.proportional import generate_proportional_svg
 from venn_diagram_lab.render.image import MplImage
 from venn_diagram_lab.render.network import render_network
+from venn_diagram_lab.render.pdf import render_pdf_report
 from venn_diagram_lab.render.svg import SvgImage, render_venn_svg
 from venn_diagram_lab.render.upset import render_upset
 from venn_diagram_lab.samples import list_samples, load_sample
@@ -60,6 +61,7 @@ __all__ = [
     "load_sample",
     "load_tsv",
     "render_network",
+    "render_pdf_report",
     "render_upset",
     "render_venn_svg",
 ]

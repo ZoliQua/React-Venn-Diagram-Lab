@@ -1,5 +1,5 @@
 # ruff: noqa: I001
-"""End-to-end Phase 1/3 integration tests: sample -> analyze -> statistics + rendering."""
+"""End-to-end Phase 1/3/4 integration tests: sample -> analyze -> statistics + rendering + PDF."""
 
 from __future__ import annotations
 
@@ -20,6 +20,9 @@ JACCARD_DIAGONAL = 1.0
 # Phase 3 constants
 UPSET_MAX_COLUMNS = 10  # max columns passed to render_upset in Phase 3 tests
 PROPORTIONAL_OVERSIZE_SET_COUNT = 4  # first set count that proportional doesn't support
+
+# Phase 4 constants
+MIN_REAL_SAMPLE_PDF_BYTES = 50_000  # minimum non-trivial PDF size (multiple pages)
 
 
 class TestSampleToStatistics:
@@ -119,3 +122,22 @@ class TestPhase3RendersOnRealSample:
         result = vdl.analyze(ds, model="proportional")
         with pytest.raises(vdl.IncompatibleModelError):
             result.render_venn()
+
+
+class TestPhase4PdfReport:
+    def test_real_sample_full_pdf(self, tmp_path) -> None:
+        ds = vdl.load_sample("dataset_real_cancer_drivers_4")
+        result = vdl.analyze(ds, model="auto")
+        out = tmp_path / "cancer_drivers_report.pdf"
+        result.to_pdf_report(out, title="Cancer Drivers Comparison")
+        assert out.is_file()
+        assert out.read_bytes()[:5] == b"%PDF-"
+        # File should be non-trivial in size (multiple pages with images).
+        assert out.stat().st_size > MIN_REAL_SAMPLE_PDF_BYTES
+
+    def test_proportional_pdf(self, tmp_path) -> None:
+        ds = vdl.Dataset.from_dict({"A": {"x", "y", "z"}, "B": {"y", "z", "w"}})
+        result = vdl.analyze(ds, model="proportional")
+        out = tmp_path / "proportional.pdf"
+        result.to_pdf_report(out)
+        assert out.is_file()

@@ -266,6 +266,16 @@ class RegionResult:
 
         return render_network(self, **opts)
 
+    def to_pdf_report(self, path, **opts) -> None:  # type: ignore[no-untyped-def]
+        """Write a multi-page PDF report to disk.
+
+        Accepts the same kwargs as render.pdf.render_pdf_report (title,
+        include_network, include_about).
+        """
+        from venn_diagram_lab.render.pdf import render_pdf_report  # noqa: PLC0415
+
+        render_pdf_report(self, path, **opts)
+
 
 # ---------------------------------------------------------------------------
 # Model resolution + public entry point

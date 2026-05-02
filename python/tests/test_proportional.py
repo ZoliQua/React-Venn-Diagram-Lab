@@ -125,7 +125,8 @@ class TestSolve3Set:
     def test_error_reported(self) -> None:
         regions = {1: 10, 2: 10, 3: 5, 4: 10, 5: 5, 6: 5, 7: 2}
         layout = solve_3set(regions)
-        assert layout.error >= 0.0
+        # error is math.nan in v0.1 (not measured); test pins this contract.
+        assert math.isnan(layout.error)
 
 
 import pytest  # noqa: E402

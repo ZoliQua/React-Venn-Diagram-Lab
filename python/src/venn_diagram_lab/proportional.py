@@ -9,6 +9,10 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from itertools import combinations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from venn_diagram_lab.analysis import RegionResult
 
 
 @dataclass(frozen=True)
@@ -36,7 +40,6 @@ class ProportionalLayout:
 
 _BISECTION_MAX_ITER = 200
 _BISECTION_EPS = 1e-9
-_CONVERGENCE_TARGET = 1e-4
 
 
 def circle_intersection_area(r1: float, r2: float, d: float) -> float:
@@ -168,7 +171,7 @@ def solve_3set(regions: dict[int, int]) -> ProportionalLayout:
             ProportionalCircle(cx=cbx, cy=cby, r=r_b),
             ProportionalCircle(cx=cx_val, cy=cy_val, r=r_c),
         ),
-        error=0.0,  # Detailed error metric deferred (test asserts >= 0).
+        error=math.nan,  # 3-set fit error not measured in v0.1; flag deliberately.
         is_approximate=True,
     )
 
@@ -386,8 +389,8 @@ def _build_bullets_group(n: int) -> list[str]:
     return parts
 
 
-def generate_proportional_svg(  # type: ignore[no-untyped-def]
-    result,
+def generate_proportional_svg(
+    result: RegionResult,
     *,
     width: int = _DEFAULT_WIDTH,
     height: int = _DEFAULT_HEIGHT,

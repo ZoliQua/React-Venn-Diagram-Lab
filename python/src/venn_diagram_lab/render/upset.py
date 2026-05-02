@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
+
+if TYPE_CHECKING:
+    from venn_diagram_lab.analysis import RegionResult
 
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
@@ -72,7 +75,7 @@ class UpsetData:
 _LETTERS = "ABCDEFGHI"
 
 
-def upset_data_from_region_result(result) -> UpsetData:  # type: ignore[no-untyped-def]
+def upset_data_from_region_result(result: RegionResult) -> UpsetData:
     """Build UpsetData from a Phase 1 RegionResult.
 
     Uses each region's ``exclusive_count`` (items in exactly these sets),
@@ -105,8 +108,8 @@ def sort_by_degree(data: UpsetData) -> list[UpsetIntersection]:
     return sorted(data.intersections, key=lambda i: (len(i.members), i.label))
 
 
-def render_upset(  # type: ignore[no-untyped-def]
-    result,
+def render_upset(
+    result: RegionResult,
     *,
     max_columns: int = 20,
     sort_by: SortBy = "size",
@@ -207,5 +210,7 @@ def render_upset(  # type: ignore[no-untyped-def]
     ax_left.set_yticks([])
     ax_left.set_xlabel("Set size")
 
-    fig.tight_layout()
+    # Use the constrained layout engine instead of tight_layout — the GridSpec
+    # composition is incompatible with tight_layout and emits a UserWarning.
+    fig.set_layout_engine("constrained")
     return MplImage(fig=fig)
