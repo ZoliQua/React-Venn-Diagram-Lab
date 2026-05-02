@@ -106,7 +106,7 @@ def _print_summary(result) -> None:
     for name in result.dataset.set_names:
         table.add_row(name, str(result.set_sizes[name]))
     _console.print(table)
-    universe = sum(r.exclusive_count for r in result.regions.values())
+    universe = result.effective_universe()
     _console.print(f"Model: [bold]{result.model}[/]")
     _console.print(f"Sets: {len(result.dataset.set_names)}")
     _console.print(f"Universe: {universe} items in {len(result.regions)} non-empty regions")
@@ -153,7 +153,7 @@ def _write_outputs(result, venn, upset, network, pdf, statistics_tsv) -> None:
             result.to_pdf_report(pdf)
             typer.echo(f"wrote {pdf}")
         if statistics_tsv is not None:
-            result.statistics.hypergeometric.to_csv(statistics_tsv, sep="\t", index=False)
+            result.to_statistics_tsv(statistics_tsv)
             typer.echo(f"wrote {statistics_tsv}")
     except (VennDiagramError, OSError) as e:
         typer.secho(f"error: {e}", fg=typer.colors.RED, err=True)
@@ -213,7 +213,7 @@ def cmd_analyze(
         Path | None, typer.Option(help="Write multi-page PDF report")
     ] = None,
     statistics_tsv: Annotated[
-        Path | None, typer.Option("--statistics-tsv", help="Write hypergeometric stats as TSV")
+        Path | None, typer.Option("--statistics-tsv", help="Write pairwise statistics as TSV")
     ] = None,
 ) -> None:
     """Analyze a dataset and write outputs (or print summary if none specified)."""
@@ -247,7 +247,7 @@ def cmd_render_sample(
     network: Annotated[Path | None, typer.Option(help="Write Network plot")] = None,
     pdf: Annotated[Path | None, typer.Option(help="Write multi-page PDF report")] = None,
     statistics_tsv: Annotated[
-        Path | None, typer.Option("--statistics-tsv", help="Write stats TSV")
+        Path | None, typer.Option("--statistics-tsv", help="Write pairwise statistics as TSV")
     ] = None,
 ) -> None:
     """Analyze a bundled sample dataset and write outputs."""

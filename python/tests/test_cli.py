@@ -103,7 +103,7 @@ class TestAnalyzeGranularOutputs:
         assert result.exit_code == 0
         assert out.is_file()
         head = out.read_text().splitlines()[0]
-        assert "set_a" in head and "p_adjusted" in head
+        assert "Set_A" in head and "Jaccard" in head and "Significant" in head
 
     def test_writes_multiple_outputs(self, tmp_path) -> None:
         path = self._binary_tsv(tmp_path)
@@ -160,6 +160,22 @@ class TestRenderSampleCommand:
     def test_unknown_sample_errors(self) -> None:
         result = runner.invoke(app, ["render-sample", "no-such-sample"])
         assert result.exit_code != 0
+
+
+class TestCliStatisticsTsvFormat:
+    def test_statistics_tsv_uses_full_pairwise_format(self, tmp_path) -> None:
+        out = tmp_path / "stats.tsv"
+        result = runner.invoke(app, [
+            "render-sample", "dataset_real_cancer_drivers_4",
+            "--statistics-tsv", str(out),
+        ])
+        assert result.exit_code == 0, result.output
+        header = out.read_text(encoding="utf-8").split("\n")[0]
+        assert header == (
+            "Set_A\tSet_B\tName_A\tName_B\tSize_A\tSize_B\t"
+            "Intersection\tUnion\tJaccard\tOverlap_Coeff\tDice\t"
+            "Expected\tFold_Enrichment\tP_value\tFDR\tSignificant"
+        )
 
 
 class TestCliErrorHandling:

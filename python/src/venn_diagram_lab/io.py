@@ -31,12 +31,23 @@ class Dataset:
         in-memory or sample-derived datasets.
     format : source format (csv / tsv / gmt / gmx). For in-memory datasets the
         default is "csv" -- callers that care about format may override.
+    item_order : first-seen insertion order across all sets, mirroring JS Set/Map semantics.
+        Empty tuple is the legacy default for callers that don't populate it (e.g. older
+        tests). All bundled loaders (load_csv/tsv/gmt/gmx) and from_dict populate it.
+    universe_size : explicit hypergeometric universe size from the source file, if known.
+        Binary CSV/TSV loaders populate this with the row count (matches the React
+        webapp's ``csv.rows.length`` semantics for binary mode -- includes all-zero rows
+        which represent items in the file's universe but in none of the selected sets).
+        Aggregated / GMT / GMX / from_dict leave it as None, signalling
+        "compute as |union of items|" downstream.
     """
 
     set_names: list[str]
     items: dict[str, set[str]]
     source_path: str | None
     format: DatasetFormat
+    item_order: tuple[str, ...] = ()
+    universe_size: int | None = None
 
     @classmethod
     def from_dict(
@@ -49,6 +60,7 @@ class Dataset:
         """Build a Dataset from a plain dict of set_name -> iterable of items.
 
         Items are coerced to `str` and de-duplicated. Set count must be in [2, 9].
+        Iterables are consumed exactly once; generators are safe to pass.
         """
         if len(data) < MIN_SETS:
             raise InvalidDatasetError(
@@ -59,8 +71,23 @@ class Dataset:
                 f"Dataset must have at most {MAX_SETS} sets, got {len(data)}"
             )
         names = list(data.keys())
-        items = {name: {str(x) for x in values} for name, values in data.items()}
-        return cls(set_names=names, items=items, source_path=source_path, format=format)
+        # Materialise each iterable to a list so we can scan it twice (item_order + items).
+        materialised: dict[str, list[str]] = {
+            name: [str(x) for x in values] for name, values in data.items()
+        }
+        items = {name: set(vals) for name, vals in materialised.items()}
+        seen: dict[str, None] = {}
+        for name in names:
+            for v in materialised[name]:
+                if v not in seen:
+                    seen[v] = None
+        return cls(
+            set_names=names,
+            items=items,
+            source_path=source_path,
+            format=format,
+            item_order=tuple(seen.keys()),
+        )
 
 
 def _split_line(line: str, delimiter: str) -> list[str]:
@@ -180,11 +207,16 @@ def _binary_columns_to_dataset(
 
     set_names = headers[prefix_cols:]
     items: dict[str, set[str]] = {name: set() for name in set_names}
+    item_order_seen: dict[str, None] = {}
+    nonempty_row_count = 0
 
     for row_idx, row in enumerate(rows, start=2):  # row 1 is the header
         if not row or not row[0].strip():
             continue
+        nonempty_row_count += 1
         item_id = row[0].strip()
+        if item_id not in item_order_seen:
+            item_order_seen[item_id] = None
         for col_offset, set_name in enumerate(set_names):
             col_idx = prefix_cols + col_offset
             cell = (row[col_idx] if col_idx < len(row) else "").strip().lower()
@@ -199,7 +231,14 @@ def _binary_columns_to_dataset(
                     "(expected 0/1/true/false/yes/no)"
                 )
 
-    return Dataset(set_names=set_names, items=items, source_path=source_path, format=fmt)
+    return Dataset(
+        set_names=set_names,
+        items=items,
+        source_path=source_path,
+        format=fmt,
+        item_order=tuple(item_order_seen.keys()),
+        universe_size=nonempty_row_count,
+    )
 
 
 def _aggregated_columns_to_dataset(
@@ -214,17 +253,26 @@ def _aggregated_columns_to_dataset(
 
     set_names = list(headers)
     items: dict[str, set[str]] = {name: set() for name in set_names}
+    seen: dict[str, None] = {}
 
     for row in rows:
         for col_idx, set_name in enumerate(set_names):
             cell = (row[col_idx] if col_idx < len(row) else "").strip()
             if cell:
                 items[set_name].add(cell)
+                if cell not in seen:
+                    seen[cell] = None
 
     if not any(items.values()):
         raise InvalidDatasetError("Aggregated file has no non-empty cells")
 
-    return Dataset(set_names=set_names, items=items, source_path=source_path, format=format)
+    return Dataset(
+        set_names=set_names,
+        items=items,
+        source_path=source_path,
+        format=format,
+        item_order=tuple(seen.keys()),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -286,6 +334,7 @@ def load_gmt(path: Path | str) -> Dataset:
 
     set_names: list[str] = []
     items: dict[str, set[str]] = {}
+    seen: dict[str, None] = {}
 
     gmt_min_cols = 3  # name, description, at least one gene
     for line in lines:
@@ -295,11 +344,14 @@ def load_gmt(path: Path | str) -> Dataset:
         name = parts[0].strip()
         if not name:
             continue
-        genes = {p.strip() for p in parts[2:] if p.strip()}
-        if not genes:
+        members = [p.strip() for p in parts[2:] if p.strip()]
+        if not members:
             continue
         set_names.append(name)
-        items[name] = genes
+        items[name] = set(members)
+        for m in members:
+            if m not in seen:
+                seen[m] = None
 
     if not set_names:
         raise InvalidDatasetError("GMT file has no valid gene sets")
@@ -313,7 +365,13 @@ def load_gmt(path: Path | str) -> Dataset:
             "Filter the file before loading."
         )
 
-    return Dataset(set_names=set_names, items=items, source_path=src, format="gmt")
+    return Dataset(
+        set_names=set_names,
+        items=items,
+        source_path=src,
+        format="gmt",
+        item_order=tuple(seen.keys()),
+    )
 
 
 def load_gmx(path: Path | str) -> Dataset:
@@ -343,11 +401,22 @@ def load_gmx(path: Path | str) -> Dataset:
         )
 
     items: dict[str, set[str]] = {name: set() for name in set_names}
+    seen: dict[str, None] = {}
+    # Row-major scan: top-to-bottom rows, left-to-right columns within each row.
+    # Matches the webapp's Set insertion order when GMX is read top-to-bottom.
     for line in lines[2:]:
         parts = [p.strip() for p in line.split("\t")]
         for col_idx, set_name in enumerate(set_names):
             cell = parts[col_idx] if col_idx < len(parts) else ""
             if cell:
                 items[set_name].add(cell)
+                if cell not in seen:
+                    seen[cell] = None
 
-    return Dataset(set_names=set_names, items=items, source_path=src, format="gmx")
+    return Dataset(
+        set_names=set_names,
+        items=items,
+        source_path=src,
+        format="gmx",
+        item_order=tuple(seen.keys()),
+    )

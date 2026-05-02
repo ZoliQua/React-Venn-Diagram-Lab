@@ -192,6 +192,17 @@ class RegionResult:
     set_sizes: dict[str, int]
     is_approximate: bool = False  # always False in Phase 1; True for proportional 3-set in Phase 3
 
+    def effective_universe(self) -> int:
+        """Hypergeometric universe N consistent with the React webapp.
+
+        Binary CSV/TSV: ``dataset.universe_size`` = ``csv.rows.length`` (includes
+        all-zero rows representing items in the file's universe but in none of
+        the selected sets). Aggregated / GMT / GMX / from_dict: |union of items|.
+        """
+        if self.dataset.universe_size is not None:
+            return self.dataset.universe_size
+        return sum(r.exclusive_count for r in self.regions.values())
+
     @cached_property
     def statistics(self) -> StatisticsResult:
         """Lazily compute pairwise statistics on first access."""
@@ -226,7 +237,7 @@ class RegionResult:
                         inter += region.exclusive_count
                 pair_inter[(self.dataset.set_names[i], self.dataset.set_names[j])] = inter
 
-        universe = sum(r.exclusive_count for r in self.regions.values())
+        universe = self.effective_universe()
 
         return compute_pairwise(
             set_names=list(self.dataset.set_names),
@@ -275,6 +286,191 @@ class RegionResult:
         from venn_diagram_lab.render.pdf import render_pdf_report  # noqa: PLC0415
 
         render_pdf_report(self, path, **opts)
+
+    def to_region_summary_tsv(self, path) -> None:  # type: ignore[no-untyped-def]
+        """Write the Region Summary TSV (matches the webapp's Export Region Summary).
+
+        Columns: Region, Sets, Depth, Exclusive_Count, Inclusive_Count, Exclusive_Pct, Items
+        Rows: every non-empty region of the diagram. Sorted by Depth ASC, then Region label ASC.
+        Items: semicolon-joined, ordered by self.dataset.item_order (insertion order from source).
+        Cells starting with =/+/-/@ are escape-prefixed with a single quote.
+
+        Exclusive_Pct denominator mirrors the webapp's ``totalUniqueItems``:
+        for binary CSV/TSV (``dataset.universe_size`` populated) it's the row
+        count; for aggregated/GMT/GMX it's the union of items across sets
+        (== sum of exclusive counts).
+        """
+        from pathlib import Path  # noqa: PLC0415
+
+        from venn_diagram_lab._tsv_escape import (  # noqa: PLC0415
+            escape_spreadsheet_cell,
+            js_to_fixed,
+        )
+
+        n = len(self.dataset.set_names)
+        letters = "ABCDEFGHI"[:n]
+        names_by_letter = dict(zip(letters, self.dataset.set_names, strict=True))
+        order_index = {item: i for i, item in enumerate(self.dataset.item_order)}
+        total = self.effective_universe()
+
+        rows: list[tuple[int, str, str]] = []  # (depth, region_label, full_line)
+        intersect = " ∩ "
+        for mask in range(1, 1 << n):
+            label = "".join(letters[i] for i in range(n) if mask & (1 << i))
+            depth = bin(mask).count("1")
+            region = self.regions.get(mask)
+            ex_count = region.exclusive_count if region else 0
+            in_count = region.inclusive_count if region else 0
+            pct = js_to_fixed(ex_count / total * 100, 2) if total > 0 else "0.00"
+            sets_col = intersect.join(
+                escape_spreadsheet_cell(names_by_letter[c]) for c in label
+            )
+            items: list[str] = []
+            if region is not None:
+                items = sorted(
+                    region.exclusive_items,
+                    key=lambda it: order_index.get(it, len(order_index)),
+                )
+            items_col = ";".join(escape_spreadsheet_cell(i) for i in items)
+            line = "\t".join(
+                [label, sets_col, str(depth), str(ex_count), str(in_count), pct, items_col]
+            )
+            rows.append((depth, label, line))
+
+        rows.sort(key=lambda r: (r[0], r[1]))
+        header = "\t".join([
+            "Region", "Sets", "Depth",
+            "Exclusive_Count", "Inclusive_Count",
+            "Exclusive_Pct", "Items",
+        ])
+        Path(path).write_text("\n".join([header, *(r[2] for r in rows)]), encoding="utf-8")
+
+    def to_statistics_tsv(self, path) -> None:  # type: ignore[no-untyped-def]
+        """Write the pairwise Statistics TSV (matches DataSummaryPanel.handleExportStats).
+
+        Columns: Set_A, Set_B, Name_A, Name_B, Size_A, Size_B, Intersection, Union,
+        Jaccard, Overlap_Coeff, Dice, Expected, Fold_Enrichment, P_value, FDR, Significant.
+
+        Float formatting mirrors the webapp byte-for-byte:
+        * Jaccard / Overlap_Coeff / Dice: 4 decimals
+        * Expected: 2 decimals
+        * Fold_Enrichment: 3 decimals
+        * P_value / FDR: scientific (JS style) if < 0.001, else 6 decimals
+        * Significant: one of "***", "**", "*", "ns"
+
+        Rows are sorted by P_value ascending (matches statistics.hypergeometric ordering).
+        """
+        from pathlib import Path  # noqa: PLC0415
+
+        from venn_diagram_lab._tsv_escape import (  # noqa: PLC0415
+            js_to_exponential_2,
+            js_to_fixed,
+        )
+        from venn_diagram_lab.statistics import (  # noqa: PLC0415
+            dice,
+            fold_enrichment,
+            jaccard,
+            overlap_coefficient,
+        )
+
+        _stats_header = "\t".join([
+            "Set_A", "Set_B", "Name_A", "Name_B", "Size_A", "Size_B",
+            "Intersection", "Union", "Jaccard", "Overlap_Coeff", "Dice",
+            "Expected", "Fold_Enrichment", "P_value", "FDR", "Significant",
+        ])
+        _p_scientific_threshold = 0.001
+        _fdr_triple_star = 0.001
+        _fdr_double_star = 0.01
+        _fdr_single_star = 0.05
+
+        n = len(self.dataset.set_names)
+        if n < _MIN_SETS_FOR_STATISTICS:
+            Path(path).write_text(_stats_header, encoding="utf-8")
+            return
+
+        letters = "ABCDEFGHI"[:n]
+        universe = self.effective_universe()
+
+        stats_table = self.statistics.hypergeometric  # already sorted by p_value asc
+
+        def fmt_p(x: float) -> str:
+            return js_to_exponential_2(x) if x < _p_scientific_threshold else js_to_fixed(x, 6)
+
+        rows: list[tuple[float, str]] = []  # sort key + line
+        for _, row in stats_table.iterrows():
+            a_name = str(row["set_a"])
+            b_name = str(row["set_b"])
+            a_letter = letters[self.dataset.set_names.index(a_name)]
+            b_letter = letters[self.dataset.set_names.index(b_name)]
+            size_a = self.set_sizes[a_name]
+            size_b = self.set_sizes[b_name]
+            inter = int(row["intersection"])
+            union_size = size_a + size_b - inter
+            jac = jaccard(size_a, size_b, inter)
+            oc = overlap_coefficient(size_a, size_b, inter)
+            dic = dice(size_a, size_b, inter)
+            expected = float(row["expected"])
+            fe = fold_enrichment(universe, size_a, size_b, inter)
+            p_val = float(row["p_value"])
+            fdr = float(row["p_adjusted"])
+
+            if fdr < _fdr_triple_star:
+                sig_label = "***"
+            elif fdr < _fdr_double_star:
+                sig_label = "**"
+            elif fdr < _fdr_single_star:
+                sig_label = "*"
+            else:
+                sig_label = "ns"
+
+            line = "\t".join([
+                a_letter, b_letter, a_name, b_name,
+                str(size_a), str(size_b),
+                str(inter), str(union_size),
+                js_to_fixed(jac, 4), js_to_fixed(oc, 4), js_to_fixed(dic, 4),
+                js_to_fixed(expected, 2), js_to_fixed(fe, 3),
+                fmt_p(p_val), fmt_p(fdr), sig_label,
+            ])
+            rows.append((p_val, line))
+
+        rows.sort(key=lambda r: r[0])
+        Path(path).write_text("\n".join([_stats_header, *(r[1] for r in rows)]), encoding="utf-8")
+
+    def to_matrix_tsv(self, path) -> None:  # type: ignore[no-untyped-def]
+        """Write the Item Matrix TSV (matches the webapp's Export Matrix).
+
+        Columns: Item, <SetName_A>, <SetName_B>, ..., Region
+        Rows: one per item. Iteration order: mask 1..(2^n - 1); within each mask,
+        items in self.dataset.item_order.
+        """
+        from pathlib import Path  # noqa: PLC0415
+
+        from venn_diagram_lab._tsv_escape import escape_spreadsheet_cell  # noqa: PLC0415
+
+        n = len(self.dataset.set_names)
+        letters = "ABCDEFGHI"[:n]
+        order_index = {item: i for i, item in enumerate(self.dataset.item_order)}
+
+        header_cols = (
+            ["Item"]
+            + [escape_spreadsheet_cell(name) for name in self.dataset.set_names]
+            + ["Region"]
+        )
+        out_lines = ["\t".join(header_cols)]
+
+        for mask in range(1, 1 << n):
+            region = self.regions.get(mask)
+            if region is None or not region.exclusive_items:
+                continue
+            label = "".join(letters[i] for i in range(n) if mask & (1 << i))
+            membership = ["1" if mask & (1 << i) else "0" for i in range(n)]
+            fallback = len(order_index)
+            items = sorted(region.exclusive_items, key=lambda it: order_index.get(it, fallback))
+            for item in items:
+                row = [escape_spreadsheet_cell(item), *membership, label]
+                out_lines.append("\t".join(row))
+
+        Path(path).write_text("\n".join(out_lines), encoding="utf-8")
 
 
 # ---------------------------------------------------------------------------

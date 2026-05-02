@@ -64,7 +64,7 @@ def _build_overview_page(result: RegionResult, *, title: str | None = None) -> F
     # Metadata on top right.
     ax_meta = fig.add_axes((0.55, 0.55, 0.4, 0.3))
     ax_meta.set_axis_off()
-    universe = sum(r.exclusive_count for r in result.regions.values())
+    universe = result.effective_universe()
     n_regions = len(result.regions)
     metadata_lines = [
         f"Model: {result.model}",

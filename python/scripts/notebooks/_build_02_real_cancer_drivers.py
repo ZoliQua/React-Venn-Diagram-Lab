@@ -128,11 +128,14 @@ _HYPER_MD = (
 
 _HYPER_DISCUSS = (
     "### Discussion\n\n"
-    "All pairs except OncoKB--IntOGen are highly significant (BH-FDR < 0.001), confirming that "
-    "the catalog overlaps are not random. "
-    "OncoKB--IntOGen is still significant at the 0.05 level but not at 0.001, "
-    "likely because IntOGen genes are more enriched in the 'long tail' oncogenes "
-    "that OncoKB only partially covers."
+    "All six pairs are overwhelmingly significant (BH-FDR p << 0.001), confirming that "
+    "the catalog overlaps are not random against a ~20,000-gene background. "
+    "Fold enrichments range from ~12x (OncoKB / IntOGen, the two largest catalogs, "
+    "where the denominator effect dampens the ratio) up to ~31x (Vogelstein / COSMIC_CGC, "
+    "where the small Vogelstein list overlaps almost completely with the larger CGC). "
+    "Several large-vs-large pairs return p = 0.0 in double precision; the package's "
+    "`p_adjusted` column applies BH-FDR but the correction is dwarfed by the raw "
+    "effect sizes."
 )
 
 _CUSTOM_MD = (

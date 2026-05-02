@@ -251,3 +251,99 @@ class TestLoadGmx:
         path.write_text("A\tB\ndesc1\tdesc2\n")  # only 2 lines, need >=3
         with pytest.raises(InvalidDatasetError, match="at least 3"):
             load_gmx(path)
+
+
+class TestDatasetItemOrder:
+    def test_from_dict_preserves_input_order(self):
+        ds = Dataset.from_dict({
+            "Set1": ["beta", "alpha", "gamma"],
+            "Set2": ["delta", "alpha", "epsilon"],
+        })
+        # Items are unioned in set_names order, then in their per-set iteration order,
+        # deduplicating on first sight.
+        assert ds.item_order == ("beta", "alpha", "gamma", "delta", "epsilon")
+
+    def test_from_dict_iterables_consumed_once(self):
+        # Generator inputs must not be consumed twice (item_order + items both need them).
+        gen = (s for s in ["x", "y", "x"])
+        ds = Dataset.from_dict({"S1": gen, "S2": ["z"]})
+        assert ds.item_order == ("x", "y", "z")
+        assert ds.items["S1"] == {"x", "y"}
+
+    def test_from_dict_leaves_universe_size_none(self):
+        # from_dict has no notion of "rows in source file" -- universe is the union of items.
+        ds = Dataset.from_dict({"S1": ["a", "b"], "S2": ["b", "c"]})
+        assert ds.universe_size is None
+
+    def test_load_csv_binary_preserves_row_order(self, tmp_path):
+        path = tmp_path / "binary.csv"
+        path.write_text(
+            "item,SetA,SetB\n"
+            "zebra,1,0\n"
+            "apple,0,1\n"
+            "mango,1,1\n"
+        )
+        ds = load_csv(path, binary=True)
+        assert ds.item_order == ("zebra", "apple", "mango")
+
+    def test_load_csv_binary_skips_blank_rows_in_order(self, tmp_path):
+        path = tmp_path / "binary.csv"
+        path.write_text(
+            "item,SetA,SetB\n"
+            "first,1,0\n"
+            ",1,1\n"          # blank item id -- skipped by loader
+            "second,0,1\n"
+        )
+        ds = load_csv(path, binary=True)
+        assert ds.item_order == ("first", "second")
+
+    def test_load_csv_binary_universe_size_counts_all_nonempty_rows(self, tmp_path):
+        # universe_size = count of non-empty rows including all-zero rows
+        # (matches React webapp's `csv.rows.length` for binary mode).
+        path = tmp_path / "binary.csv"
+        path.write_text(
+            "item,SetA,SetB\n"
+            "in_a,1,0\n"
+            "in_b,0,1\n"
+            "in_neither,0,0\n"   # all-zero row -- counted in universe but in no region
+            "in_both,1,1\n"
+        )
+        ds = load_csv(path, binary=True)
+        expected_universe = 4  # all four non-empty rows count
+        assert ds.universe_size == expected_universe
+        assert ds.item_order == ("in_a", "in_b", "in_neither", "in_both")
+
+    def test_load_csv_aggregated_first_seen_order(self, tmp_path):
+        path = tmp_path / "agg.csv"
+        path.write_text(
+            "SetA,SetB,SetC\n"
+            "alpha,gamma,beta\n"
+            "delta,alpha,gamma\n"   # alpha (already seen), gamma (already seen)
+            "eta,zeta,delta\n"
+        )
+        ds = load_csv(path, binary=False)
+        # Top-to-bottom rows, left-to-right columns within a row, first-seen wins.
+        assert ds.item_order == ("alpha", "gamma", "beta", "delta", "eta", "zeta")
+
+    def test_load_gmt_first_seen_order(self, tmp_path):
+        path = tmp_path / "sets.gmt"
+        path.write_text(
+            "SetA\tdesc1\talpha\tbeta\tgamma\n"
+            "SetB\tdesc2\tdelta\tbeta\tepsilon\n"
+        )
+        ds = load_gmt(path)
+        assert ds.item_order == ("alpha", "beta", "gamma", "delta", "epsilon")
+
+    def test_load_gmx_first_seen_order(self, tmp_path):
+        path = tmp_path / "sets.gmx"
+        # GMX = transposed GMT: columns are sets, rows are items.
+        # Row-major scan: top-to-bottom rows, left-to-right columns within each row.
+        path.write_text(
+            "SetA\tSetB\n"
+            "desc1\tdesc2\n"
+            "alpha\tdelta\n"
+            "beta\tbeta\n"
+            "gamma\tepsilon\n"
+        )
+        ds = load_gmx(path)
+        assert ds.item_order == ("alpha", "delta", "beta", "gamma", "epsilon")

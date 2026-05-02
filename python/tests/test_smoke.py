@@ -25,6 +25,6 @@ def test_version_format_is_semver() -> None:
     )
 
 
-def test_version_is_phase_six() -> None:
-    """During Phase 6 development, version is 0.7.0."""
-    assert venn_diagram_lab.__version__ == "0.7.0"
+def test_version_is_phase_seven() -> None:
+    """During Phase 7 development, version is 0.8.0."""
+    assert venn_diagram_lab.__version__ == "0.8.0"
