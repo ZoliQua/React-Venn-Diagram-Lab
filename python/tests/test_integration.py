@@ -141,3 +141,36 @@ class TestPhase4PdfReport:
         out = tmp_path / "proportional.pdf"
         result.to_pdf_report(out)
         assert out.is_file()
+
+
+import subprocess  # noqa: E402
+import shutil  # noqa: E402
+
+
+# Resolve the vdl binary: prefer the venv-installed script, fall back to PATH.
+_VDL_BIN = shutil.which("vdl") or "/Users/Zoli/Code/Orthologs/2-venn-diagram/.venv/bin/vdl"
+
+
+class TestPhase5CliBinary:
+    def test_vdl_version_works_as_subprocess(self) -> None:
+        # The `vdl` console script is installed by `pip install -e python/[dev]`.
+        result = subprocess.run(
+            [_VDL_BIN, "version"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert result.returncode == 0, f"stderr: {result.stderr}"
+        assert vdl.__version__ in result.stdout
+
+    def test_vdl_render_sample_pdf_as_subprocess(self, tmp_path) -> None:
+        out = tmp_path / "sub.pdf"
+        result = subprocess.run(
+            [_VDL_BIN, "render-sample", "dataset_mock_streaming_platforms", "--pdf", str(out)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert result.returncode == 0, f"stderr: {result.stderr}"
+        assert out.is_file()
+        assert out.read_bytes()[:5] == b"%PDF-"
