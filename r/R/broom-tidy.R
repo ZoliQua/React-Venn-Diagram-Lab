@@ -28,7 +28,14 @@
 #'   `n*(n-1)/2` rows for an `n`-set dataset.
 #' @exportS3Method broom::tidy
 #' @examples
-#' \dontrun{
+#' ds <- methods::new("VennDataset",
+#'     set_names = c("A", "B"),
+#'     items = list(A = c("x", "y"), B = c("y", "z")),
+#'     item_order = c("x", "y", "z"),
+#'     universe_size = 10L, source_path = NULL, format = "csv")
+#' result <- analyze(ds)
+#' if (requireNamespace("broom", quietly = TRUE)) broom::tidy(result)
+#' \donttest{
 #' result <- analyze(load_sample("dataset_real_cancer_drivers_4"))
 #' broom::tidy(result)
 #' }
@@ -106,7 +113,14 @@ tidy.RegionResult <- function(x, ...) {
 #'   `n_significant`, `n_highly_significant`.
 #' @exportS3Method broom::glance
 #' @examples
-#' \dontrun{
+#' ds <- methods::new("VennDataset",
+#'     set_names = c("A", "B"),
+#'     items = list(A = c("x", "y"), B = c("y", "z")),
+#'     item_order = c("x", "y", "z"),
+#'     universe_size = 10L, source_path = NULL, format = "csv")
+#' result <- analyze(ds)
+#' if (requireNamespace("broom", quietly = TRUE)) broom::glance(result)
+#' \donttest{
 #' result <- analyze(load_sample("dataset_real_cancer_drivers_4"))
 #' broom::glance(result)
 #' }
@@ -149,7 +163,14 @@ glance.RegionResult <- function(x, ...) {
 #'   the set), `region_label` (character).
 #' @exportS3Method broom::augment
 #' @examples
-#' \dontrun{
+#' ds <- methods::new("VennDataset",
+#'     set_names = c("A", "B"),
+#'     items = list(A = c("x", "y"), B = c("y", "z")),
+#'     item_order = c("x", "y", "z"),
+#'     universe_size = 10L, source_path = NULL, format = "csv")
+#' result <- analyze(ds)
+#' if (requireNamespace("broom", quietly = TRUE)) broom::augment(result)
+#' \donttest{
 #' result <- analyze(load_sample("dataset_real_cancer_drivers_4"))
 #' broom::augment(result)
 #' }

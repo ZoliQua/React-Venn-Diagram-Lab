@@ -37,7 +37,8 @@ Imports:
     grDevices,
     rsvg,
     patchwork,
-    gridExtra
+    gridExtra,
+    BiocGenerics
 Suggests:
     testthat (>= 3.0.0),
     knitr,
@@ -46,7 +47,11 @@ Suggests:
     pdftools,
     broom,
     tibble,
-    dplyr
+    dplyr,
+    covr,
+    BiocCheck,
+    lintr,
+    pkgdown
 VignetteBuilder: knitr
 biocViews: Visualization, GeneSetEnrichment, Software
 Encoding: UTF-8

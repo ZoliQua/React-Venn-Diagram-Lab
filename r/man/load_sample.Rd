@@ -18,7 +18,9 @@ cover biological (cancer drivers, MSigDB pathways) and mock (streaming
 platforms, gene sets) use cases. Use [list_samples()] to enumerate.
 }
 \examples{
-\dontrun{
+ds <- load_sample("dataset_mock_gene_sets")
+length(ds@set_names)
+\donttest{
 ds <- load_sample("dataset_real_cancer_drivers_4")
 analyze(ds)@model
 }

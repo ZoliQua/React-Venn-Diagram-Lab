@@ -202,10 +202,10 @@ NULL
 #' @return A [`VennDataset-class`].
 #' @export
 #' @examples
-#' \dontrun{
-#' ds <- load_csv("genes.csv", binary = TRUE)
+#' tmp <- tempfile(fileext = ".csv")
+#' writeLines(c("Gene,SetA,SetB", "G1,1,0", "G2,1,1", "G3,0,1"), tmp)
+#' ds <- load_csv(tmp, binary = TRUE)
 #' ds@set_names
-#' }
 load_csv <- function(path, binary = TRUE, delimiter = NULL, prefix_cols = 1L) {
     txt_src <- .read_text(path)
     delim <- if (is.null(delimiter)) .detect_delimiter(txt_src$text) else delimiter
@@ -227,10 +227,10 @@ load_csv <- function(path, binary = TRUE, delimiter = NULL, prefix_cols = 1L) {
 #' @return A [`VennDataset-class`].
 #' @export
 #' @examples
-#' \dontrun{
-#' ds <- load_tsv("cancer_drivers.tsv", binary = TRUE)
+#' tmp <- tempfile(fileext = ".tsv")
+#' writeLines(c("Gene\tSetA\tSetB", "G1\t1\t0", "G2\t1\t1", "G3\t0\t1"), tmp)
+#' ds <- load_tsv(tmp, binary = TRUE)
 #' ds@universe_size
-#' }
 load_tsv <- function(path, binary = TRUE, prefix_cols = 1L) {
     load_csv(path, binary = binary, delimiter = "\t", prefix_cols = prefix_cols)
 }
@@ -244,10 +244,11 @@ load_tsv <- function(path, binary = TRUE, prefix_cols = 1L) {
 #' @return A [`VennDataset-class`].
 #' @export
 #' @examples
-#' \dontrun{
-#' ds <- load_gmt("hallmark.gmt")
-#' ds@set_names[1:3]
-#' }
+#' tmp <- tempfile(fileext = ".gmt")
+#' writeLines(c("SetA\tdesc\tGENE1\tGENE2\tGENE3",
+#'              "SetB\tdesc\tGENE2\tGENE3\tGENE4"), tmp)
+#' ds <- load_gmt(tmp)
+#' ds@set_names
 load_gmt <- function(path) {
     txt_src <- .read_text(path)
     text <- gsub("\r\n", "\n", txt_src$text, fixed = TRUE)
@@ -305,10 +306,13 @@ load_gmt <- function(path) {
 #' @return A [`VennDataset-class`].
 #' @export
 #' @examples
-#' \dontrun{
-#' ds <- load_gmx("pathways.gmx")
+#' tmp <- tempfile(fileext = ".gmx")
+#' writeLines(c("SetA\tSetB",
+#'              "desc_A\tdesc_B",
+#'              "GENE1\tGENE2",
+#'              "GENE2\tGENE3"), tmp)
+#' ds <- load_gmx(tmp)
 #' length(ds@items)
-#' }
 load_gmx <- function(path) {
     txt_src <- .read_text(path)
     text <- gsub("\r\n", "\n", txt_src$text, fixed = TRUE)

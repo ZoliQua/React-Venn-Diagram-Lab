@@ -89,9 +89,8 @@ NULL
 #' @param result A [`RegionResult-class`].
 #' @param edge_metric One of `"intersection"`, `"jaccard"`,
 #'   `"fold_enrichment"` (capped at 20.0), `"overlap_coefficient"`.
-#' @param seed Random seed for the layout (default 42L). Layout is
-#'   deterministic for the `stress` algorithm regardless, but the seed is
-#'   set before layout for cross-version safety.
+#' @param seed Retained for API compatibility; currently unused. The `stress`
+#'   layout algorithm is fully deterministic and does not rely on a random seed.
 #' @param significance_threshold FDR p_adjusted threshold below which edges
 #'   are colored as significant (default 0.05).
 #' @param node_color_map Optional named character vector mapping letters
@@ -100,10 +99,18 @@ NULL
 #' @return A `ggplot` (ggraph subclass).
 #' @export
 #' @examples
-#' \dontrun{
+#' ds <- methods::new("VennDataset",
+#'     set_names = c("A", "B"),
+#'     items = list(A = c("x", "y"), B = c("y", "z")),
+#'     item_order = c("x", "y", "z"),
+#'     universe_size = 10L, source_path = NULL, format = "csv")
+#' result <- analyze(ds)
+#' p <- render_network(result)
+#' inherits(p, "ggplot")
+#' \donttest{
 #' result <- analyze(load_sample("dataset_real_cancer_drivers_4"))
 #' p <- render_network(result, edge_metric = "jaccard")
-#' ggplot2::ggsave("network.png", p, width = 7, height = 7)
+#' ggplot2::ggsave(tempfile(fileext = ".png"), p, width = 7, height = 7)
 #' }
 render_network <- function(result,
                             edge_metric = "intersection",
@@ -148,7 +155,6 @@ render_network <- function(result,
     }, character(1L))
 
     g <- tidygraph::tbl_graph(nodes = nodes_df, edges = edges_df, directed = FALSE)
-    set.seed(seed)
     layout <- ggraph::create_layout(g, layout = "stress")
 
     plot <- ggraph::ggraph(layout)

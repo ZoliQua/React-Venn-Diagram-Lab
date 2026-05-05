@@ -29,7 +29,14 @@ matching the labels in `RegionResult@regions` and the bundled SVG models,
 regardless of the dataset's `set_names`.
 }
 \examples{
-\dontrun{
+ds <- methods::new("VennDataset",
+    set_names = c("A", "B"),
+    items = list(A = c("x", "y"), B = c("y", "z")),
+    item_order = c("x", "y", "z"),
+    universe_size = 10L, source_path = NULL, format = "csv")
+result <- analyze(ds)
+if (requireNamespace("broom", quietly = TRUE)) broom::augment(result)
+\donttest{
 result <- analyze(load_sample("dataset_real_cancer_drivers_4"))
 broom::augment(result)
 }

@@ -50,9 +50,17 @@ emit slightly different whitespace/attribute ordering than lxml. Functional
 content (text, fill colors, structure) is identical.
 }
 \examples{
-\dontrun{
+ds <- methods::new("VennDataset",
+    set_names = c("A", "B"),
+    items = list(A = c("x", "y"), B = c("y", "z")),
+    item_order = c("x", "y", "z"),
+    universe_size = 10L, source_path = NULL, format = "csv")
+result <- analyze(ds)
+svg <- render_venn_svg(result)
+nchar(svg) > 0
+\donttest{
 result <- analyze(load_sample("dataset_real_cancer_drivers_4"))
 svg <- render_venn_svg(result)
-writeLines(svg, "cancer_drivers.svg")
+nchar(svg) > 0
 }
 }

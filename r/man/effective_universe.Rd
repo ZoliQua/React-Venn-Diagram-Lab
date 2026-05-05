@@ -22,7 +22,14 @@ all-zero rows); aggregated/GMT/GMX datasets fall back to
 `length(item_order)` (= |union of items|).
 }
 \examples{
-\dontrun{
+ds <- methods::new("VennDataset",
+    set_names = c("A", "B"),
+    items = list(A = c("x", "y"), B = c("y", "z")),
+    item_order = c("x", "y", "z"),
+    universe_size = 10L, source_path = NULL, format = "csv")
+result <- analyze(ds)
+effective_universe(result)
+\donttest{
 ds <- load_sample("dataset_real_cancer_drivers_4")
 result <- analyze(ds)
 effective_universe(result)   # 20000 for binary cancer drivers sample

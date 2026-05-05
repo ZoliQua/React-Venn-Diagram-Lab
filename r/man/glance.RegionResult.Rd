@@ -24,7 +24,14 @@ resolved model name, whether the layout is approximate (proportional
 pairs (FDR-adjusted q < 0.05 / < 0.001).
 }
 \examples{
-\dontrun{
+ds <- methods::new("VennDataset",
+    set_names = c("A", "B"),
+    items = list(A = c("x", "y"), B = c("y", "z")),
+    item_order = c("x", "y", "z"),
+    universe_size = 10L, source_path = NULL, format = "csv")
+result <- analyze(ds)
+if (requireNamespace("broom", quietly = TRUE)) broom::glance(result)
+\donttest{
 result <- analyze(load_sample("dataset_real_cancer_drivers_4"))
 broom::glance(result)
 }

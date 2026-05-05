@@ -1,3 +1,6 @@
+#' @importFrom BiocGenerics union
+NULL
+
 .LETTERS_VDL <- "ABCDEFGHI"
 
 # Internal: locate the bundled inst/extdata/models/json/ directory.
@@ -151,7 +154,14 @@ list_models <- function() {
 #'   sizes, and (lazily) `statistics(result)`.
 #' @export
 #' @examples
-#' \dontrun{
+#' ds <- methods::new("VennDataset",
+#'     set_names = c("A", "B"),
+#'     items = list(A = c("x", "y"), B = c("y", "z")),
+#'     item_order = c("x", "y", "z"),
+#'     universe_size = 10L, source_path = NULL, format = "csv")
+#' result <- analyze(ds)
+#' result@model
+#' \donttest{
 #' ds <- load_sample("dataset_real_cancer_drivers_4")
 #' result <- analyze(ds, model = "auto")
 #' result@model
@@ -186,7 +196,14 @@ analyze <- function(dataset, model = "auto") {
 #' @return Integer, the universe size N.
 #' @export
 #' @examples
-#' \dontrun{
+#' ds <- methods::new("VennDataset",
+#'     set_names = c("A", "B"),
+#'     items = list(A = c("x", "y"), B = c("y", "z")),
+#'     item_order = c("x", "y", "z"),
+#'     universe_size = 10L, source_path = NULL, format = "csv")
+#' result <- analyze(ds)
+#' effective_universe(result)
+#' \donttest{
 #' ds <- load_sample("dataset_real_cancer_drivers_4")
 #' result <- analyze(ds)
 #' effective_universe(result)   # 20000 for binary cancer drivers sample
@@ -198,9 +215,9 @@ setMethod("effective_universe", "RegionResult", function(result) {
     if (!is.null(result@dataset@universe_size)) {
         return(as.integer(result@dataset@universe_size))
     }
-    # Fallback: sum of exclusive_count across all regions = |union of items|.
-    excl_counts <- vapply(result@regions, function(r) length(r@exclusive_items), integer(1L))
-    sum(excl_counts)
+    # Fallback: |union of all items| across sets (Bioconductor-idiomatic set union).
+    all_items <- Reduce(BiocGenerics::union, result@dataset@items, character(0L))
+    length(all_items)
 })
 
 #' Lazy pairwise statistics for a RegionResult
@@ -214,7 +231,15 @@ setMethod("effective_universe", "RegionResult", function(result) {
 #' @return A [`StatisticsResult-class`].
 #' @export
 #' @examples
-#' \dontrun{
+#' ds <- methods::new("VennDataset",
+#'     set_names = c("A", "B"),
+#'     items = list(A = c("x", "y"), B = c("y", "z")),
+#'     item_order = c("x", "y", "z"),
+#'     universe_size = 10L, source_path = NULL, format = "csv")
+#' result <- analyze(ds)
+#' stats <- statistics(result)
+#' stats@jaccard["A", "B"]
+#' \donttest{
 #' result <- analyze(load_sample("dataset_real_cancer_drivers_4"))
 #' stats <- statistics(result)
 #' stats@jaccard

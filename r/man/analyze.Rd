@@ -24,7 +24,14 @@ Compute the Venn region map for a [`VennDataset-class`] and bind it to
 a model.
 }
 \examples{
-\dontrun{
+ds <- methods::new("VennDataset",
+    set_names = c("A", "B"),
+    items = list(A = c("x", "y"), B = c("y", "z")),
+    item_order = c("x", "y", "z"),
+    universe_size = 10L, source_path = NULL, format = "csv")
+result <- analyze(ds)
+result@model
+\donttest{
 ds <- load_sample("dataset_real_cancer_drivers_4")
 result <- analyze(ds, model = "auto")
 result@model

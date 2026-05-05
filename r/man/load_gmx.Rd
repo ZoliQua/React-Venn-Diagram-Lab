@@ -16,8 +16,11 @@ A [`VennDataset-class`].
 Row 0 = set names, row 1 = descriptions, rows 2+ = items column-aligned.
 }
 \examples{
-\dontrun{
-ds <- load_gmx("pathways.gmx")
+tmp <- tempfile(fileext = ".gmx")
+writeLines(c("SetA\tSetB",
+             "desc_A\tdesc_B",
+             "GENE1\tGENE2",
+             "GENE2\tGENE3"), tmp)
+ds <- load_gmx(tmp)
 length(ds@items)
-}
 }

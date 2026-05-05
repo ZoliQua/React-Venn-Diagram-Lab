@@ -29,8 +29,8 @@ Supports two layouts:
   contain item identifiers. Empty cells are ignored.
 }
 \examples{
-\dontrun{
-ds <- load_csv("genes.csv", binary = TRUE)
+tmp <- tempfile(fileext = ".csv")
+writeLines(c("Gene,SetA,SetB", "G1,1,0", "G2,1,1", "G3,0,1"), tmp)
+ds <- load_csv(tmp, binary = TRUE)
 ds@set_names
-}
 }

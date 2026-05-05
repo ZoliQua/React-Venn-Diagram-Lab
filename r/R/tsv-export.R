@@ -71,9 +71,16 @@
 #' @return Invisibly returns `path`.
 #' @export
 #' @examples
-#' \dontrun{
+#' ds <- methods::new("VennDataset",
+#'     set_names = c("A", "B"),
+#'     items = list(A = c("x", "y"), B = c("y", "z")),
+#'     item_order = c("x", "y", "z"),
+#'     universe_size = 10L, source_path = NULL, format = "csv")
+#' result <- analyze(ds)
+#' to_region_summary_tsv(result, tempfile(fileext = ".tsv"))
+#' \donttest{
 #' result <- analyze(load_sample("dataset_real_cancer_drivers_4"))
-#' to_region_summary_tsv(result, "region_summary.tsv")
+#' to_region_summary_tsv(result, tempfile(fileext = ".tsv"))
 #' }
 setGeneric("to_region_summary_tsv",
     function(result, path) standardGeneric("to_region_summary_tsv"))
@@ -143,9 +150,16 @@ setMethod("to_region_summary_tsv", "RegionResult", function(result, path) {
 #' @return Invisibly returns `path`.
 #' @export
 #' @examples
-#' \dontrun{
+#' ds <- methods::new("VennDataset",
+#'     set_names = c("A", "B"),
+#'     items = list(A = c("x", "y"), B = c("y", "z")),
+#'     item_order = c("x", "y", "z"),
+#'     universe_size = 10L, source_path = NULL, format = "csv")
+#' result <- analyze(ds)
+#' to_matrix_tsv(result, tempfile(fileext = ".tsv"))
+#' \donttest{
 #' result <- analyze(load_sample("dataset_real_cancer_drivers_4"))
-#' to_matrix_tsv(result, "matrix.tsv")
+#' to_matrix_tsv(result, tempfile(fileext = ".tsv"))
 #' }
 setGeneric("to_matrix_tsv",
     function(result, path) standardGeneric("to_matrix_tsv"))
@@ -208,9 +222,16 @@ setMethod("to_matrix_tsv", "RegionResult", function(result, path) {
 #' @return Invisibly returns `path`.
 #' @export
 #' @examples
-#' \dontrun{
+#' ds <- methods::new("VennDataset",
+#'     set_names = c("A", "B"),
+#'     items = list(A = c("x", "y"), B = c("y", "z")),
+#'     item_order = c("x", "y", "z"),
+#'     universe_size = 10L, source_path = NULL, format = "csv")
+#' result <- analyze(ds)
+#' to_statistics_tsv(result, tempfile(fileext = ".tsv"))
+#' \donttest{
 #' result <- analyze(load_sample("dataset_real_cancer_drivers_4"))
-#' to_statistics_tsv(result, "statistics.tsv")
+#' to_statistics_tsv(result, tempfile(fileext = ".tsv"))
 #' }
 setGeneric("to_statistics_tsv",
     function(result, path) standardGeneric("to_statistics_tsv"))

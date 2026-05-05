@@ -16,15 +16,10 @@ NULL
 # Format current UTC time as "D Month YYYY HH:MM:SS UTC" (no zero-padded day).
 # Mirrors python _format_timestamp byte-for-byte for the footer string.
 .format_pdf_timestamp <- function() {
-    old_tz <- Sys.getenv("TZ", unset = "")
-    Sys.setenv(TZ = "UTC")
-    on.exit({
-        if (nzchar(old_tz)) Sys.setenv(TZ = old_tz) else Sys.unsetenv("TZ")
-    })
     now <- Sys.time()
-    day <- format(now, "%d")
+    day <- format(now, "%d", tz = "UTC")
     day <- sub("^0", "", day)
-    sprintf("%s %s UTC", day, format(now, "%B %Y %H:%M:%S"))
+    sprintf("%s %s UTC", day, format(now, "%B %Y %H:%M:%S", tz = "UTC"))
 }
 
 #' @noRd
@@ -424,9 +419,11 @@ NULL
 #' @return Invisibly returns `NULL`. The PDF is written to `path`.
 #' @export
 #' @examples
-#' \dontrun{
-#' result <- analyze(load_sample("dataset_real_cancer_drivers_4"))
-#' to_pdf_report(result, "cancer_drivers_report.pdf")
+#' \donttest{
+#' if (getRversion() >= "4.6") {
+#'   result <- analyze(load_sample("dataset_real_cancer_drivers_4"))
+#'   to_pdf_report(result, tempfile(fileext = ".pdf"))
+#' }
 #' }
 to_pdf_report <- function(result, path, title = NULL,
                            include_network = TRUE, include_about = TRUE) {

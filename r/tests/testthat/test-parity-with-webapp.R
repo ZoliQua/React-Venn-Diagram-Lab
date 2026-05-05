@@ -30,9 +30,32 @@ WRITER_BY_KIND <- list(
     testthat::test_path("fixtures", "parity")
 }
 
+.short_sample <- function(s) {
+    # Drop the `dataset_` prefix to keep tarball paths under R's 100-char limit.
+    sub("^dataset_", "", s)
+}
+
+.short_model <- function(m) {
+    # venn-N-set → vN ; venn-5-set-grunbaum → v5g
+    if (m == "venn-5-set-grunbaum") return("v5g")
+    sub("^venn-(\\d+)-set$", "v\\1", m)
+}
+
+.short_kind <- function(k) {
+    switch(k,
+        region_summary = "regions",
+        matrix         = "matrix",
+        statistics     = "stats",
+        stop(sprintf("Unknown export kind: %s", k))
+    )
+}
+
 .parity_fixture_path <- function(sample, model, kind) {
     file.path(.parity_fixture_dir(),
-              sprintf("%s__%s__%s.tsv", sample, model, kind))
+              sprintf("%s__%s__%s.tsv",
+                      .short_sample(sample),
+                      .short_model(model),
+                      .short_kind(kind)))
 }
 
 .skip_if_no_parity_fixtures <- function() {

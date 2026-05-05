@@ -1,7 +1,58 @@
 # vennDiagramLab — NEWS
 
-## v2.0.0 (in development) — 2026-05-03
+## v2.0.0 — 2026-05-04
 
-Initial scaffolding. Real public API arrives in Phase 1.
+First public release. Headless companion to the [Venn Diagram Lab web tool](https://www.venndiagramlab.org/) and the [Python `venn-diagram-lab` package](https://pypi.org/project/venn-diagram-lab/), targeting CRAN + Bioconductor.
 
-- Phase 0: r/ skeleton, DESCRIPTION, NAMESPACE, sync_data.R, GitHub Actions, vignette stubs
+### Core (Phase 1)
+
+* `VennDataset`, `RegionData`, `RegionResult`, `StatisticsResult` — four S4 classes covering inputs, regions, results, and pairwise statistics.
+* Loaders for CSV, TSV, GMT, GMX (`load_csv`, `load_tsv`, `load_gmt`, `load_gmx`) plus `load_sample` / `list_samples` for five bundled datasets (3 biological, 2 mock).
+* `analyze(dataset, model = "auto")` — region enumeration via integer bitmask, model resolution mirroring the web tool.
+* `statistics(result)` — lazy `StatisticsResult` with five pairwise metrics: Jaccard, Dice, overlap coefficient, fold enrichment, hypergeometric p-value (BH-FDR adjusted).
+* Stateless metric helpers: `jaccard()`, `dice()`, `overlap_coefficient()`, `hypergeometric_p_value()`, `fold_enrichment()`, `bh_fdr()`, `compute_pairwise()`.
+* `effective_universe(result)` — universe N consistent with the web tool's binary/aggregated semantics.
+
+### TSV exports + parity (Phase 2)
+
+* `to_region_summary_tsv()`, `to_matrix_tsv()`, `to_statistics_tsv()` — three byte-equivalent writers matching the React webapp's TSV exports.
+* JS-style float formatting helpers under the hood (toExponential / toFixed semantics).
+* Twelve byte-parity tests against the Python golden fixtures (4 samples × 3 export types). The 8-set `dataset_mock_streaming_platforms` is xfail-strict due to the documented row-vs-set divergence in the web tool's loader.
+
+### SVG rendering (Phase 3)
+
+* `render_venn_svg(result, ...)` — templates the bundled 44-model SVG library via xml2 (`Count_*`, `Name*`, `Bullet*`, `Shape*` substitution).
+* Custom `set_names`, `colors`, `title`, `show_names`, `show_counts` overrides per render.
+* `analyze(ds, model = "proportional")` — area-proportional 2-set (exact) and 3-set (approximate) generator with `solve_2set`, `solve_3set`, `circle_intersection_area`, `generate_proportional_svg` helpers.
+
+### UpSet + Network rendering (Phase 4)
+
+* `render_upset(result, ...)` — `ComplexUpset`-based UpSet plot with sort modes (`size`, `degree`), color modes (`depth`, `heatmap`, `custom`), and `threshold` / `max_columns` cutoffs.
+* `render_network(result, ...)` — force-directed network via `tidygraph` + `ggraph`. Edge metric configurable (`intersection`, `jaccard`, `fold_enrichment`, `overlap_coefficient`); significance threshold colorises edges.
+
+### PDF reports (Phase 5)
+
+* `to_pdf_report(result, path, ...)` — multi-page US-Letter-landscape PDF combining venn + UpSet + statistics + network + about pages, generated via `grDevices::pdf` + `patchwork`.
+* Network and About pages are toggleable via `include_network` and `include_about`.
+
+### ggplot2 + broom integration (Phase 6)
+
+* `geom_venn(data, ...)` — embed a rendered venn as a ggplot2 layer (annotation_custom + geom_blank + coord_fixed).
+* `tidy.RegionResult()`, `glance.RegionResult()`, `augment.RegionResult()` — broom-compatible S3 methods returning tibbles.
+* `broom` and `tibble` are Suggests-only (registered via `@exportS3Method`) — users not in the tidyverse pay zero install cost.
+
+### Vignette gallery (Phase 7)
+
+* Eight RMarkdown vignettes, all executed during `R CMD check --as-cran`:
+  * `v01_quickstart` — five-step intro
+  * `v02_real_cancer_drivers` — long-form biological walkthrough (Vogelstein / COSMIC / OncoKB / IntOGen)
+  * `v03_proportional_diagrams` — when to use area-proportional + low-level helpers
+  * `v04_upset_vs_venn_vs_network` — choosing the right visualization
+  * `v05_statistics_deep_dive` — Jaccard / Dice / hypergeometric / BH-FDR worked
+  * `v06_pipeline_integration` — broom + dplyr + targets pipeline sketch
+  * `v07_pdf_reports` — composite PDF generation
+  * `v08_custom_styling_and_export` — custom names/colors, geom_venn, multi-format export
+
+### Compatibility notes
+
+* On R < 4.6, `render_upset()` and `to_pdf_report()` emit a runtime warning about an upstream `ComplexUpset` 1.3.3 / `ggplot2` 4.x incompatibility (tracking [krassowski/complex-upset#213](https://github.com/krassowski/complex-upset/issues/213)). Vignette chunks that depend on UpSet rendering are gated on `eval = (getRversion() >= "4.6")`. The warning + skip will be removed when ComplexUpset 1.4+ ships.

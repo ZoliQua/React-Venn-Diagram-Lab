@@ -21,8 +21,8 @@ A [`VennDataset-class`].
 Equivalent to `load_csv(path, binary = binary, delimiter = "\\t", prefix_cols = prefix_cols)`.
 }
 \examples{
-\dontrun{
-ds <- load_tsv("cancer_drivers.tsv", binary = TRUE)
+tmp <- tempfile(fileext = ".tsv")
+writeLines(c("Gene\tSetA\tSetB", "G1\t1\t0", "G2\t1\t1", "G3\t0\t1"), tmp)
+ds <- load_tsv(tmp, binary = TRUE)
 ds@universe_size
-}
 }

@@ -87,6 +87,24 @@ cat(sprintf("Copied %d sample datasets -> r/inst/extdata/samples/\n", n_sample))
 # ---------------------------------------------------------------------------
 # Phase 2 addition: copy parity fixtures from python/tests/fixtures/expected/
 # ---------------------------------------------------------------------------
+# Fixture filenames are shortened during copy to satisfy R CMD check's
+# 100-character tarball-path portability rule:
+#   dataset_<sample>__<model>__<kind>.tsv
+#     → <sample>__<vN>__<short-kind>.tsv
+# where vN = venn-N-set → vN, venn-5-set-grunbaum → v5g,
+# region_summary → regions, statistics → stats.
+.shorten_fixture_name <- function(fname) {
+    # Strip dataset_ prefix.
+    fname <- sub("^dataset_", "", fname)
+    # Shorten model segment.
+    fname <- sub("__venn-5-set-grunbaum__", "__v5g__", fname, fixed = TRUE)
+    fname <- gsub("__venn-(\\d+)-set__", "__v\\1__", fname, perl = TRUE)
+    # Shorten kind segment.
+    fname <- sub("__region_summary\\.tsv$", "__regions.tsv", fname)
+    fname <- sub("__statistics\\.tsv$",     "__stats.tsv",   fname)
+    fname
+}
+
 parity_src <- file.path(repo_root, "python", "tests", "fixtures", "expected")
 parity_dst <- file.path(repo_root, "r", "tests", "testthat", "fixtures", "parity")
 if (!dir.exists(parity_src)) {
@@ -95,9 +113,14 @@ if (!dir.exists(parity_src)) {
 } else {
     dir.create(parity_dst, recursive = TRUE, showWarnings = FALSE)
     fixture_files <- list.files(parity_src, pattern = "\\.tsv$", full.names = TRUE)
-    file.copy(fixture_files, parity_dst, overwrite = TRUE)
-    cat(sprintf("Copied %d parity fixtures -> r/tests/testthat/fixtures/parity/\n",
-                length(fixture_files)))
+    n_copied <- 0L
+    for (src in fixture_files) {
+        short_name <- .shorten_fixture_name(basename(src))
+        dest <- file.path(parity_dst, short_name)
+        file.copy(src, dest, overwrite = TRUE)
+        n_copied <- n_copied + 1L
+    }
+    cat(sprintf("Copied %d parity fixtures -> r/tests/testthat/fixtures/parity/\n", n_copied))
 }
 
 cat("Done.\n")

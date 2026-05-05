@@ -28,7 +28,13 @@ match the requested intersection counts. The returned SVG matches the
 elements are all present and addressable via xml2.
 }
 \examples{
-\dontrun{
-# cancer_drivers has 4 sets; would need a 2- or 3-set dataset
-}
+tmp <- tempfile(fileext = ".tsv")
+writeLines(c("Gene\tSetA\tSetB",
+             "GENE1\t1\t0",
+             "GENE2\t1\t1",
+             "GENE3\t0\t1"), tmp)
+ds  <- load_tsv(tmp, binary = TRUE)
+res <- analyze(ds, model = "proportional")
+svg <- generate_proportional_svg(res)
+nchar(svg) > 0
 }

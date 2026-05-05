@@ -8,9 +8,11 @@ navbar:
   title: vennDiagramLab
   type: default
   left:
+    - text: Get started
+      href: articles/v01_quickstart.html
     - text: Reference
       href: reference/index.html
-    - text: Vignettes
+    - text: Articles
       href: articles/index.html
     - text: News
       href: news/index.html
@@ -19,6 +21,92 @@ navbar:
       href: https://github.com/ZoliQua/Venn-Diagram-Lab
 
 reference:
+  - title: Loading data
+    desc: Read CSV / TSV / GMT / GMX files into a `VennDataset`, or load one of the five bundled samples.
+    contents:
+      - load_csv
+      - load_tsv
+      - load_gmt
+      - load_gmx
+      - load_sample
+      - list_samples
+      - list_models
+
+  - title: Analysis
+    desc: Compute regions and pairwise statistics from a `VennDataset`.
+    contents:
+      - analyze
+      - statistics
+      - effective_universe
+
+  - title: Rendering
+    desc: Generate SVG, ggplot2-based UpSet / Network plots, and multi-page PDF reports.
+    contents:
+      - render_venn_svg
+      - render_upset
+      - render_network
+      - to_pdf_report
+
+  - title: TSV exports
+    desc: Byte-equivalent TSV writers for region summaries, item-membership matrices, and pairwise statistics tables.
+    contents:
+      - to_region_summary_tsv
+      - to_matrix_tsv
+      - to_statistics_tsv
+
+  - title: ggplot2 + broom integration
+    desc: Embed venns in ggplot chains and convert results to tidyverse-friendly tibbles.
+    contents:
+      - geom_venn
+      - tidy.RegionResult
+      - glance.RegionResult
+      - augment.RegionResult
+
+  - title: Pairwise statistical helpers
+    desc: Stateless functions for individual metrics. Useful for ad-hoc calculations outside of `analyze()`.
+    contents:
+      - jaccard
+      - dice
+      - overlap_coefficient
+      - hypergeometric_p_value
+      - fold_enrichment
+      - bh_fdr
+      - compute_pairwise
+
+  - title: Area-proportional helpers
+    desc: Low-level geometry solvers behind `analyze(model = "proportional")`.
+    contents:
+      - solve_2set
+      - solve_3set
+      - circle_intersection_area
+      - generate_proportional_svg
+
+  - title: S4 classes
+    desc: Result types returned by the loaders and analyzers.
+    contents:
+      - VennDataset-class
+      - RegionData-class
+      - RegionResult-class
+      - StatisticsResult-class
+
   - title: Package
     contents:
       - vdl_version
+
+articles:
+  - title: Tutorials
+    navbar: ~
+    contents:
+      - v01_quickstart
+      - v02_real_cancer_drivers
+      - v03_proportional_diagrams
+      - v04_upset_vs_venn_vs_network
+      - v05_statistics_deep_dive
+      - v06_pipeline_integration
+      - v07_pdf_reports
+      - v08_custom_styling_and_export
+
+news:
+  releases:
+    - text: "v2.0.0"
+      href: news/index.html#vennDiagramLab-200

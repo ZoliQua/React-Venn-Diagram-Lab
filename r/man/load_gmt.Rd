@@ -17,8 +17,9 @@ Each line is one set: `set_name<TAB>description<TAB>item1<TAB>item2<TAB>...`.
 Lines with fewer than 3 tab-separated columns or empty set names are skipped.
 }
 \examples{
-\dontrun{
-ds <- load_gmt("hallmark.gmt")
-ds@set_names[1:3]
-}
+tmp <- tempfile(fileext = ".gmt")
+writeLines(c("SetA\tdesc\tGENE1\tGENE2\tGENE3",
+             "SetB\tdesc\tGENE2\tGENE3\tGENE4"), tmp)
+ds <- load_gmt(tmp)
+ds@set_names
 }

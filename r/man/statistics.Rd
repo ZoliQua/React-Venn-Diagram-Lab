@@ -22,7 +22,15 @@ equivalent for S4 slots, so this is recomputed each call. Cache externally
 via `stats <- statistics(result)` if you need to access it many times.
 }
 \examples{
-\dontrun{
+ds <- methods::new("VennDataset",
+    set_names = c("A", "B"),
+    items = list(A = c("x", "y"), B = c("y", "z")),
+    item_order = c("x", "y", "z"),
+    universe_size = 10L, source_path = NULL, format = "csv")
+result <- analyze(ds)
+stats <- statistics(result)
+stats@jaccard["A", "B"]
+\donttest{
 result <- analyze(load_sample("dataset_real_cancer_drivers_4"))
 stats <- statistics(result)
 stats@jaccard

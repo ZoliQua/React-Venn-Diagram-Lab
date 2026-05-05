@@ -29,8 +29,15 @@ Cells starting with `=`/`+`/`-`/`@` (after optional leading whitespace) are
 escape-prefixed with a single quote.
 }
 \examples{
-\dontrun{
+ds <- methods::new("VennDataset",
+    set_names = c("A", "B"),
+    items = list(A = c("x", "y"), B = c("y", "z")),
+    item_order = c("x", "y", "z"),
+    universe_size = 10L, source_path = NULL, format = "csv")
+result <- analyze(ds)
+to_region_summary_tsv(result, tempfile(fileext = ".tsv"))
+\donttest{
 result <- analyze(load_sample("dataset_real_cancer_drivers_4"))
-to_region_summary_tsv(result, "region_summary.tsv")
+to_region_summary_tsv(result, tempfile(fileext = ".tsv"))
 }
 }

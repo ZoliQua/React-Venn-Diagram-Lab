@@ -32,7 +32,9 @@ list_samples <- function() {
 #' @return A [`VennDataset-class`] with the appropriate format and mode applied.
 #' @export
 #' @examples
-#' \dontrun{
+#' ds <- load_sample("dataset_mock_gene_sets")
+#' length(ds@set_names)
+#' \donttest{
 #' ds <- load_sample("dataset_real_cancer_drivers_4")
 #' analyze(ds)@model
 #' }

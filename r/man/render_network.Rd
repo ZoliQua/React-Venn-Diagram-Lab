@@ -18,9 +18,8 @@ render_network(
 \item{edge_metric}{One of `"intersection"`, `"jaccard"`,
 `"fold_enrichment"` (capped at 20.0), `"overlap_coefficient"`.}
 
-\item{seed}{Random seed for the layout (default 42L). Layout is
-deterministic for the `stress` algorithm regardless, but the seed is
-set before layout for cross-version safety.}
+\item{seed}{Retained for API compatibility; currently unused. The `stress`
+layout algorithm is fully deterministic and does not rely on a random seed.}
 
 \item{significance_threshold}{FDR p_adjusted threshold below which edges
 are colored as significant (default 0.05).}
@@ -44,9 +43,17 @@ Idiomatic R port of Python `render_network` -- same parameter contract,
 but renders via ggraph + tidygraph instead of networkx + matplotlib.
 }
 \examples{
-\dontrun{
+ds <- methods::new("VennDataset",
+    set_names = c("A", "B"),
+    items = list(A = c("x", "y"), B = c("y", "z")),
+    item_order = c("x", "y", "z"),
+    universe_size = 10L, source_path = NULL, format = "csv")
+result <- analyze(ds)
+p <- render_network(result)
+inherits(p, "ggplot")
+\donttest{
 result <- analyze(load_sample("dataset_real_cancer_drivers_4"))
 p <- render_network(result, edge_metric = "jaccard")
-ggplot2::ggsave("network.png", p, width = 7, height = 7)
+ggplot2::ggsave(tempfile(fileext = ".png"), p, width = 7, height = 7)
 }
 }

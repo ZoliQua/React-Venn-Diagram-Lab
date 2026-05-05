@@ -117,10 +117,22 @@ NULL
 #' @return A `ggplot` object (saveable via `ggplot2::ggsave()`).
 #' @export
 #' @examples
-#' \dontrun{
-#' result <- analyze(load_sample("dataset_real_cancer_drivers_4"))
-#' p <- render_upset(result, sort_by = "degree", color_mode = "heatmap")
-#' ggplot2::ggsave("upset.png", p, width = 8, height = 5)
+#' ds <- methods::new("VennDataset",
+#'     set_names = c("A", "B"),
+#'     items = list(A = c("x", "y"), B = c("y", "z")),
+#'     item_order = c("x", "y", "z"),
+#'     universe_size = 10L, source_path = NULL, format = "csv")
+#' result <- analyze(ds)
+#' if (getRversion() >= "4.6") {
+#'   p <- render_upset(result)
+#'   inherits(p, "ggplot")
+#' }
+#' \donttest{
+#' if (getRversion() >= "4.6") {
+#'   result <- analyze(load_sample("dataset_real_cancer_drivers_4"))
+#'   p <- render_upset(result, sort_by = "degree", color_mode = "heatmap")
+#'   ggplot2::ggsave(tempfile(fileext = ".png"), p, width = 8, height = 5)
+#' }
 #' }
 render_upset <- function(result,
                           max_columns = 20L,
