@@ -45,7 +45,7 @@
 </div>
 <div class="section level3">
 <h3 id="id_2-bioconductor-support-site-one-time-already-done-in-phase-8">2. Bioconductor support site (one-time, already done in Phase 8)<a class="anchor" aria-label="anchor" href="#id_2-bioconductor-support-site-one-time-already-done-in-phase-8"></a></h3>
-<p>Maintainer email <code>ssdbtc@gmail.com</code> is registered at <a href="https://support.bioconductor.org/" class="external-link uri">https://support.bioconductor.org/</a> and <code>vennDiagramLab</code> is added to Watched Tags in the maintainer profile. BiocCheck verifies this automatically.</p>
+<p>Maintainer email <code>zoltan.dul@gmail.com</code> is registered at <a href="https://support.bioconductor.org/" class="external-link uri">https://support.bioconductor.org/</a> and <code>vennDiagramLab</code> is added to Watched Tags in the maintainer profile. BiocCheck verifies this automatically.</p>
 </div>
 <div class="section level3">
 <h3 id="id_3-recommended-subscribe-to-bioc-devel-mailing-list">3. (Recommended) Subscribe to Bioc-Devel mailing list<a class="anchor" aria-label="anchor" href="#id_3-recommended-subscribe-to-bioc-devel-mailing-list"></a></h3>
@@ -81,7 +81,7 @@
 <div class="section level3">
 <h3 id="b-bump-version-if-iterating-past-v200">B. Bump version (if iterating past v2.0.0)<a class="anchor" aria-label="anchor" href="#b-bump-version-if-iterating-past-v200"></a></h3>
 <p>For v2.0.0 (the first R release), <code>r/DESCRIPTION::Version</code> is already <code>2.0.0</code> — no bump needed.</p>
-<p>For subsequent releases (v2.0.1, v2.0.2, …): 1. Edit <code>r/DESCRIPTION</code> <code>Version: 2.0.X</code> → <code>Version: 2.0.Y</code>. 2. Add new entry to <code>r/NEWS.md</code> at the top (under the existing v2.0.0 block). 3. Commit: <code>bash    cd /Users/Zoli/Code/Orthologs/2-venn-diagram    git -c user.name="Zoltán Dul" -c user.email="ssdbtc@gmail.com" \        commit -am "chore(r): bump to 2.0.Y for next CRAN release"    git push origin main</code></p>
+<p>For subsequent releases (v2.0.1, v2.0.2, …): 1. Edit <code>r/DESCRIPTION</code> <code>Version: 2.0.X</code> → <code>Version: 2.0.Y</code>. 2. Add new entry to <code>r/NEWS.md</code> at the top (under the existing v2.0.0 block). 3. Commit: <code>bash    cd /Users/Zoli/Code/Orthologs/2-venn-diagram    git -c user.name="Zoltán Dul" -c user.email="zoltan.dul@gmail.com" \        commit -am "chore(r): bump to 2.0.Y for next CRAN release"    git push origin main</code></p>
 </div>
 <div class="section level3">
 <h3 id="c-tag-and-push-r-specific-tag-pattern">C. Tag and push (R-specific tag pattern)<a class="anchor" aria-label="anchor" href="#c-tag-and-push-r-specific-tag-pattern"></a></h3>
@@ -164,8 +164,8 @@ Are you ready to upload?
 <p>After the GitHub release in step D fires, Zenodo automatically:</p>
 <ol style="list-style-type: decimal"><li>Archives the source tarball at the release tag.</li>
 <li>Mints a fresh DOI under the same Zenodo “concept” (parent DOI = <code>10.5281/zenodo.20000599</code>).</li>
-<li>Emails the maintainer (<code>ssdbtc@gmail.com</code>) with the new version-specific DOI within ~5-10 minutes.</li>
-</ol><p><strong>Verify:</strong> 1. Go to <a href="https://zenodo.org/account/settings/github/" class="external-link uri">https://zenodo.org/account/settings/github/</a> and find the entry for <code>ZoliQua/Venn-Diagram-Lab</code>. The latest release (<code>r-v2.0.0</code>) should be listed with its own DOI link. 2. Update <code>CITATION.cff::doi</code> to the new version-specific DOI: <code>bash    cd /Users/Zoli/Code/Orthologs/2-venn-diagram    # Edit CITATION.cff: doi: "10.5281/zenodo.&lt;new_id&gt;"    git -c user.name="Zoltán Dul" -c user.email="ssdbtc@gmail.com" \        commit -am "docs: update Zenodo DOI for vennDiagramLab R v2.0.0"    git push origin main</code> 3. (Optional) Add a DOI badge to <code>r/README.md</code>: <code>markdown    [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.&lt;new_id&gt;.svg)](https://doi.org/10.5281/zenodo.&lt;new_id&gt;)</code></p>
+<li>Emails the maintainer (<code>zoltan.dul@gmail.com</code>) with the new version-specific DOI within ~5-10 minutes.</li>
+</ol><p><strong>Verify:</strong> 1. Go to <a href="https://zenodo.org/account/settings/github/" class="external-link uri">https://zenodo.org/account/settings/github/</a> and find the entry for <code>ZoliQua/Venn-Diagram-Lab</code>. The latest release (<code>r-v2.0.0</code>) should be listed with its own DOI link. 2. Update <code>CITATION.cff::doi</code> to the new version-specific DOI: <code>bash    cd /Users/Zoli/Code/Orthologs/2-venn-diagram    # Edit CITATION.cff: doi: "10.5281/zenodo.&lt;new_id&gt;"    git -c user.name="Zoltán Dul" -c user.email="zoltan.dul@gmail.com" \        commit -am "docs: update Zenodo DOI for vennDiagramLab R v2.0.0"    git push origin main</code> 3. (Optional) Add a DOI badge to <code>r/README.md</code>: <code>markdown    [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.&lt;new_id&gt;.svg)](https://doi.org/10.5281/zenodo.&lt;new_id&gt;)</code></p>
 </div>
 <div class="section level3">
 <h3 id="h-post-acceptance-checklist">H. Post-acceptance checklist<a class="anchor" aria-label="anchor" href="#h-post-acceptance-checklist"></a></h3>

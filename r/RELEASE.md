@@ -20,7 +20,7 @@ release Zenodo sees will be archived and assigned a fresh DOI.
 
 ### 2. Bioconductor support site (one-time, already done in Phase 8)
 
-Maintainer email `ssdbtc@gmail.com` is registered at
+Maintainer email `zoltan.dul@gmail.com` is registered at
 <https://support.bioconductor.org/> and `vennDiagramLab` is added to
 Watched Tags in the maintainer profile. BiocCheck verifies this
 automatically.
@@ -79,7 +79,7 @@ For v2.0.0 (the first R release), `r/DESCRIPTION::Version` is already
 For subsequent releases (v2.0.1, v2.0.2, …): 1. Edit `r/DESCRIPTION`
 `Version: 2.0.X` → `Version: 2.0.Y`. 2. Add new entry to `r/NEWS.md` at
 the top (under the existing v2.0.0 block). 3. Commit:
-`bash cd /Users/Zoli/Code/Orthologs/2-venn-diagram git -c user.name="Zoltán Dul" -c user.email="ssdbtc@gmail.com" \ commit -am "chore(r): bump to 2.0.Y for next CRAN release" git push origin main`
+`bash cd /Users/Zoli/Code/Orthologs/2-venn-diagram git -c user.name="Zoltán Dul" -c user.email="zoltan.dul@gmail.com" \ commit -am "chore(r): bump to 2.0.Y for next CRAN release" git push origin main`
 
 ### C. Tag and push (R-specific tag pattern)
 
@@ -211,14 +211,14 @@ After the GitHub release in step D fires, Zenodo automatically:
 1.  Archives the source tarball at the release tag.
 2.  Mints a fresh DOI under the same Zenodo “concept” (parent DOI =
     `10.5281/zenodo.20000599`).
-3.  Emails the maintainer (`ssdbtc@gmail.com`) with the new
+3.  Emails the maintainer (`zoltan.dul@gmail.com`) with the new
     version-specific DOI within ~5-10 minutes.
 
 **Verify:** 1. Go to <https://zenodo.org/account/settings/github/> and
 find the entry for `ZoliQua/Venn-Diagram-Lab`. The latest release
 (`r-v2.0.0`) should be listed with its own DOI link. 2. Update
 `CITATION.cff::doi` to the new version-specific DOI:
-`bash cd /Users/Zoli/Code/Orthologs/2-venn-diagram # Edit CITATION.cff: doi: "10.5281/zenodo.<new_id>" git -c user.name="Zoltán Dul" -c user.email="ssdbtc@gmail.com" \ commit -am "docs: update Zenodo DOI for vennDiagramLab R v2.0.0" git push origin main`
+`bash cd /Users/Zoli/Code/Orthologs/2-venn-diagram # Edit CITATION.cff: doi: "10.5281/zenodo.<new_id>" git -c user.name="Zoltán Dul" -c user.email="zoltan.dul@gmail.com" \ commit -am "docs: update Zenodo DOI for vennDiagramLab R v2.0.0" git push origin main`
 3. (Optional) Add a DOI badge to `r/README.md`:
 `markdown [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.<new_id>.svg)](https://doi.org/10.5281/zenodo.<new_id>)`
 
