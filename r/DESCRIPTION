@@ -21,7 +21,7 @@ Description: Headless companion to the Venn Diagram Lab web tool
     Integrates with ggplot2, tidygraph, and broom.
 License: MIT + file LICENSE
 Language: en-US
-URL: https://zoliqua.github.io/Venn-Diagram-Lab/r,
+URL: https://zoliqua.github.io/Venn-Diagram-Lab/r/,
     https://github.com/ZoliQua/Venn-Diagram-Lab,
     https://www.venndiagramlab.org/
 BugReports: https://github.com/ZoliQua/Venn-Diagram-Lab/issues

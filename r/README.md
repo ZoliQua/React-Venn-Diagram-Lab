@@ -62,7 +62,7 @@ See `vignette("v01_quickstart")` for the full intro and `vignette()` for the com
 
 ## Documentation
 
-* Full reference + vignettes: <https://zoliqua.github.io/Venn-Diagram-Lab/r>
+* Full reference + vignettes: <https://zoliqua.github.io/Venn-Diagram-Lab/r/>
 * Eight RMarkdown vignettes covering quickstart, biological walkthroughs, statistical interpretation, ggplot2 / pipeline integration, and PDF reports.
 
 ## Related projects
