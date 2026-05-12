@@ -11,8 +11,11 @@ The parallel doc for Python is `../python/RELEASE.md`.
 
 ### 1. Verify Zenodo-GitHub integration
 
-Already enabled if `CITATION.cff::doi` is populated (currently
-`10.5281/zenodo.20000599` from the v2.0.0 web/Python release).
+Already enabled — `CITATION.cff::doi` is populated with the Zenodo
+concept (all-versions) DOI `10.5281/zenodo.19510813`, which always
+resolves to the latest version-specific archive. The most recent
+version-specific deposit is browsable at
+<https://zenodo.org/records/20088768>.
 
 Verify at <https://zenodo.org/account/settings/github/> that
 `ZoliQua/Venn-Diagram-Lab` is toggled **ON**. From now on, every GitHub
