@@ -4,11 +4,20 @@
 [![PyPI version](https://img.shields.io/pypi/v/venn-diagram-lab.svg?v=2)](https://pypi.org/project/venn-diagram-lab/)
 [![Python versions](https://img.shields.io/pypi/pyversions/venn-diagram-lab.svg?v=2)](https://pypi.org/project/venn-diagram-lab/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![DOI (Zenodo concept)](https://zenodo.org/badge/DOI/10.5281/zenodo.19510813.svg)](https://doi.org/10.5281/zenodo.19510813)
 
 Headless Python companion to the [Venn Diagram Lab web tool](https://www.venndiagramlab.org/).
 Build, render, and statistically analyse Venn / UpSet diagrams from CSV / TSV / GMT / GMX
 inputs — same 44 SVG models, same intersection/Jaccard/hypergeometric statistics, same PDF report
 layout — but in a notebook, a Snakemake rule, or a CI job, with no browser involved.
+
+> **Working in R?** The same analysis + rendering pipeline is available as a
+> CRAN package: [`vennDiagramLab`](https://CRAN.R-project.org/package=vennDiagramLab)
+> (`install.packages("vennDiagramLab")`, on CRAN as of 2026-05-18). Source +
+> docs: [`r/`](https://github.com/ZoliQua/Venn-Diagram-Lab/tree/main/r) ·
+> pkgdown site: <https://zoliqua.github.io/Venn-Diagram-Lab/r/>. The three
+> implementations (web tool, Python, R) share the same SVG model library
+> and produce byte-equivalent TSV outputs — see `tests/test_parity_with_webapp.py`.
 
 ## Install
 
@@ -185,15 +194,29 @@ MIT — see [`LICENSE`](LICENSE).
 
 ## Citation
 
-If you use this package in research, please cite:
+If you use this package in research, please cite the software using the
+Zenodo concept (all-versions) DOI — it always resolves to the latest
+archived release, so there is nothing to update per version:
 
 ```
 Dul Z., Ölbei M., Thomas N. S. B., Si Ammour A., Csikász-Nagy A. (2026).
-Venn Diagram Lab — interactive Venn / UpSet diagrams (v2.0.0).
+Venn Diagram Lab — interactive Venn / UpSet diagrams.
 https://www.venndiagramlab.org/
-DOI: 10.5281/zenodo.20000599
+DOI: 10.5281/zenodo.19510813 (concept, all versions)
 ```
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20000599.svg)](https://doi.org/10.5281/zenodo.20000599)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19510813.svg)](https://doi.org/10.5281/zenodo.19510813)
+
+The R companion package also has a CRAN-minted DOI:
+[`10.32614/CRAN.package.vennDiagramLab`](https://doi.org/10.32614/CRAN.package.vennDiagramLab).
 
 See [`CITATION.cff`](https://github.com/ZoliQua/Venn-Diagram-Lab/blob/main/CITATION.cff) for machine-readable citation metadata.
+
+## See also
+
+| Surface | Package / URL | Status |
+|---|---|---|
+| Web tool | <https://www.venndiagramlab.org/> | live |
+| Python (this package) | [`venn-diagram-lab` on PyPI](https://pypi.org/project/venn-diagram-lab/) | live |
+| R (companion) | [`vennDiagramLab` on CRAN](https://CRAN.R-project.org/package=vennDiagramLab) | live (since 2026-05-18) |
+| R (companion, Bioconductor) | [`vennDiagramLab` on Bioconductor](https://bioconductor.org/packages/vennDiagramLab) | submission pending |

@@ -22,13 +22,14 @@ bibentry(
     ),
     year     = year,
     note     = paste0("R package version ", version),
-    url      = "https://zoliqua.github.io/Venn-Diagram-Lab/r/",
-    doi      = "10.5281/zenodo.19510813",
+    url      = "https://CRAN.R-project.org/package=vennDiagramLab",
+    doi      = "10.32614/CRAN.package.vennDiagramLab",
     textVersion = paste0(
         "Dul Z., Olbei M., Thomas N.S.B., Si Ammour A., Csikasz-Nagy A. (",
         year, "). vennDiagramLab: Headless Venn diagram analysis and ",
         "rendering. R package version ", version,
-        ". https://doi.org/10.5281/zenodo.19510813"
+        ". https://doi.org/10.32614/CRAN.package.vennDiagramLab",
+        " (Zenodo concept DOI: 10.5281/zenodo.19510813)"
     ),
     header   = "To cite vennDiagramLab in publications, please use:"
 )
