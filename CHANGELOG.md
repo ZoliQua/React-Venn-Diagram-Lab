@@ -2,6 +2,35 @@
 
 All notable changes to the Venn Diagram Lab project.
 
+## v2.2.2 — 2026-05-31 — Item Share Distribution histogram + Cluster Heatmap (UPGMA reorder + dendrograms)
+
+Minor statistics release. Adds two new analytical surfaces to the Data
+mode that fill long-standing gaps:
+
+### `Item Share Distribution` (new card)
+
+Single-bar histogram showing, for each set-membership count `k = 1..N`,
+how many items appear in exactly `k` sets. Answers core / accessory /
+unique distribution at a glance. Available in the Statistics panel, in
+the PDF report, in the guided tour, and in the Help dialog.
+
+### `Cluster Heatmap` (Heatmap card augmentation)
+
+The existing pairwise Heatmap card gains an `Original ⇄ Cluster`
+axis-order toggle. Cluster mode reorders rows and columns by UPGMA
+hierarchical clustering on `1 − Jaccard` distance, and overlays the
+matching dendrograms on top (columns) and left (rows). The PDF report
+respects whichever axis-order is active when generation runs.
+
+### Python + R parity (v2.2.2)
+
+Same release across all three companion packages:
+
+- Python: new `item_share_distribution()`, `render_share_distribution_svg()`,
+  `cluster_set_order()`, `render_cluster_heatmap_svg()` in `venn_diagram_lab`.
+- R: matching `item_share_distribution()`, `render_share_distribution()`,
+  `cluster_set_order()`, `render_cluster_heatmap()` in `vennDiagramLab`.
+
 ## v2.2.1 — 2026-05-28 — Branding: new 3-circle favicon, PWA manifest, welcome-screen logo
 
 Patch release rolling out the new visual identity.
