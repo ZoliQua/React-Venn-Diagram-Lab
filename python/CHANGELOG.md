@@ -7,6 +7,15 @@ summarises the Python-only changes.
 
 [root]: https://github.com/ZoliQua/Venn-Diagram-Lab/blob/main/CHANGELOG.md
 
+## v2.2.2 — 2026-05-31 — Item Share Distribution + Cluster Heatmap
+
+- New `item_share_distribution(matrix)` returning a per-membership-count
+  item-total dict.
+- New `cluster_set_order(D, method=...)` and `render_cluster_heatmap_svg(...)`
+  for UPGMA / complete / single linkage on a 1 − Jaccard distance matrix.
+- New `render_share_distribution_svg(dataset)` for the histogram.
+- Mirrors webtool v2.2.2 and R v2.2.2 (cross-package parity tests in CI).
+
 ## v2.0.3 — 2026-05-06 — Pre-submission feedback fixes (Marci)
 
 Patch release addressing the three Python bugs surfaced during pre-submission testing of the v2.0.2 wheel.
