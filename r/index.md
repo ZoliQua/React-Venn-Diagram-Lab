@@ -47,7 +47,7 @@ Python package down to the byte.
 ### From CRAN (recommended)
 
 `vennDiagramLab` is on CRAN as of **2026-05-18** (current version:
-**2.0.5**):
+**2.2.2**):
 
 ``` r
 
@@ -114,6 +114,36 @@ See
 [`vignette("v01_quickstart")`](https://zoliqua.github.io/Venn-Diagram-Lab/r/articles/v01_quickstart.md)
 for the full intro and `browseVignettes("vennDiagramLab")` for the
 complete eight-vignette gallery.
+
+## Statistics surfaces (v2.2.2)
+
+Two additional statistics surfaces complement the pairwise tables,
+matching the web tool’s Statistics panel and the Python package:
+
+| Function | Purpose |
+|----|----|
+| `item_share_distribution(matrix)` | Histogram of how many sets each item belongs to (1, 2, …, n) |
+| `cluster_set_order(D, linkage = "average")` | UPGMA / complete / single hierarchical linkage on a distance matrix; returns leaf order plus dendrogram merges |
+| `render_share_distribution(dataset)` | SVG bar chart of the item-share distribution |
+| `render_cluster_heatmap(result, linkage = "average")` | Pairwise-Jaccard heatmap with UPGMA-reordered axes and side dendrograms |
+
+``` r
+
+library(vennDiagramLab)
+
+ds  <- load_sample("dataset_real_cancer_drivers_4")
+res <- analyze(ds)
+
+img <- render_share_distribution(ds)
+substr(slot(img, "content"), 1L, 200L)
+
+heatmap <- render_cluster_heatmap(res, linkage = "average")
+substr(slot(heatmap, "content"), 1L, 200L)
+```
+
+Both renderers return an `SvgImage` S4 object (slots: `content`,
+`width`, `height`), the same shape as
+[`render_venn_svg()`](https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/render_venn_svg.md).
 
 ## Documentation
 
@@ -190,7 +220,7 @@ reference style:
 
     Dul Z., Ölbei M., Thomas N.S.B., Si Ammour A., Csikász-Nagy A. (2026).
     vennDiagramLab: Headless Venn diagram analysis and rendering.
-    R package version 2.0.5.
+    R package version 2.2.2.
     https://CRAN.R-project.org/package=vennDiagramLab
     DOI: 10.32614/CRAN.package.vennDiagramLab
 

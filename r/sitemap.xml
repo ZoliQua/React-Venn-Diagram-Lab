@@ -18,11 +18,13 @@
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/RegionData-class.html</loc></url>
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/RegionResult-class.html</loc></url>
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/StatisticsResult-class.html</loc></url>
+<url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/SvgImage-class.html</loc></url>
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/VennDataset-class.html</loc></url>
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/analyze.html</loc></url>
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/augment.RegionResult.html</loc></url>
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/bh_fdr.html</loc></url>
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/circle_intersection_area.html</loc></url>
+<url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/cluster_set_order.html</loc></url>
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/compute_pairwise.html</loc></url>
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/dice.html</loc></url>
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/effective_universe.html</loc></url>
@@ -32,6 +34,7 @@
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/glance.RegionResult.html</loc></url>
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/hypergeometric_p_value.html</loc></url>
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/index.html</loc></url>
+<url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/item_share_distribution.html</loc></url>
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/jaccard.html</loc></url>
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/list_models.html</loc></url>
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/list_samples.html</loc></url>
@@ -41,7 +44,9 @@
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/load_sample.html</loc></url>
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/load_tsv.html</loc></url>
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/overlap_coefficient.html</loc></url>
+<url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/render_cluster_heatmap.html</loc></url>
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/render_network.html</loc></url>
+<url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/render_share_distribution.html</loc></url>
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/render_upset.html</loc></url>
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/render_venn_svg.html</loc></url>
 <url><loc>https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/solve_2set.html</loc></url>

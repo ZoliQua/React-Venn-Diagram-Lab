@@ -44,8 +44,22 @@ reports.
   : Render an UpSet plot from a RegionResult
 - [`render_network()`](https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/render_network.md)
   : Render a force-directed network plot from a RegionResult
+- [`render_share_distribution()`](https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/render_share_distribution.md)
+  : Render the Item Share Distribution histogram
+- [`render_cluster_heatmap()`](https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/render_cluster_heatmap.md)
+  : Render a cluster-ordered Jaccard similarity heatmap
 - [`to_pdf_report()`](https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/to_pdf_report.md)
   : Compose a multi-page PDF report from a RegionResult
+
+## Statistics surfaces (v2.2.2)
+
+Item Share Distribution histogram + Cluster Heatmap helpers. Mirror the
+webtool and Python package APIs.
+
+- [`item_share_distribution()`](https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/item_share_distribution.md)
+  : Item Share Distribution
+- [`cluster_set_order()`](https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/cluster_set_order.md)
+  : Hierarchical clustering on a symmetric distance matrix.
 
 ## TSV exports
 
@@ -120,6 +134,8 @@ Result types returned by the loaders and analyzers.
   : RegionResult: result of analyze()
 - [`StatisticsResult-class`](https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/StatisticsResult-class.md)
   : StatisticsResult: container for pairwise statistical metric tables
+- [`SvgImage-class`](https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/SvgImage-class.md)
+  : SvgImage: wrapper for rendered SVG output
 
 ## Package
 
