@@ -45,7 +45,15 @@ reference:
       - render_venn_svg
       - render_upset
       - render_network
+      - render_share_distribution
+      - render_cluster_heatmap
       - to_pdf_report
+
+  - title: Statistics surfaces (v2.2.2)
+    desc: Item Share Distribution histogram + Cluster Heatmap helpers. Mirror the webtool and Python package APIs.
+    contents:
+      - item_share_distribution
+      - cluster_set_order
 
   - title: TSV exports
     desc: Byte-equivalent TSV writers for region summaries, item-membership matrices, and pairwise statistics tables.
@@ -88,6 +96,7 @@ reference:
       - RegionData-class
       - RegionResult-class
       - StatisticsResult-class
+      - SvgImage-class
 
   - title: Package
     contents:
