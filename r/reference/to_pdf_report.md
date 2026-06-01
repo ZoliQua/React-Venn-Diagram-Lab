@@ -50,5 +50,6 @@ if (getRversion() >= "4.6") {
   result <- analyze(load_sample("dataset_real_cancer_drivers_4"))
   to_pdf_report(result, tempfile(fileext = ".pdf"))
 }
+#> Warning: for 'Dul Z., Ölbei M., Thomas N.S.B., Si Ammour A., Csikász-Nagy A. (2026). Venn Diagram Lab —' in 'mbcsToSbcs': - substituted for — (U+2014)
 # }
 ```

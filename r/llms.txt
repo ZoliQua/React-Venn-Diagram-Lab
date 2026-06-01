@@ -145,6 +145,16 @@ Both renderers return an `SvgImage` S4 object (slots: `content`,
 `width`, `height`), the same shape as
 [`render_venn_svg()`](https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/render_venn_svg.md).
 
+## PDF report — About + Credits (v2.2.3)
+
+[`to_pdf_report()`](https://zoliqua.github.io/Venn-Diagram-Lab/r/reference/to_pdf_report.md)
+now closes with the unified *About This Report* appendix shared across
+the webtool, the Python package, and this companion: 12 structured
+sections (intro, Plots, Statistics) followed by a *Credits and Cite*
+footer listing authors, package URLs, and the Zenodo DOI. Section titles
+render in bold, bodies in plain weight, and the content auto-paginates
+across as many landscape pages as needed.
+
 ## Documentation
 
 - Full reference site + vignettes:

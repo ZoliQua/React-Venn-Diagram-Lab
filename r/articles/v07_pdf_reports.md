@@ -30,10 +30,13 @@ to_pdf_report(result, path = out, title = "Cancer driver overlap")
 #> This warning is displayed once per session.
 #> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
 #> generated.
+#> Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+#> for 'Dul Z., Ölbei M., Thomas N.S.B., Si Ammour A., Csikász-Nagy A. (2026).
+#> Venn Diagram Lab —' in 'mbcsToSbcs': - substituted for — (U+2014)
 file.exists(out)
 #> [1] TRUE
 file.size(out)   # bytes
-#> [1] 120544
+#> [1] 125558
 ```
 
 (The chunk above is gated on `R >= 4.6` because the report embeds an
