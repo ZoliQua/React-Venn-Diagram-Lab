@@ -28,6 +28,11 @@ from venn_diagram_lab.share_distribution import item_share_distribution
 FIXTURES = Path(__file__).parent / "fixtures" / "expected"
 DATASET = Path(__file__).resolve().parents[2] / "data" / "dataset_real_cancer_drivers_4.tsv"
 
+# Pinned constants for the 4-set cancer-drivers fixture.
+_MIN_SETS_FOR_DISTANCE = 2
+_FIXTURE_TOTAL_ITEMS = 1394
+_HEIGHT_TOL = 1e-9
+
 
 def _dataset_to_binary_matrix(ds: Dataset) -> np.ndarray:
     """Re-derive the binary item-by-set matrix from a Dataset.
@@ -57,7 +62,7 @@ def _jaccard_distance_matrix(result) -> np.ndarray:
     """
     jacc = result.statistics.jaccard
     n = len(result.dataset.set_names)
-    if jacc.empty or n < 2:
+    if jacc.empty or n < _MIN_SETS_FOR_DISTANCE:
         return np.zeros((n, n), dtype=float)
     arr = jacc.to_numpy(dtype=float, copy=True)
     distance = 1.0 - arr
@@ -78,7 +83,7 @@ def test_share_distribution_matches_webtool() -> None:
         f"  Webtool:    {expected}"
     )
     # Sanity: total items in the cancer-drivers 4-set fixture is 1394.
-    assert sum(got.values()) == 1394
+    assert sum(got.values()) == _FIXTURE_TOTAL_ITEMS
 
 
 def test_cluster_order_matches_webtool() -> None:
@@ -98,4 +103,4 @@ def test_cluster_order_matches_webtool() -> None:
         assert got.left == want["left"], (got, want)
         assert got.right == want["right"], (got, want)
         assert got.size == want["size"], (got, want)
-        assert abs(got.height - want["height"]) < 1e-9, (got, want)
+        assert abs(got.height - want["height"]) < _HEIGHT_TOL, (got, want)
