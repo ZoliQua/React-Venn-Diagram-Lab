@@ -21,6 +21,17 @@ from venn_diagram_lab.version import __version__
 ModeLiteral = Literal["binary", "aggregated"]
 FormatLiteral = Literal["csv", "tsv", "gmt", "gmx"]
 
+def _emit_deprecation(legacy: str, replacements: list[str]) -> None:
+    """Print a deprecation banner with concrete migration hints."""
+    typer.secho(
+        f"warning: `vdl {legacy}` is deprecated and will be removed in v2.3. "
+        f"Use {' or '.join(repr(r) for r in replacements)} instead. "
+        f"See `vdl --help` for the new subapp catalog.",
+        fg=typer.colors.YELLOW,
+        err=True,
+    )
+
+
 app = typer.Typer(
     name="vdl",
     help="venn-diagram-lab - headless Venn diagram analysis and rendering.",
@@ -248,8 +259,17 @@ def cmd_analyze(
     statistics_tsv: Annotated[
         Path | None, typer.Option("--statistics-tsv", help="Write pairwise statistics as TSV")
     ] = None,
+    no_deprecation_warning: Annotated[
+        bool,
+        typer.Option("--no-deprecation-warning", help="Suppress deprecation banner"),
+    ] = False,
 ) -> None:
     """Analyze a dataset and write outputs (or print summary if none specified)."""
+    if not no_deprecation_warning:
+        _emit_deprecation(
+            "analyze",
+            ["vdl render <kind>", "vdl export <kind>", "vdl report <kind>"],
+        )
     try:
         dataset = _load_dataset(input, format_override=format, mode=mode)
         result = analyze(dataset, model=model)
@@ -282,8 +302,17 @@ def cmd_render_sample(
     statistics_tsv: Annotated[
         Path | None, typer.Option("--statistics-tsv", help="Write pairwise statistics as TSV")
     ] = None,
+    no_deprecation_warning: Annotated[
+        bool,
+        typer.Option("--no-deprecation-warning", help="Suppress deprecation banner"),
+    ] = False,
 ) -> None:
     """Analyze a bundled sample dataset and write outputs."""
+    if not no_deprecation_warning:
+        _emit_deprecation(
+            "render-sample",
+            ["vdl render <kind> <sample>", "vdl report <kind> <sample>"],
+        )
     try:
         dataset = load_sample(name)
     except KeyError as e:
