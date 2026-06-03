@@ -36,7 +36,7 @@ from venn_diagram_lab.cli import (  # noqa: E402
     _model,
     _render,
     _report,
-    _stats,  # noqa: F401  # registered via decorator in Phase 7
+    _stats,
     _workflow,
 )
 
@@ -46,6 +46,9 @@ app.add_typer(_report.app, name="report")
 app.add_typer(_data.app, name="data")
 app.add_typer(_model.app, name="model")
 app.add_typer(_workflow.app, name="workflow")
+
+# Top-level v2.2.2 shortcuts.
+_stats.register(app)
 
 
 @app.callback()
